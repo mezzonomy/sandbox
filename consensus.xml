@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='utf-8'?>
+<?NDA (c) 2014-2016, sarl mezzònomy
+	Only the following societies are granted by sarl mezzonomy
+	to read and modify this piece of code, engineer part of
+	the HYPER software : 
+	 - SYNTYS
+	 - HARMONIE MUTUELLE
+	By detaining a copy of this file on their disks, these 
+	societies accepts the following term : do not disclose
+	the content to this file to any third parties.
+
+	This agreement has no limit in time.
+
+	If you discover this file on a disk of a society not listed
+	in the above list, this detention could be prosecuted as
+	violation of the intellectuel property of sarl mezzonomy. 
+
+	Please delete it.
+?>
+<bhb:consensus version="0.5" locale="fr"
+	xmlns:bhb = "bhb://the.hypertext.blockchain" 
+	xmlns:on  = "bhb://sourced.events"
+	on:clock  = "time://localhost" 
+	on:sign   = "ecdsa://NIST192p"
+	on:uuid   = "uuid.uuid1"       
+	on:hash   = "SHA256">
+	<bhb:resources>
+		<html>
+			<head>
+				<link type="text/css" rel="stylesheet" 
+					href="sandbox/sandbox.css" charset="utf-8"/>
+			</head>
+			<body background="sandbox/mezzonomy-logo-large.png">
+				<div id="popup">
+					<div>Matricule:</div><input id="login" value="example"/>
+					<div>Mot de passe:</div><input id="passwd" type="password"/>
+					<button style="padding: 7px 24px" 
+							onclick="_snd({bhb:'authentify',
+							login:  _get('login').value, passwd: _get('passwd').value,
+							})">Se connecter</button>
+		</div></body></html>
+		<on:authentify user="login-passwd" create="bhb:display"
+			href="bhb://{@user}@{@subscribed}">
+			<on:create    method="choose-document"/>
+			<on:refresh   method="diff"/>
+			<on:paraph    method="ask-signature"/>  
+			<on:query     method="query"/>
+			<on:alert     method="alert"/>
+		</on:authentify>
+	</bhb:resources>
+	<on:document  method="new-document" create="bhb:document" select="."/>
+	<on:body      method="virtual"/>
+	<on:block     method="virtual"/>
+	<on:promote   method="virtual"/>
+	<on:subscribe method="register"/>
+	<on:signature method="put-signature"     select="."/>  
+	<on:update    method="refresh"           update="no"/>
+	<on:request   method="check"             update="no"/>
+</bhb:consensus>
+

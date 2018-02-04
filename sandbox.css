@@ -1,0 +1,206 @@
+body {
+	font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+	font-size:1rem;
+	font-weight:400;
+	margin:0px;
+}
+
+#environment {
+	position:absolute;
+	top:0px;
+	left:45px;
+	user-select: none;
+}
+
+.header {
+    width:100%;
+    position:fixed;
+    top:10px;
+		left:10px;
+	z-index: 100;
+}
+
+#env-name {
+	margin:0px;
+}
+
+#env-role {
+	border: 0;
+	background: transparent;
+	border-radius: 0;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	outline: 0;
+	color: #58595b;
+	width: 130%;
+	box-shadow: none;
+	line-height: 1em;
+	}
+
+div.upper-left {
+	position: absolute;
+	top:10px;
+	left:10px;
+	width:200px;
+}
+div.upper-right {
+	position: absolute;
+	top:10px;
+	right:10px;
+	width:200px;
+}
+
+div.lower-left {
+	position: absolute;
+	bottom:10px;
+	left:10px;
+	width:200px;
+}
+
+div.lower-right {
+	position: absolute;
+	bottom:10px;
+	right:10px;
+	width:200px;
+}
+
+/* layout */
+html {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  background-color: lightgrey;
+}
+
+#universe {
+	width: 99%;
+	height: 100%;
+	padding-right: 1px;
+	padding-left: 1px;
+	margin-right: auto;
+	margin-left: auto;
+	z-index:10;
+}
+
+div.render-scene {
+	width: 100%;
+	height: 100%;
+}
+
+svg {
+	width: 100%;
+	height: 100%;
+}
+
+.toolbox {
+	padding: 5px;
+	z-index:100;
+	opacity:.8;
+	background-color: lightcoral;
+}
+
+.toolbox > h1 {
+	font-size: .8rem;
+}
+
+.toolbox > p {
+	font-size: .8rem;
+}
+
+#control-panel {
+	background-color: orange;
+}
+
+div.editToolBox {
+  background-color: steelblue;
+}
+
+div.upper-right {
+	position: absolute;
+	top:10px;
+	right:10px;
+	width:150px;
+}
+
+div.lower-left {
+	position: absolute;
+	bottom:10px;
+	left:10px;
+	width:200px;
+}
+
+div.lower-right {
+	position: absolute;
+	bottom:10px;
+	right:10px;
+	width:200px;
+}
+
+/*slider*/
+label.slider {
+	display: inline-block;
+	width: 240px;
+	text-align: right
+}
+/*btn*/
+button {
+	margin: 0;
+	font-family: inherit;
+}
+
+.btn {
+	display: inline-block;
+	font-weight: 400;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: middle;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	border: 1px solid transparent;
+	padding: .375rem .75rem;
+	font-size: 1rem;
+	line-height: 1.5;
+	border-radius: .25rem;
+	transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.btn-primary { /*https://v4-alpha.getbootstrap.com/components/buttons/*/
+	color: #fff;
+	background-color: #007bff;
+	border-color: #007bff;
+}
+
+.btn-info { /*https://v4-alpha.getbootstrap.com/components/buttons/*/
+	color: #fff;
+	background-color: #5bc0de;
+	border-color: #5bc0de;
+}
+
+/*tab elements*/
+td , th {
+	font-size: .5rem;
+	padding : 2px 4px ;
+	border : 1px grey solid ;
+	}
+
+table {
+	border-collapse:collapse;
+	border : 2px grey solid;
+	}
+
+#nodesList {
+	background-color:yellow
+	}
+
+

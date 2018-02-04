@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<?NDA (c) 2014-2016, sarl mezzònomy
+	Only the following societies are granted by sarl mezzonomy
+	to read and modify this piece of code, engineer part of
+	the HYPER software : 
+	 - SYNTYS
+	 - HARMONIE MUTUELLE
+	By detaining a copy of this file on their disks, these 
+	societies accepts the following term : do not disclose
+	the content to this file to any third parties.
+
+	This agreement has no limit in time.
+
+	If you discover this file on a disk of a society not listed
+	in the above list, this detention could be prosecuted as
+	violation of the intellectuel property of sarl mezzonomy. 
+
+	Please delete it.
+?>
+<bhb:hub 
+    xmlns:bhb = "bhb://the.hypertext.blockchain" 
+    xmlns:on  = "bhb://sourced.events"
+	ifaddress = "eth0"      server = "{mac}"
+	profile   = "no" post-profiler = "work-0.000"
+	bhb:consensus="sandbox/consensus.xml"
+	>
+	<bhb:node id="hyper" server="bhb://{ip}:4040">
+		<bhb:resource     server="http://{ip}:8080"/>
+		<bhb:server       server="ws://{ip}:5177"
+			html="//bhb:consensus/bhb:resources/html"
+			on:authentify='//bhb:consensus/bhb:resources/on:authentify'
+		/>
+ 		<bhb:static server="file://localhost/{input}" 
+			stop="always" static-dump='no' pass=""/>
+	</bhb:node>
+</bhb:hub>

@@ -1,0 +1,79 @@
+
+/*svg elements*/
+#container {
+	opacity : .6;
+}
+
+.gvertex {
+  fill: none;
+}
+
+.vertexCircleRotate {
+	opacity: 0;
+  fill: white; // fill is mandatory to event trigger
+}
+
+.vertexCircle {
+	fill-opacity: 1;
+	stroke-width: 2px;
+	stroke: /*grey*/ black;
+}
+
+.pinned {
+  stroke-width: 3px;
+  stroke: black;
+}
+
+.point {
+	fill: green;
+	stroke-width: 0px;
+	stroke: none;
+}
+
+.dragging {
+	fill: yellow;
+	stroke-width: 1px;
+	stroke: black;
+}
+
+.focused {
+  fill: steelblue;
+  stroke: /*black*/ darkblue;
+}
+
+.label  {
+	font-size: /*.4rem*/12pt;
+	color: /*lightgrey*/ black;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hyperbolicLnk{
+	fill: none;
+	stroke-width: 1px;
+	stroke: /*green*/ black;
+  pointer-events: none;
+}
+
+line.planar{
+	fill: none;
+	stroke-width: 1px;
+	stroke: /*red*/ black;
+  pointer-events: none;
+}
+
+line.spheric{
+	fill: none;
+	stroke-width: 1px;
+	stroke: /*darkblue*/ black;
+  pointer-events: none;
+}
+
+.arc{
+	stroke-width: 0px;
+  opacity: 1;
+}
+
+.notdisplayed{
+  opacity: 0;
+}
