@@ -51,21 +51,21 @@
 .hyperbolicLnk{
 	fill: none;
 	stroke-width: 1px;
-	stroke: green;
+	stroke: black;
   pointer-events: none;
 }
 
 line.planar{
 	fill: none;
 	stroke-width: 1px;
-	stroke: red;
+	stroke: black;
   pointer-events: none;
 }
 
 line.spheric{
 	fill: none;
 	stroke-width: 1px;
-	stroke: darkblue;
+	stroke: black;
   pointer-events: none;
 }
 

@@ -13,8 +13,8 @@ const BEYOND=800; // to get infinite line for spheric links
 const ARC_INNER_RADIUS=.1; // Arc inner radius ratio proportianal to VERTEX_RADIUS
 const LINK_TOPOLOGY = {planar:"planar", spheric:"spheric"};
 const AMEND_EDITZONE_ID = "amendment-editzone";
-const AMEND_TEMPLATE_T_X = '<bhb:link after="$ID">\nINSERT XML\n</bhb:link>';
-const AMEND_TEMPLATE_B_X = '<bhb:link push="$ID">\nINSERT XML\n</bhb:link>';
+const AMEND_TEMPLATE_T_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>";
+const AMEND_TEMPLATE_B_X = "<bhb:link push='$ID'>\nINSERT XML\n</bhb:link>";
 
 var scene; //d3 object select scene
 var svgScene; //dom object byid scene
@@ -85,10 +85,10 @@ function arcDragEnded(d) {
 		alertInit();
 		var point = d3.event.subject.point.replace("T_","").replace("B_","");
 		if (d3.event.subject.point.startsWith("T_")){
-			d3.select("#" + AMEND_EDITZONE_ID).text(AMEND_TEMPLATE_T_X.replace("$ID",point)); //does not do the job with xml like content
+			document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE_T_X.replace("$ID",point);
 		}
 		if (d3.event.subject.point.startsWith("B_")){
-			d3.select("#" + AMEND_EDITZONE_ID).text(AMEND_TEMPLATE_B_X.replace("$ID",point)); //does not do the job with xml like content
+			document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE_B_X.replace("$ID",point);
 		}
 	}
 	d3.select("#" + AMEND_EDITZONE_ID).classed("targeted", false).classed("zoom11", false);
