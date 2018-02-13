@@ -96,12 +96,15 @@
 			<link type="text/css" rel="stylesheet" href="sandbox/render.css" charset="utf-8" />
 			<script src="sandbox/d3.js" type="text/javascript"></script>
 			<script src="sandbox/render.js" type="text/javascript"></script>
+			<script src="sandbox/misc.js" type="text/javascript"></script>
 		</head>
 		<body>
 			<div id="universe">
 				<xsl:call-template name="explorer"/>
 				<xsl:call-template name="perspective"/>
-				<xsl:call-template name="amendment"/>
+				<xsl:call-template name="amendment">
+					<xsl:with-param name="role" select="'admin'" />
+				</xsl:call-template>
 				<xsl:call-template name="text"/>
 				<xsl:call-template name="placeholder"/>
 			</div>
@@ -214,36 +217,11 @@
 	</xsl:variable>
 
 	<xsl:variable name="name" select="name()"/>
-	<xsl:variable name="hyperbolic">
-		<xsl:choose>
-			<xsl:when test="self::bhb:link and $perspective/@*[ name()=$name]='1'">0</xsl:when>
-			<xsl:when test="self::bhb:link">1</xsl:when>
-			<xsl:otherwise>
-				<xsl:value-of select="$perspective/@*[ name()=$name]"/>
-			</xsl:otherwise>
-		</xsl:choose>
+	<xsl:variable name="planar">
+			<xsl:value-of select="$perspective/@*[ name()=$name]"/>
 	</xsl:variable>
 	<xsl:choose>
-		<xsl:when test="$hyperbolic='1'">
-			<!-- hyperbolic -->
-			<xsl:call-template name="matrix-line">
-				<xsl:with-param name="point" select="$top"/>
-				<xsl:with-param name="next" select="$push"/>
-				<xsl:with-param name="peer" select="$bottom"/>
-				<xsl:with-param name="info">
-					<xsl:apply-templates select="." mode="info"/>
-				</xsl:with-param>
-			</xsl:call-template>
-			<xsl:call-template name="matrix-line">
-				<xsl:with-param name="point" select="$bottom"/>
-				<xsl:with-param name="next" select="$after"/>
-				<xsl:with-param name="peer" select="$top"/>
-				<xsl:with-param name="info">
-					<xsl:apply-templates select="." mode="info"/>
-				</xsl:with-param>
-			</xsl:call-template>
-		</xsl:when>
-		<xsl:otherwise>
+		<xsl:when test="$planar='1'">
 			<!-- planar -->
 			<xsl:call-template name="matrix-line">
 				<xsl:with-param name="point" select="$top"/>
@@ -256,6 +234,25 @@
 			<xsl:call-template name="matrix-line">
 				<xsl:with-param name="point" select="$bottom"/>
 				<xsl:with-param name="next" select="$push"/>
+				<xsl:with-param name="peer" select="$top"/>
+				<xsl:with-param name="info">
+					<xsl:apply-templates select="." mode="info"/>
+				</xsl:with-param>
+			</xsl:call-template>
+		</xsl:when>
+		<xsl:otherwise>
+			<!-- hyperbolic -->
+			<xsl:call-template name="matrix-line">
+				<xsl:with-param name="point" select="$top"/>
+				<xsl:with-param name="next" select="$push"/>
+				<xsl:with-param name="peer" select="$bottom"/>
+				<xsl:with-param name="info">
+					<xsl:apply-templates select="." mode="info"/>
+				</xsl:with-param>
+			</xsl:call-template>
+			<xsl:call-template name="matrix-line">
+				<xsl:with-param name="point" select="$bottom"/>
+				<xsl:with-param name="next" select="$after"/>
 				<xsl:with-param name="peer" select="$top"/>
 				<xsl:with-param name="info">
 					<xsl:apply-templates select="." mode="info"/>

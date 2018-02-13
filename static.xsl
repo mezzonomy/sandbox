@@ -41,50 +41,92 @@
      = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 
 <xsl:template name="perspective">
-	<div id="perspective" class="toolbox lower-left">
-		<h1> Perspectives </h1>
-		<xsl:variable name="dictionary" select="@*"/>
-		<xsl:for-each select="bhb:unique(*/descendant::*)/@key">
-			<xsl:variable name="name" select="bhb:short_ns(.)"/>
-			<p>
-				<xsl:choose>
-					<xsl:when test="$perspective/@*[ name()=$name]='1'">
-						<a onclick="{bhb:query(.,'0')}">&#x2611; </a>
-					</xsl:when>
-					<xsl:otherwise>
-						<a onclick="{bhb:query(.,'1')}">&#x2610; </a>
-					</xsl:otherwise>
-				</xsl:choose>
-				<xsl:choose>
-					<xsl:when test="$dictionary[ name()=$name]">
-						<xsl:value-of select="$dictionary[ name()=$name]"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<I>
-							<xsl:value-of select="$name"/>
-						</I>
-					</xsl:otherwise>
-				</xsl:choose>
-			</p>
-		</xsl:for-each>
+	<xsl:variable name="toolbox_ID">perspective</xsl:variable>
+	<xsl:variable name="toolbox_LBL">Perspective</xsl:variable>
+	<div id="{$toolbox_ID}" class="toolbox lower-left opened">
+		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
+			<p><xsl:value-of select="$toolbox_LBL"/></p>
+		</div>
+		<div id="{$toolbox_ID}-body" class="toolbox-body">
+			<xsl:variable name="dictionary" select="@*"/>
+			<xsl:for-each select="bhb:unique(*/descendant::*)/@key">
+				<xsl:variable name="name" select="bhb:short_ns(.)"/>
+				<p>
+					<xsl:choose>
+						<xsl:when test="$perspective/@*[ name()=$name]='1'">
+							<a onclick="{bhb:query(.,'0')}">
+								<!--<xsl:attribute name="id"><xsl:value-of select="$toolbox_ID"/>-<xsl:value-of select="$dictionary[ name()=$name]"/></xsl:attribute>-->&#x2611;
+							</a>
+						</xsl:when>
+						<xsl:otherwise>
+							<a onclick="{bhb:query(.,'1')}">
+								<!--<xsl:attribute name="id"><xsl:value-of select="$toolbox_ID"/>-<xsl:value-of select="$dictionary[ name()=$name]"/></xsl:attribute>-->&#x2610;
+							</a>
+						</xsl:otherwise>
+					</xsl:choose>
+					<xsl:choose>
+						<xsl:when test="$dictionary[ name()=$name]">
+							<xsl:value-of select="$dictionary[ name()=$name]"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<I>
+								<xsl:value-of select="$name"/>
+							</I>
+						</xsl:otherwise>
+					</xsl:choose>
+				</p>
+			</xsl:for-each>
+	</div>
 	</div>
 </xsl:template>
 
 <xsl:template name="explorer">
-	<div id="explorer" class="toolbox upper-left">
-		<h1> Explorer </h1>
+	<xsl:variable name="toolbox_ID">explorer</xsl:variable>
+	<xsl:variable name="toolbox_LBL">Explorer</xsl:variable>
+	<div id="{$toolbox_ID}" class="toolbox upper-left closed">
+		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
+			<p><xsl:value-of select="$toolbox_LBL"/></p>
+		</div>
 	</div>
 </xsl:template>
 
 <xsl:template name="amendment">
-	<div id="amendment" class="toolbox upper-right">
-		<h1> Amendments </h1>
+	<xsl:param name="role"/>
+	<xsl:variable name="toolbox_ID">amendment</xsl:variable>
+	<xsl:variable name="toolbox_LBL">Amendment</xsl:variable>
+	<div id="{$toolbox_ID}" class="toolbox upper-right closed">
+		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
+			<p><xsl:value-of select="$toolbox_LBL"/> as <xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</p>
+		</div>
+		<div id="{$toolbox_ID}-body" class="toolbox-body">
+			<form id="amendment-valid-form" name="amendment-valid-form" action="javascript:void(0);">
+				<on:submit create="bhb:block">
+					<on:attribute name="body" script="_get('amendment-editzone').value"/>
+					<bhb:copy-of select="bhb:parse(@body)"/>
+				</on:submit>
+				<input id="amendment-user" name="amendment-user" type="hidden" required="required">
+					<xsl:attribute name="value"><xsl:value-of select="$perspective/@username"/></xsl:attribute>
+				</input>
+				<input id="amendment-role" name="amendment-role" type="hidden" required="required">
+					<xsl:attribute name="value"><xsl:value-of select="$role"/></xsl:attribute>
+				</input>
+				<label for="amendment-editzone">Edit Amendment</label>
+				<textarea id="amendment-editzone" name="amendment-editzone" rows="10" class="form-control" placeholder="Please drop a vertex arc here to create a new amendment" spellcheck="false" required="required" oninput="validateAmendment('amendment-editzone')" onchange="validateAmendment('amendment-editzone')"/>
+				<div id="amendment-editinfo" class="alert"/>
+				<!--<button type="button" id="amendment-checkbtn" name="amendment-checkbtn" class="btn btn-info left" onclick="validateAmendment('amendment-editzone')">check</button>-->
+				<button type="submit" form="amendment-valid-form" value="Submit" id="amendment-validbtn" name="amendment-validbtn" class="btn btn-primary right" disabled="disabled">validate</button>
+			</form>
+		</div>
 	</div>
 </xsl:template>
 
 <xsl:template name="text">
-	<div id="text" class="toolbox lower-right">
-		<h1> Text </h1>
+	<xsl:variable name="toolbox_ID">text</xsl:variable>
+	<xsl:variable name="toolbox_LBL">Text</xsl:variable>
+	<div id="{$toolbox_ID}" class="toolbox lower-right closed">
+		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
+			<p><xsl:value-of select="$toolbox_LBL"/></p>
+		</div>
 	</div>
 </xsl:template>
 

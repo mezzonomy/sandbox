@@ -5,39 +5,53 @@ body {
 	margin:0px;
 }
 
-#environment {
-	position:absolute;
-	top:0px;
-	left:45px;
-	user-select: none;
+.left {
+	float: left;
 }
 
-.header {
-    width:100%;
-    position:fixed;
-    top:10px;
-		left:10px;
-	z-index: 100;
+.right {
+	float: right;
 }
 
-#env-name {
-	margin:0px;
+#sign {
+	color: #fff;
+	font: 14px;
+	line-height: 1.45em;
+	text-shadow: 0 1px 2px rgba(34,0,1,0.6);
+	height: 180px;
+	width: 180px;
+	position:fixed;
+	top:35px;
+	left:240px;
+	z-index: 4;
 }
 
-#env-role {
-	border: 0;
-	background: transparent;
-	border-radius: 0;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	outline: 0;
-	color: #58595b;
-	width: 130%;
-	box-shadow: none;
-	line-height: 1em;
+#popup {
+	color: #fff;
+	font: 14px "Bree Rg",sans-serif;
+	line-height: 1.45em;
+	text-shadow: 0 1px 2px rgba(34,0,1,0.6);
+	background-image: url('id-default.png');
+	height: 180px;
+	width: 180px;
+	padding: 68px 25px 0;
+	position:fixed;
+	top:35px;
+	left:380px;
+	z-index: 4;
+}
+
+button, input[type="submit"]{
+	border-width: 0;
+	font: bold 13px "CartoGothic Std",sans-serif;
+	border-radius: 20px!important;
+	background-color: #e53;
+	color: #fff;
+	box-shadow: 1px 2px 2px 0 rgba(0,0,0,0.12);
+	text-shadow: 0 1px 2px rgba(34,0,1,0.6);
+	padding: 7px 48px;
+	position: relative;
+	border: none!important;
 	}
 
 div.upper-left {
@@ -65,6 +79,10 @@ div.lower-right {
 	bottom:10px;
 	right:10px;
 	width:200px;
+}
+
+.zoom11 {
+    transform: scale(1.1);
 }
 
 /* layout */
@@ -108,41 +126,88 @@ svg {
 	background-color: lightcoral;
 }
 
-.toolbox > h1 {
+.toolbox-header > p {
+	font-size: .9rem;
+	font-weight: bold;
+}
+
+div.closed > .toolbox-header {
+	background-image: url(icon-open.png);
+	background-repeat: no-repeat;
+	background-position: right;
+	background-size: auto .4rem;
+}
+
+div.opened > .toolbox-header {
+	background-image: url(icon-close.png);
+	background-repeat: no-repeat;
+	background-position: right;
+	background-size: auto .4rem;
+}
+
+.toolbox-body > p {
 	font-size: .8rem;
 }
 
-.toolbox > p {
-	font-size: .8rem;
+ div.closed > .toolbox-body{
+	display: none;
+}
+/*user form*/
+form {
+	font-size: .7rem;
 }
 
-#control-panel {
-	background-color: orange;
+label {
+    display: inline-block;
+    margin-bottom: .5rem;
 }
 
-div.editToolBox {
-  background-color: steelblue;
+.form-control {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
-div.upper-right {
-	position: absolute;
-	top:10px;
-	right:10px;
-	width:150px;
+textarea {
+    overflow: auto;
+    resize: vertical;
 }
 
-div.lower-left {
-	position: absolute;
-	bottom:10px;
-	left:10px;
-	width:200px;
+/*error div management*/
+.alert {
+    position: relative;
+    padding: .5rem .7rem;
+    margin-bottom: .7rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+		font-size: .7rem;
+		display: none;
 }
-
-div.lower-right {
-	position: absolute;
-	bottom:10px;
-	right:10px;
-	width:200px;
+.alert-success {
+		display: block;
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+.alert-warning {
+		display: block;
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+.alert-danger {
+		display: block;
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
 }
 
 /*slider*/
@@ -154,6 +219,7 @@ label.slider {
 /*btn*/
 button {
 	margin: 0;
+	margin-top: 5px;
 	font-family: inherit;
 }
 
@@ -169,7 +235,7 @@ button {
 	user-select: none;
 	border: 1px solid transparent;
 	padding: .375rem .75rem;
-	font-size: 1rem;
+	font-size: .8rem;
 	line-height: 1.5;
 	border-radius: .25rem;
 	transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
@@ -187,7 +253,11 @@ button {
 	border-color: #5bc0de;
 }
 
-/*tab elements*/
+.btn.disabled, .btn:disabled {
+    opacity: .65;
+}
+
+/*tab elements currently unused*/
 td , th {
 	font-size: .5rem;
 	padding : 2px 4px ;
@@ -198,9 +268,3 @@ table {
 	border-collapse:collapse;
 	border : 2px grey solid;
 	}
-
-#nodesList {
-	background-color:yellow
-	}
-
-

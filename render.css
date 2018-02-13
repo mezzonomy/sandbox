@@ -16,7 +16,7 @@
 .vertexCircle {
 	fill-opacity: 1;
 	stroke-width: 2px;
-	stroke: /*grey*/ black;
+	stroke: grey;
 }
 
 .pinned {
@@ -38,12 +38,12 @@
 
 .focused {
   fill: steelblue;
-  stroke: /*black*/ darkblue;
+  stroke: black;
 }
 
 .label  {
-	font-size: /*.4rem*/12pt;
-	color: /*lightgrey*/ black;
+	font-size: .4rem;
+	color: lightgrey;
   pointer-events: none;
   user-select: none;
 }
@@ -51,21 +51,21 @@
 .hyperbolicLnk{
 	fill: none;
 	stroke-width: 1px;
-	stroke: /*green*/ black;
+	stroke: green;
   pointer-events: none;
 }
 
 line.planar{
 	fill: none;
 	stroke-width: 1px;
-	stroke: /*red*/ black;
+	stroke: red;
   pointer-events: none;
 }
 
 line.spheric{
 	fill: none;
 	stroke-width: 1px;
-	stroke: /*darkblue*/ black;
+	stroke: darkblue;
   pointer-events: none;
 }
 

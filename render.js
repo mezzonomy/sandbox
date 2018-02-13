@@ -6,11 +6,15 @@
 const SCENE_COLOR = "none";
 const POINT_RADIUS = +1;
 const VERTEX_RADIUS = +30;
-const VERTEX_INNER_CIRCLE_RADIUS_RATIO = 0.1; // for hyperbolic crtl points
+const VERTEX_RADIUS_M = 10; //The vertex radius is multiplied by ((this ratio) * sqrt(point number))
+const VERTEX_INNER_CIRCLE_RADIUS_RATIO = 0.7; // for hyperbolic crtl points
 const VERTEX_COMPUTATION_MAX_ITERATION = 100; // Limits the vertex computation iterations
 const BEYOND=800; // to get infinite line for spheric links
-const ARC_INNER_RADIUS=.8; // Arc inner radius ratio proportianal to VERTEX_RADIUS
+const ARC_INNER_RADIUS=.1; // Arc inner radius ratio proportianal to VERTEX_RADIUS
 const LINK_TOPOLOGY = {planar:"planar", spheric:"spheric"};
+const AMEND_EDITZONE_ID = "amendment-editzone";
+const AMEND_TEMPLATE_T_X = '<bhb:link after="$ID">\nINSERT XML\n</bhb:link>';
+const AMEND_TEMPLATE_B_X = '<bhb:link push="$ID">\nINSERT XML\n</bhb:link>';
 
 var scene; //d3 object select scene
 var svgScene; //dom object byid scene
@@ -32,9 +36,6 @@ function dragstarted(d) {
 }
 
 function dragged(d) {
-	if (!d3.event.active) {
-		d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-	}
 	d.fx = d3.event.x, d.fy = d3.event.y;
 	d3.select(this).classed("dragging", true);
 	//console.log("VertexDragEvent dragged on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
@@ -51,11 +52,55 @@ function dragended(d) {
 	//console.log("VertexDragEvent ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 
+
+function arcDragStarted(d) {
+	d3.event.sourceEvent.stopPropagation();
+	d3.select("#" + AMEND_EDITZONE_ID).attr("placeholder","drag the selected arc here to amend it !");
+	d3.select("#" + AMEND_EDITZONE_ID).classed("targeted", true);
+	//console.log("dataTransfer",d3.event.sourceEvent.dataTransfer)
+	//console.log("evt.target:", d3.event.sourceEvent.target,"evt.currentTarget:", d3.event.sourceEvent.currentTarget )
+	//d3.event.dataTransfer.setData("text",AMEND_TEMPLATE.replace("$ID",d3.event.subject.point));
+	//console.log("arcDragStarted started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+function arcDragged(d) {
+	d3.select(this).attr("transform", "translate("+  d3.event.x + "," + d3.event.y + ")");
+	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
+		d3.select("#" + AMEND_EDITZONE_ID).classed("zoom11", true);
+	} else {
+		d3.select("#" + AMEND_EDITZONE_ID).classed("zoom11", false);
+	}
+	if (d3.event.sourceEvent.target.id == "amendment") {
+		if (!d3.select("#amendment").classed("opened")) {
+			d3.select("#amendment").classed("opened", true).classed("closed", false);
+		}
+	}
+	//d3.select(this).classed("dragging", true);
+	//console.log("arcDragged dragged on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+function arcDragEnded(d) {
+	//d3.select(this).classed("dragging", false);
+	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
+		alertInit();
+		var point = d3.event.subject.point.replace("T_","").replace("B_","");
+		if (d3.event.subject.point.startsWith("T_")){
+			d3.select("#" + AMEND_EDITZONE_ID).text(AMEND_TEMPLATE_T_X.replace("$ID",point)); //does not do the job with xml like content
+		}
+		if (d3.event.subject.point.startsWith("B_")){
+			d3.select("#" + AMEND_EDITZONE_ID).text(AMEND_TEMPLATE_B_X.replace("$ID",point)); //does not do the job with xml like content
+		}
+	}
+	d3.select("#" + AMEND_EDITZONE_ID).classed("targeted", false).classed("zoom11", false);
+	d3.select(this).attr("transform", null); //return arc to initial position
+	//console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
 /***********************************************************************
 ***********************************************************************/
 /*
  * Main render function. Called each time by the engine via websockets
- *
+ * @param data {array} Array of QA points
  * @returns a svg display of the vertices
  */
 function render(data){
@@ -100,7 +145,7 @@ function render(data){
 			.attr("stroke","black");
 		/** ------------------------------------------------------------
 			QUANTUM ALGEBRA MARKERS
-			
+
 			TBD : change the market of the the view for user spot
 
 			<marker id="marker-end" markerWidth="10" markerHeight="10" refX="1" refY="5"
@@ -150,7 +195,7 @@ function render(data){
 	// ******************************************************
 	//TODO: dev mode cheat
 	// Add controls to perspective
-	var div_perspective = d3.select("#perspective");
+	var div_perspective = d3.select("#perspective-body");
 	var btnResetZoom = div_perspective.select("#btnReset-zoom");
 	if (btnResetZoom.empty()) {
 			//reset zoom
@@ -166,7 +211,7 @@ function render(data){
 			//reset zoom
 			var btnResetPosHistory = div_perspective.append("button").attr("type","button").attr("class","btn btn-info").attr("id","btnReset-posHistory").text("reset");
 			btnResetPosHistory.on("click", function(){
-				console.log(localStorage.vertexLastPosition_json);
+				// DEBUG console.log(localStorage.vertexLastPosition_json);
 				verticesPositionning.stop();
 				localStorage.removeItem("vertexLastPosition_json");
 				//d3.selectAll(".container").remove();
@@ -216,14 +261,15 @@ function render(data){
 		.attr("class", "gvertex")
 		.attr("id", function(d) {return "gvertex_" + d.hc;})
 		.attr("vertex", function(d) {return d.hc;})
-		.attr("pointNumber", function(d) {return d.pc;})
-		.call(d3.drag()
-				.on("start", dragstarted)
-				.on("drag", dragged)
-				.on("end", dragended));
+		.attr("pointNumber", function(d) {return d.pc;});
 
 		// Selecting all displayed vertex groups
 		vertexGroup = container.selectAll(".gvertex");
+
+		vertexGroup.call(d3.drag()
+				.on("start", dragstarted)
+				.on("drag", dragged)
+				.on("end", dragended));
 
 	/*
 	 * ----------------------------------------------------------------
@@ -246,7 +292,8 @@ function render(data){
 	.enter()
 	.append("circle")
 	.attr("class", "vertexCircle")
-	.attr("r", VERTEX_RADIUS)
+	.attr("r", function(d){
+		return VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(d.pc);})
 	.attr("fill", "white")
 	//.attr("filter","url(#shadow2)")
 	.attr("id", function(d) {return "vertexCircle_" + d.hc;});
@@ -284,7 +331,7 @@ function render(data){
 	.enter()
 	.append("circle")
 	.attr("class", "vertexCircleRotate")
-	.attr("r", VERTEX_RADIUS);
+	.attr("r",function(d){return VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(d.pc);});
 
 	// Entering arcs within vertex's group grotate
 	var pie = d3.pie()
@@ -292,8 +339,10 @@ function render(data){
 	    .value(function(d) { return 1; });
 
 	var arc = d3.arc()
-	    .outerRadius(VERTEX_RADIUS)
-	    .innerRadius(VERTEX_RADIUS * ARC_INNER_RADIUS);
+	    .outerRadius(function(d){
+				return VERTEX_RADIUS + VERTEX_RADIUS_M *  Math.sqrt(d.pc);})
+	    .innerRadius(function(d){
+				return (VERTEX_RADIUS + VERTEX_RADIUS_M *  Math.sqrt(d.pc)) * ARC_INNER_RADIUS;} );
 
 	var coloring = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -305,13 +354,7 @@ function render(data){
 	.attr("class", "arc notdisplayed") //arcs are hidden by default
 	.attr("id", function(d) {return "arc_" + d.point;})
 	.attr("d", arc)
-	.style("fill",function(d) {return coloring(d.point);})
-	.attr("draggable","true")
-	.attr("ondragstart","drag(event)")
-	.on("click", function() {
-      d3.event.stopPropagation();
-			window.alert("toto");
-		});
+	.style("fill",function(d) {return coloring(d.point);});
 
 	// Entering points within vertex's group rotate (last added to be on top)
 	var point = vertexGroupRotate
@@ -322,25 +365,29 @@ function render(data){
 	.attr("class", "point")
 	.attr("id", function(d) {return d.point;})
 	.attr("r", POINT_RADIUS)
-	.attr("cx", function(d,i) {return d.posX;})
-	.attr("cy", function(d,i) {return d.posY;});
+	.attr("cx", function(d,i) {return d.ptX;})
+	.attr("cy", function(d,i) {return d.ptY;});
 
 	// Create a map of points across the vertices
 	var points=[];
 	vertexGroupRotate.each(function(d,i){
-		d.segments.forEach(function(d,i){
-			var index={index: i};
-			var pc= d.pc;
-			var hc= d.hc;
-			var info= d.info;
-			var cx= d.posX;
-			var cy= d.posY;
-			var ctrlpointx= cx * VERTEX_INNER_CIRCLE_RADIUS_RATIO;
-			var ctrlpointy= cy * VERTEX_INNER_CIRCLE_RADIUS_RATIO;
-			points.push(Object.assign({}, d, index, {pc: pc}, {hc: hc}, {cx: cx}, {cy: cy}, {ctrlpointx: ctrlpointx}, {ctrlpointy: ctrlpointy}));
-		})
+		d.segments.forEach(function(d,i){points.push(Object.assign({}, d));})
 	});
 	var pointsById = d3.map(points, function(d) { return d.point; });
+
+	//DEBUG: drawing ctrlpoints of hyperbolic arcs TODO:REMOVE
+	/*
+	var ctrlpt = vertexGroupRotate.selectAll(".ctrlpt").data(function(d){return d.segments;}, function(d){return d.point;});
+	ctrlpt.exit().remove();
+	ctrlpt.enter().append("circle").attr("r",.5).attr("fill","red")
+		.filter(function(d){return pointsById.get(d.point).topology == "hyperbolic";})
+		.attr("cx", function(d,i) {return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).cp1X;})
+		.attr("cy", function(d,i) {return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).cp1Y;});
+	ctrlpt.enter().append("circle").attr("r",.5).attr("fill","purple")
+		.filter(function(d){return pointsById.get(d.point).hc == "hyperbolic";})
+		.attr("cx", function(d,i) {return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).cp2X;})
+		.attr("cy", function(d,i) {return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).cp2Y;});
+		*/
 
 	/*------------------------------------------------------------------
 	 * Drawing hyperbolic arcs within the vertices
@@ -349,22 +396,14 @@ function render(data){
 	.selectAll(".hyperbolicLnk")
 	.data(function(d){return d.segments;}, function(d){return d.point;})
 	.enter()
-	.filter(function(d) {return (d.point.startsWith("T") && (d.hc == pointsById.get(d.peer).hc))})
+	.filter(function(d) {return (d.point.startsWith("T") && (d.topology == "hyperbolic"))})
 	.append("path")
 	.attr("class", "hyperbolicLnk")
 		.attr("marker-end","url(#marker-end)")
 		.attr("marker-start","url(#marker-start)")
 	.attr("id", function(d) {return "arc_" + d.point;})
 	// JUST AN EXAMPLE : TODO, remove
-	.attr("d", function(d){
-		return "M" + pointsById.get(d.point).cx + "," + pointsById.get(d.point).cy
-		+ "C" + pointsById.get(d.point).ctrlpointx * ratioCtrlPointsHyperbolicLnk(pointsById.get(d.point), pointsById.get(d.peer))
-		+ "," + pointsById.get(d.point).ctrlpointy * ratioCtrlPointsHyperbolicLnk(pointsById.get(d.point), pointsById.get(d.peer))
-		+ " " + pointsById.get(d.peer).ctrlpointx * ratioCtrlPointsHyperbolicLnk(pointsById.get(d.point), pointsById.get(d.peer))
-		+ "," + pointsById.get(d.peer).ctrlpointy * ratioCtrlPointsHyperbolicLnk(pointsById.get(d.point), pointsById.get(d.peer))
-		+ " " + pointsById.get(d.peer).cx + "," + pointsById.get(d.peer).cy
-		;
-	});
+	.attr("d", function(d){return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).path;});
 
 	/*
 	 * Applying previous stored Positionning
@@ -408,12 +447,17 @@ function render(data){
 		});
 
 		// 2.entering forceLink between quantum center
-		var forceLink = container
+		var newforceLink = container
 		.selectAll(".forceLink")
-		.data(forceLinks, function(d){return d.id;})
-		.enter()
+		.data(forceLinks, function(d){return d.id;});
+
+		newforceLink.exit().remove();
+
+		newforceLink.enter()
 		.append("line").attr("class", "forceLink")
 		.attr("id", function(d){return d.id;});
+
+		forceLink= container.selectAll(".forceLink");
 
 	//TODO: remove when forces OK
 
@@ -427,23 +471,21 @@ function render(data){
 	 var qaLinks=[];
 
 	 pointsById.each(function(d){
-		var topology = "";
-		if (d.point == d.peer) { //spheric link case
-			topology = "spheric";
+		var id="";
+		if (d.topology == "spheric") { //spheric link case
 			var s = Object.assign({}, d);
  			var t = Object.assign({}, d); // new fictionnal point alone in deep universe
  				t.point = d.peer;
  				t.peer = d.point;
  				t.virtual = true;
- 			var id = topology + "_" + d.hc + "_" + d.point;
+ 			id = d.topology + "_" + d.hc + "_" + d.point;
 		}
-		if (d.point.startsWith("T") && (d.hc != pointsById.get(d.peer).hc)) { // planar link
-			topology = "planar";
+		if (d.point.startsWith("T") && (d.topology == "planar")) { // planar link
 			var s = Object.assign({}, d);
 			var t = Object.assign({}, pointsById.get(d.peer));
-			var id = topology + "_" + d.hc + "_" + t.hc + "_" + d.point;
+			id = d.topology + "_" + d.hc + "_" + t.hc + "_" + d.point;
 		}
-		if (topology) {qaLinks.push({topology:topology, id:id, source:s, target:t});}
+		if (id) {qaLinks.push({topology:d.topology, id:id, source:s, target:t});}
  	});
 
 	/*
@@ -481,8 +523,8 @@ function render(data){
 	 	.append("text")
 	 	.attr("class", function(d) {return "linkLabel label " + d.topology;})
 	 	.attr("id", function(d){return "label_" + d.id;})
+		.attr("text-anchor", "middle")
 	 	.text(function(d) {
-			//return d.source.info + " " + d.source.point + "->" + d.target.point;
 			return d.source.info;
 			});
 
@@ -511,7 +553,7 @@ function render(data){
 				.attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")";});
 
 				vertexGroupRotate
-				.attr("transform", function(d) {return "rotate(" + d.spin + ")";}); //rotation by spin in coded in force
+				.attr("transform", function(d) {return "rotate(" + (d.spin || 0) + ")";}); //rotation by spin in coded in force TODO:FIX spin
 				/*.attr("transform", function(d) {return this.dataset.storedRotation });*/
 
 				forceLink
@@ -599,7 +641,7 @@ function redrawLinksforOneVertex(vertexhc) {
 
 /**
  * Utility to find absolute x,y coordinates of a dom element in zoomed contexts
- * @param {string}  elt - element dom id
+ * @param elt {string}  elt - element dom id string
  * @returns {object} svg point - point coordinates {x,y}
  */
 function getAbsCoord(elt) {
@@ -637,8 +679,7 @@ function getAbsCoord(elt) {
  * - computation of "oldest point" for the vertex
  * - computation of topology
  *
- * @param {array}
- *            QApointsList - array of QApoints (point, next, peer, type)
+ * @param QApointsList {array} QApointsList - array of QApoints (point, next, peer, type)
  * @returns an array of vertex objectqaLinks with a sub array of segments : the points
  *          of the vertex
  */
@@ -685,19 +726,32 @@ function vertexComputation(QApointsList){
 		}
 		j++;
 	}
+	// Create a map of points across the vertices
+	var points=[];
+	for(var i=0, n=sr.length; i<n; i++){
+		for (var k=0, l=sr[i].segments.length;k<l;k++) {
+		points.push(Object.assign({}, sr[i].segments[k]));}
+	};
+	var pointsById = d3.map(points, function(d) { return d.point; });
 
 	//Adding positionning calculation of points and arcs as data in post computation
+	//Setting topology
 	for(var i=0, n=sr.length; i<n; i++){
 		for (var k=0, l=sr[i].segments.length;k<l;k++) {
 			var angle1 = k * (2*Math.PI / (sr[i].pc + (sr[i].pc + .5)%2));
 			var angle2 = (k == l-1)? 2*Math.PI:(k+1) * (2*Math.PI / (sr[i].pc + (sr[i].pc + .5)%2));
-			sr[i].segments[k].posX=VERTEX_RADIUS * Math.cos(angle1); // x coordinate of the point on the vertex's circle
-			sr[i].segments[k].posY=VERTEX_RADIUS * Math.sin(angle1); // y coordinates of the point on the vertex's circle
-			sr[i].segments[k].startAngle=angle1 + Math.PI*.5; // angle in degrees of the point on the vertex circle. To draw arcs (D3 pie format)
-			sr[i].segments[k].endAngle=angle2 + Math.PI*.5; // angle in degrees of the next point on the vertex circle. To draw arcs (D3 pie format)
-			sr[i].segments[k].index=k; // index of the point in the vertex
-			sr[i].segments[k].padAngle=0; //no pading between arcs
-			sr[i].segments[k].value=1; //all arcs have the same weight
+			var ptX = (VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(sr[i].pc)) * Math.cos(angle1); // x coordinate of the point on the vertex's circle
+			var ptY = (VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(sr[i].pc)) * Math.sin(angle1); // y coordinates of the point on the vertex's circle
+			sr[i].segments[k].ptX = ptX; // points coordinates within the vertex
+			sr[i].segments[k].ptY = ptY;
+			sr[i].segments[k].startAngle = angle1 + Math.PI * .5; // angle in degrees of the point on the vertex circle. To draw arcs (D3 pie format)
+			sr[i].segments[k].endAngle = angle2 + Math.PI * .5; // angle in degrees of the next point on the vertex circle. To draw arcs (D3 pie format)
+			sr[i].segments[k].index = k; // index of the point in the vertex
+			sr[i].segments[k].padAngle = 0; //no pading between arcs
+			sr[i].segments[k].value = 1; //all arcs have the same weight
+			sr[i].segments[k].topology="hyperbolic"; //default topology
+			if (sr[i].segments[k].point == sr[i].segments[k].peer) {sr[i].segments[k].topology="spheric";}
+			if (sr[i].segments[k].hc != pointsById.get(sr[i].segments[k].peer).hc) {sr[i].segments[k].topology="planar";}
 		}
 	}
 
@@ -723,6 +777,7 @@ function selectVertex(vertex){
 	unselectVertices(); // 1. unselect all
 	// 2. select current vertex or unpin and unselect
 	var d3vertex = d3.select(vertex);
+	d3vertex.raise();
 	if (!d3vertex.classed("focused")){
 		d3vertex.classed("focused", true);
 		var arc = d3vertex.selectAll(".arc");
@@ -735,8 +790,11 @@ function selectVertex(vertex){
 		d3vertex.fy=null;
 		d3vertex.classed("pinned", false);
 	}
-
-
+	d3vertex.selectAll(".arc").call(d3.drag() //add edit arc listener
+				.filter(function(d){return !this.classList.contains("notdisplayed");}) //not fired if arc is not displayed (removing the handler is buggy)
+				.on("start", arcDragStarted)
+				.on("drag", arcDragged)
+				.on("end", arcDragEnded));
 }
 
 /**
@@ -769,8 +827,7 @@ function unpinVertices(){
  * length is 0, returns 0. See website below
  *
  * @see http://erlycoder.com/49/javascript-hash-functions-to-convert-string-into-integer-hash-
- * @param {string}
- *            str - js string value
+ * @param str {string} str - js string value
  * @returns {integer} hascode - 32bit integer
  */
 function hashCode(str){
@@ -815,43 +872,73 @@ function vertexToString(vertex, hash){
  * function for computing the arcs depending of points distance and points#
  * giving a nice shape and intersec vertex's circle
  *
- * @param {object:point} - point object from
- * @param {object:point} - point object to
+ * @param pointSource {object:point} - point object from
+ * @param pointTarget {object:point} - point object to
  * @returns {integer} numeric - A ratio based on proximity to apply to point
  */
-function ratioCtrlPointsHyperbolicLnk(pointSource, pointTarget){
-	// PGT: 180205 - pas d'impact visible de cette valeur
-	var distance = pointTarget.index - pointSource.index;
-	return 1.0
+function ratioCtrlPtHyperArcs(pointSource, pointTarget){
+	var distance = Math.abs(pointTarget.index - pointSource.index);
+	if (distance==0){distance=1;}
+	if (distance==1){distance=1.2;}
+	var ratio = Math.min((0.8/distance) + (.2/Math.sqrt(pointSource.pc)), 1/distance, .9) + Math.random()*.1;
+	// flatening on larger vertex
+	if (pointSource.pc >= 80) {ratio = Math.min((ratio *= 2),.9);}
+	//ratio *= ratio;
+	console.log("ratio:", ratio, "pc:", pointSource.pc, "dist", distance, "idx1:", pointTarget.index,"idx2:", pointSource.index);
+	return ratio;
+}
+
+/**
+ * function for computing the hyperbolics arcs
+ *
+ * @param s {object:point} - point object from
+ * @param t {object:point} - point object to
+ * @returns {string} - svg path for the bezier hyperlink
+ */
+function hyperArcs(s, t){
+	var path, cs = {x:0, y:0}, ct = {x:0, y:0};
+	var distance, min_distance = 1.3; // minimum distance, also prevents 0
+	if (t.index < s.index) {t.index += (s.pc + 1);} // to manage the circleling index in the vertex
+	distance = Math.max(t.index - s.index,  min_distance);
+	var vertex_radius = (VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(s.pc));
+	var a = -3 // angle correction coef of the bezier curve if 0, no impact, if > 0 close the angle, if <0 open it
+	if (distance == min_distance) {a = 0;} // for short distances, no angle correction
+	var da = (Math.PI / s.pc) * a; // angle reduction based on point#
+	var q = (1/Math.sqrt(distance)); // compute distance from center of the vertex. The higher q is, closer is the point to the circle
+	var cdistance = Math.min((vertex_radius * q), (vertex_radius - 5)); // Compute distance from center of the vertex. Maximized at radius - 5px.
+	cs.x = Math.cos(s.startAngle - Math.PI * .5 + da) * cdistance;
+	ct.x = Math.cos(t.startAngle - Math.PI * .5 - da) * cdistance;
+	cs.y = Math.sin(s.startAngle - Math.PI * .5 + da) * cdistance;
+	ct.y = Math.sin(t.startAngle - Math.PI * .5 - da) * cdistance;
+	path =  "M" + s.ptX + "," + s.ptY
+	+ "C" + cs.x + "," + cs.y
+	+ " " + ct.x + "," + ct.y
+	+ " " + t.ptX + "," + t.ptY;
+	return {path:path, s:s, t:t, cp1X:cs.x, cp1Y:cs.y, cp2X:ct.x, cp2Y:ct.y};
 }
 
 /**
  * function for computing label orientation of a line
  *
- * @param {x1 -y2} - num - coordinates of the begin/end of the link
+ * @param x1..y2 {num} - num - coordinates of the begin/end of the link
  * @param optional {labelId} - id - uid of the label to get correct positionning
  * @returns {string} - A SVG rotate transformation string
  */
 function LnkLabelOrientation(x1, y1, x2, y2, labelId) {
 	labelId = labelId || "";
 	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
-	var labelBox, translate1 = 0, translate2 = 0;
-	if (document.getElementById(labelId)) {
-		labelBox = document.getElementById(labelId).getBBox();
-	} else {
-		labelBox = {x:0, y:0, width:0, height:0};
-	}
 	if (Math.abs(rt) < 90) {
-		return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (10, -3)";
+		return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (x2-x1)/2 + "," + (-3) + ")";
 	} else {
-		return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + (-labelBox.width - 10) + " , -3)";
+		return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + (x2-x1)/2 + "," + (-3) + ")";
 	}
 }
 
 /**
  * Store localy the position of the vertices (both tanslation & rotation) in the global variable vertexLastPosition
  *
- * @param {_verticesbyHc} - d3map - map of drawn vertices to register their transformations
+ * @param _verticesbyHc {d3map} - map of drawn vertices to register their transformations
+ * @returns {-} - Stores positionning as a json string in nav's localStorage
  */
 function storeLocalVertexPositionning(_verticesbyHc){
 	vertexLastPositionbyPoint = d3.map(vertexLastPosition, function(d) {return d.oPt});
@@ -895,7 +982,7 @@ function qa_vertices_forces(qaLinks, vertices) {
 		//.alphaTarget(def_alphaTarget)
 		.force("center", d3.forceCenter(xc,yc))
 		.force("charge", d3.forceManyBody().strength(-30))
-		//.force("charge", d3.forceCollide().radius(VERTEX_RADIUS * 2)/*.iterations(16)*/)
+		.force("charge", d3.forceCollide().strength(.8).radius(function(d){VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(d.pc)}).iterations(2))
 		.force("link", qa_linkPoints().distance(4*VERTEX_RADIUS).strength(1).id(function(d) {return d.id;})) // customized force
 		//.force("link", d3.forceLink().distance(4*VERTEX_RADIUS).strength(4).id(function(d) {return d.id;})) // std d3 force
 		//.force("link").links(forceLinks);
@@ -930,12 +1017,12 @@ function qa_linkPoints(links) {
 
   function getAbsTheta(point) {
 		var d = document.getElementById("grotate_" + point.hc);
-		if (!d) return 0
+		if (!d) return 0;
 		var theta = Number(d.attributes.transform.value
                                .replace("rotate(", "").replace(")",""));
-		theta /= 180.0; theta *= Math.PI
-		theta += Math.atan2(point.cy, point.cx)
-		return theta
+		theta /= 180.0; theta *= Math.PI;
+		theta += Math.atan2(point.cy, point.cx);
+		return theta;
 }
 /** --------------------------------------------------------------------
  * Defining a new force for vertices positioning driven by points' positions and links
@@ -944,14 +1031,16 @@ function qa_linkPoints(links) {
  */
 
   function force(alpha) {
-	  // left bound for spheric binding to it 
+	  /* left bound for spheric binding to it
       for (var i = 0, x_min = 10000000000000.0; i < links.length; ++i) {
-      	var link = links[i], source = link.source; 
-			x_min = Math.min(getAbsCoord(source.point).x, x_min)};  
+      	var link = links[i], source = link.source;
+			x_min = Math.min(getAbsCoord(source.point).x, x_min)
+		};
+	  */
 
       for (var i = 0; i < links.length; ++i) {
         var f    = alpha * strengths[i];           /* force intensity */
-        var b    = bias[i]                              /* force bias */
+        var b    = bias[i];                              /* force bias */
         var link = links[i], source = link.source, target = link.target;
                                                          /* link data */
 		var d_tgt, d_src; try {
@@ -965,28 +1054,30 @@ function qa_linkPoints(links) {
 		                                              /* point angles */
 		    xy_src  = getAbsCoord(source.point), xy_tgt  = getAbsCoord(target.point),
 		                                        /*  point coordinates */
-		    x       = xy_tgt.x - xy_src.x || qa_jiggle(),
-			y       = xy_tgt.y - xy_src.y || qa_jiggle();
+		    x       = xy_tgt.x + d_tgt.vx - xy_src.x - d_src.vx|| qa_jiggle(),
+			y       = xy_tgt.y + d_tgt.vy - xy_src.y - d_src.vy|| qa_jiggle();
                                         /* point to point link vector */
 
 	    var l = Math.sqrt(x * x + y * y);           /*       distance */
 	                      x /= l, y /= l;           /*    unit vector */
 
 		// -------------------------------------------------------------
-                               
+
         /* SPHERIC LINK CASE */
 		if (link.topology=='spheric') {
-			console.log("(spheric) i:", i, "id: ", links[i].id);
+			//console.log("(spheric) i:", i, "id: ", links[i].id);
 			var vtt = tgt_rot + Math.PI;
-			vtt %= 2 * Math.PI; if(vtt > Math.PI) vtt -= 2 * Math.PI;  
+			vtt %= 2 * Math.PI; if(vtt > Math.PI) vtt -= 2 * Math.PI;
+			/*
 	        d_src.spin -= vtt       / 3;          /* bind theta to TT */
+			/*
 	        d_src.vx   -= (xy_tgt.x - x_min) / 3;    /* bind x to min */
 			continue;}
 
 		/* SOURCE SPIN */
 		var vtt = tgt_rot - Math.atan2(y,x) + Math.PI;
-		vtt %= 2 * Math.PI; if(vtt > Math.PI) vtt -= 2 * Math.PI;  
-		vtt *= f                   
+		vtt %= 2 * Math.PI; if(vtt > Math.PI) vtt -= 2 * Math.PI;
+		vtt *= f
 
 		/* TARGET SPIN */
 		var vst = src_rot - Math.atan2(y, x);
@@ -1004,14 +1095,14 @@ function qa_linkPoints(links) {
          **/
 
 	    var intensity = f * (l - distances[i]);        //force intensity
-	    var flx = x * intensity, fly = y * intensity;  //force vector 
+	    var flx = x * intensity, fly = y * intensity;  //force vector
 
-		// -------------------------------------------------------------                               
+		// -------------------------------------------------------------
 	    d_tgt.vx -= flx * b ;
-        d_tgt.vy -= fly * b;    
+        d_tgt.vy -= fly * b;
 	    d_src.vx += flx * (1 - b);
 		d_src.vy += fly * (1 - b);                      //link force
-		 
+
 
 	    d_tgt.spin -= vtt                              //target spin
 	    d_src.spin -= vst;                             //source spin
@@ -1088,4 +1179,3 @@ function qa_linkPoints(links) {
 
   return force;
 }
-
