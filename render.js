@@ -2,34 +2,31 @@
 // Main constants affecting rendering
 // runs once @js load
 // ******************************************************
-//const SCENE_HEIGHT = +800, SCENE_WIDTH = +800;
-const SCENE_COLOR = "none";
-const POINT_RADIUS = +1;
-const VERTEX_RADIUS = +30;
-const VERTEX_RADIUS_M = 10; //The vertex radius is multiplied by ((this ratio) * sqrt(point number))
-const VERTEX_INNER_CIRCLE_RADIUS_RATIO = 0.7; // for hyperbolic crtl points
-const VERTEX_COMPUTATION_MAX_ITERATION = 100; // Limits the vertex computation iterations
-const BEYOND=800; // to get infinite line for spheric links
-const ARC_INNER_RADIUS=.1; // Arc inner radius ratio proportianal to VERTEX_RADIUS
-const LINK_TOPOLOGY = {planar:"planar", spheric:"spheric"};
-const AMEND_EDITZONE_ID = "amendment-editzone";
-const AMEND_TEMPLATE_T_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>";
-const AMEND_TEMPLATE_B_X = "<bhb:link push='$ID'>\nINSERT XML\n</bhb:link>";
 
-var scene; //d3 object select scene
-var svgScene; //dom object byid scene
-var def_alpha = 1; // [0-1] default 1
-var def_alphaTarget = 0; // [0-1] default 0
-var def_linkDistance = 2 * VERTEX_RADIUS;
-var zoom;
-var vertexLastPosition=[];
-var verticesbyHc=[];
-var verticesPositionning;
+const SCENE_COLOR = "none",
+			POINT_RADIUS = +1,
+			VERTEX_RADIUS = +30,
+			VERTEX_RADIUS_M = 10, //The vertex radius is multiplied by ((this ratio) * sqrt(point number))
+			VERTEX_COMPUTATION_MAX_ITERATION = 100, // Limits the vertex computation iterations
+			BEYOND=800, // to get infinite line for spheric links
+			ARC_INNER_RADIUS=.1, // Proportional to VERTEX_RADIUS. It is the radius of the inner donut circle of a selected vertex
+			AMEND_EDITZONE_ID = "amendment-editzone",
+			AMEND_TEMPLATE_T_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>",
+			AMEND_TEMPLATE_B_X = "<bhb:link push='$ID'>\nINSERT XML\n</bhb:link>";
+
+var scene, //d3 object select scene
+		svgScene, //dom object byid scene
+		def_alpha = 1, // [0-1] default 1
+		fast_alpha = .3, // accelerate forces when dragging
+		zoom,
+		vertexLastPosition=[],
+		verticesbyHc=[],
+		verticesPositionning;
 
 function dragstarted(d) {
 	d3.event.sourceEvent.stopPropagation();
 	if (!d3.event.active) {
-		verticesPositionning.alphaTarget(0.3).restart();
+		verticesPositionning.alphaTarget(fast_alpha).restart();
 	}
 	d.fx = d.x, d.fy = d.y;
 	//console.log("VertexDragEvent started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
@@ -43,7 +40,7 @@ function dragged(d) {
 
 function dragended(d) {
 	if (!d3.event.active) {
-		verticesPositionning.alphaTarget(0.3);
+		verticesPositionning.alphaTarget(fast_alpha);
 	}
 	//d.fx = null, d.fy = null;
 	d.fx = d.x, d.fy = d.y; // fixed last place
@@ -52,14 +49,11 @@ function dragended(d) {
 	//console.log("VertexDragEvent ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 
-
 function arcDragStarted(d) {
 	d3.event.sourceEvent.stopPropagation();
 	d3.select("#" + AMEND_EDITZONE_ID).attr("placeholder","drag the selected arc here to amend it !");
 	d3.select("#" + AMEND_EDITZONE_ID).classed("targeted", true);
-	//console.log("dataTransfer",d3.event.sourceEvent.dataTransfer)
-	//console.log("evt.target:", d3.event.sourceEvent.target,"evt.currentTarget:", d3.event.sourceEvent.currentTarget )
-	//d3.event.dataTransfer.setData("text",AMEND_TEMPLATE.replace("$ID",d3.event.subject.point));
+	// TODO: fix adding dataTransfert API to drag/drop outside the browser
 	//console.log("arcDragStarted started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 
@@ -111,8 +105,7 @@ function render(data){
 
 	// ------- no scene handler
 	if (scene.empty()){
-		scene = d3.select("#placeholder").append("svg")
-		.attr("id", "scene");
+		scene = d3.select("#placeholder").append("svg").attr("id", "scene");
 	}
 	svgScene = document.getElementById("scene");
 	// ******************************************************
@@ -120,7 +113,6 @@ function render(data){
 	// ******************************************************
 	var defs= scene.select("defs");
 
-	// ------- no scene handler
 	if (defs.empty()){
 		defs = scene.append("defs")
 		defs.append("marker")
@@ -146,7 +138,7 @@ function render(data){
 		/** ------------------------------------------------------------
 			QUANTUM ALGEBRA MARKERS
 
-			TBD : change the market of the the view for user spot
+			TBD : change the marker of the view for user spot
 
 			<marker id="marker-end" markerWidth="10" markerHeight="10" refX="1" refY="5"
 		    	orient="auto">
@@ -163,7 +155,6 @@ function render(data){
 	// ******************************************************
 	var container = scene.select("#container");
 
-	// ------- no container handler
 	if (container.empty()){
 		container = scene.append("g")
 		.attr("id", "container")
@@ -195,7 +186,7 @@ function render(data){
 	// ******************************************************
 	//TODO: dev mode cheat
 	// Add controls to perspective
-	var div_perspective = d3.select("#perspective-body");
+	var div_perspective = d3.select("#perspective-footer");
 	var btnResetZoom = div_perspective.select("#btnReset-zoom");
 	if (btnResetZoom.empty()) {
 			//reset zoom
@@ -291,8 +282,7 @@ function render(data){
 	.enter()
 	.append("circle")
 	.attr("class", "vertexCircle")
-	.attr("r", function(d){
-		return VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(d.pc);})
+	.attr("r", function(d){return d.radius;})
 	.attr("fill", "white")
 	//.attr("filter","url(#shadow2)")
 	.attr("id", function(d) {return "vertexCircle_" + d.hc;});
@@ -331,7 +321,7 @@ function render(data){
 	.enter()
 	.append("circle")
 	.attr("class", "vertexCircleRotate")
-	.attr("r",function(d){return VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(d.pc);});
+	.attr("r",function(d){return d.radius;});
 
 	// Entering arcs within vertex's group grotate
 	var pie = d3.pie()
@@ -339,10 +329,8 @@ function render(data){
 	    .value(function(d) { return 1; });
 
 	var arc = d3.arc()
-	    .outerRadius(function(d){
-				return VERTEX_RADIUS + VERTEX_RADIUS_M *  Math.sqrt(d.pc);})
-	    .innerRadius(function(d){
-				return (VERTEX_RADIUS + VERTEX_RADIUS_M *  Math.sqrt(d.pc)) * ARC_INNER_RADIUS;} );
+	    .outerRadius(function(d){return d.radius;})
+	    .innerRadius(function(d){return d.radius * ARC_INNER_RADIUS;} );
 
 	var coloring = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -412,41 +400,6 @@ function render(data){
 	// ******************************************************
 	// Rendering planar edges
 	// ******************************************************
-
-	/*
-	 * Force planar links between vertices (temporary)
-	 */
-
-	//TODO: remove when forces OK
-
-		// virtual planar Lnk forces beween vertex's group layer
-
-		// 1.creating a source/target array
-		var forceLinks=[];
-		pointsById.each(function(d){
-			if (d.point.startsWith("T") && (d.hc != pointsById.get(d.peer).hc)) {
-				var s = verticesbyHc.get(d.hc);
-				var t = verticesbyHc.get(pointsById.get(d.peer).hc);
-				var id = "forceLinksVertices_" + verticesbyHc.get(d.hc).hc;
-				forceLinks.push({id: id, source: s, target: t});
-			}
-		});
-
-		// 2.entering forceLink between quantum center
-		var newforceLink = container
-		.selectAll(".forceLink")
-		.data(forceLinks, function(d){return d.id;});
-
-		newforceLink.exit().remove();
-
-		newforceLink.enter()
-		.append("line").attr("class", "forceLink")
-		.attr("id", function(d){return d.id;});
-
-		forceLink= container.selectAll(".forceLink");
-
-	//TODO: remove when forces OK
-
 	/*
 	 * Real qa links map
 	 */
@@ -522,9 +475,8 @@ function render(data){
 
     ------------------------------------------------------------------*/
 	// Link forces
-	verticesPositionning = qa_vertices_forces()
-	verticesPositionning.force("link").links(qaLinks);
-	verticesPositionning.nodes(vertices).on("tick", ticked).on("end", endTick);
+	verticesPositionning = qa_vertices_forces(qaLinks, vertices);
+	verticesPositionning.on("tick", ticked).on("end", endTick);
 	verticesPositionning.restart(); //reinit forces
 
 	// Positionning calculation at each tick
@@ -548,12 +500,6 @@ function render(data){
 						return "rotate(0)";
 					}
 				});
-
-				forceLink
-				.attr("x1", function(d) {return d.source.x;})
-				.attr("y1", function(d) {return d.source.y;})
-				.attr("x2", function(d) {return d.target.x;})
-				.attr("y2", function(d) {return d.target.y;});
 
 				qaLink
 				.filter(function(d){return (d.topology == "planar");})
@@ -588,14 +534,12 @@ function render(data){
 	function endTick() {
 		//toggle force btn off
 		//d3.select("#stop-animation").attr("value","start").text("Ended. Restart animation");
+		console.log("ticks ended");
 	}
 }
 
-
 /***********************************************************************
 ***********************************************************************/
-
-
 
 function redrawLinksforOneVertex(vertexhc) {
 	var trueVertexhc=Number(vertexhc.replace("grotate_",""));
@@ -725,11 +669,13 @@ function vertexComputation(QApointsList){
 	//Adding positionning calculation of points and arcs as data in post computation
 	//Setting topology
 	for(var i=0, n=sr.length; i<n; i++){
+		sr[i].radius = VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(sr[i].pc) // Node radius
 		for (var k=0, l=sr[i].segments.length;k<l;k++) {
 			var angle1 = k * (2*Math.PI / (sr[i].pc + (sr[i].pc + .5)%2));
 			var angle2 = (k == l-1)? 2*Math.PI:(k+1) * (2*Math.PI / (sr[i].pc + (sr[i].pc + .5)%2));
-			var ptX = (VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(sr[i].pc)) * Math.cos(angle1); // x coordinate of the point on the vertex's circle
-			var ptY = (VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(sr[i].pc)) * Math.sin(angle1); // y coordinates of the point on the vertex's circle
+			var ptX = sr[i].radius * Math.cos(angle1); // x coordinate of the point on the vertex's circle
+			var ptY = sr[i].radius * Math.sin(angle1); // y coordinates of the point on the vertex's circle
+			sr[i].segments[k].radius = sr[i].radius;
 			sr[i].segments[k].ptX = ptX; // points coordinates within the vertex
 			sr[i].segments[k].ptY = ptY;
 			sr[i].segments[k].startAngle = angle1 + Math.PI * .5; // angle in degrees of the point on the vertex circle. To draw arcs (D3 pie format)
@@ -793,6 +739,8 @@ function selectVertex(vertex){
 function unselectVertices(){
 	d3.selectAll(".focused").classed("focused", false);
 	d3.selectAll(".arc").classed("notdisplayed", true);
+	d3.selectAll(".link").raise(); // raise links above vortices
+	d3.selectAll(".linkLabel").raise();
 }
 
 /**
@@ -869,12 +817,11 @@ function hyperArcs(s, t){
 	var distance, min_distance = 1.3; // minimum distance, also prevents 0
 	if (t.index < s.index) {t.index += (s.pc + 1);} // to manage the circleling index in the vertex
 	distance = Math.max(t.index - s.index,  min_distance);
-	var vertex_radius = (VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(s.pc));
 	var a = -3 // angle correction coef of the bezier curve if 0, no impact, if > 0 close the angle, if <0 open it
 	if (distance == min_distance) {a = 0;} // for short distances, no angle correction
 	var da = (Math.PI / s.pc) * a; // angle reduction based on point#
 	var q = (1/Math.sqrt(distance)); // compute distance from center of the vertex. The higher q is, closer is the point to the circle
-	var cdistance = Math.min((vertex_radius * q), (vertex_radius - 5)); // Compute distance from center of the vertex. Maximized at radius - 5px.
+	var cdistance = Math.min((s.radius * q), (s.radius - 5)); // Compute distance from center of the vertex. Maximized at radius - 5px.
 	cs.x = Math.cos(s.startAngle - Math.PI * .5 + da) * cdistance;
 	ct.x = Math.cos(t.startAngle - Math.PI * .5 - da) * cdistance;
 	cs.y = Math.sin(s.startAngle - Math.PI * .5 + da) * cdistance;
@@ -936,11 +883,12 @@ function storeLocalVertexPositionning(_verticesbyHc){
 	})
 }
 
-	// ******************************************************             _______________________________
+	// ******************************************************					_______________________________
 	// Applying Forces to elements
-    //            1. forceCenter: center vertices                                   F O R C E S
-    //            2. forceCollide: colliding vertices                     _______________________________
-    //            3. qa_linkPoints: edge-directed force
+	//			1. forceCenter: center vertices                                   F O R C E S
+	//			2. forceCollide: colliding vertices												_______________________________
+	//			3. forceManyBody: Electrostatic force
+	//			4. qa_linkPoints: edge-directed force and rotation
 	// ******************************************************
 
 function qa_vertices_forces(qaLinks, vertices) {
@@ -948,13 +896,11 @@ function qa_vertices_forces(qaLinks, vertices) {
 	var yc= scene.property("clientHeight") / 2;
 	forces = d3.forceSimulation()
 		//.alpha(def_alpha)
-		//.alphaTarget(def_alphaTarget)
-		.force("center", d3.forceCenter(xc,yc))
-		.force("charge", d3.forceManyBody().strength(-30))
-		.force("charge", d3.forceCollide().strength(.8).radius(function(d){VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(d.pc)}).iterations(2))
-		.force("link", qa_linkPoints().distance(4*VERTEX_RADIUS).strength(1).id(function(d) {return d.id;})) // customized force
-		//.force("link", d3.forceLink().distance(4*VERTEX_RADIUS).strength(4).id(function(d) {return d.id;})) // std d3 force
-		//.force("link").links(forceLinks);
+		.nodes(vertices)
+		.force("center", d3.forceCenter(xc,yc)) // force toward the center
+		.force("charge", d3.forceManyBody().strength(function(d){return d.radius * -1;}))  // Nodes attrating or reppelling each others (negative = repelling)
+		.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;})) // collision detection
+		.force("link", qa_linkPoints().links(qaLinks).id(function(d) {return d.id;})) // customized force
         ;
 	return forces
 }
@@ -1004,20 +950,19 @@ function qa_linkPoints(links) {
       for (var i = 0, x_min = 10000000000000.0; i < links.length; ++i) {
       	var link = links[i], source = link.source;
 			x_min = Math.min(getAbsCoord(source.point).x, x_min)
-		};
-	  */
+		}; */
 
     for (var i = 0; i < links.length; ++i) {
-      var f    = alpha * strengths[i];           /* force intensity */
-      var b    = bias[i];                              /* force bias */
-      var link = links[i], source = link.source, target = link.target;
-                                                       /* link data */
-		var d_tgt, d_src; try {
+      var f    = alpha * strengths[i];	//force intensity
+      var b    = bias[i];	// force bias
+      var link = links[i], source = link.source, target = link.target;	// link data
+			var d_tgt, d_src; try {
 			d_tgt = d3.select("#gvertex_"+target.hc).datum();
 			d_src = d3.select("#gvertex_"+source.hc).datum();
 		} catch (e) {
 			//console.log("(error - data) i:", i, "id: ", links[i].id);
-			continue;}                              /* vertex d3 data */
+			continue;
+		}                              /* vertex d3 data */
 
 		var src_rot = getAbsTheta(source), tgt_rot = getAbsTheta(target),
 		                                              /* point angles */

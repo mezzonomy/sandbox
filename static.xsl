@@ -76,7 +76,9 @@
 					</xsl:choose>
 				</p>
 			</xsl:for-each>
-	</div>
+		</div>
+		<div id="{$toolbox_ID}-footer" class="toolbox-body">
+		</div>
 	</div>
 </xsl:template>
 
