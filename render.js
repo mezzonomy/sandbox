@@ -211,7 +211,6 @@ function render(data){
 			//reset zoom
 			var btnResetPosHistory = div_perspective.append("button").attr("type","button").attr("class","btn btn-info").attr("id","btnReset-posHistory").text("reset");
 			btnResetPosHistory.on("click", function(){
-				// DEBUG console.log(localStorage.vertexLastPosition_json);
 				verticesPositionning.stop();
 				localStorage.removeItem("vertexLastPosition_json");
 				//d3.selectAll(".container").remove();
@@ -316,12 +315,13 @@ function render(data){
 		//console.log("Wheel rotate vertex Event on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this))
 		selectVertex(this.parentNode);
 		if (this.attributes.transform) {
-			var currentRotate=Number(this.attributes.transform.value.replace("rotate(", "").replace(")",""));
+			var curRt=Number(this.attributes.transform.value.replace("rotate(", "").replace(")",""));
+			if (isNaN(curRt)) {curRt=0;}
 		} else {
-			var currentRotate=0;
+			var curRt=0;
 		}
-		d3.select(this).attr("transform", "rotate(" + (currentRotate + d3.event.wheelDelta) + ")");
-		d3.select(this).attr("data-storedRotation", "rotate(" + (currentRotate + d3.event.wheelDelta) + ")"); // store on vertex for simulation forces ticks
+		d3.select(this).attr("transform", "rotate(" + (curRt + d3.event.wheelDelta) + ")");
+		d3.select(this).attr("data-storedRotation", "rotate(" + (curRt + d3.event.wheelDelta) + ")"); // store on vertex for simulation forces ticks
 		redrawLinksforOneVertex(this.id);
 	});
 
@@ -374,20 +374,6 @@ function render(data){
 		d.segments.forEach(function(d,i){points.push(Object.assign({}, d));})
 	});
 	var pointsById = d3.map(points, function(d) { return d.point; });
-
-	//DEBUG: drawing ctrlpoints of hyperbolic arcs TODO:REMOVE
-	/*
-	var ctrlpt = vertexGroupRotate.selectAll(".ctrlpt").data(function(d){return d.segments;}, function(d){return d.point;});
-	ctrlpt.exit().remove();
-	ctrlpt.enter().append("circle").attr("r",.5).attr("fill","red")
-		.filter(function(d){return pointsById.get(d.point).topology == "hyperbolic";})
-		.attr("cx", function(d,i) {return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).cp1X;})
-		.attr("cy", function(d,i) {return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).cp1Y;});
-	ctrlpt.enter().append("circle").attr("r",.5).attr("fill","purple")
-		.filter(function(d){return pointsById.get(d.point).hc == "hyperbolic";})
-		.attr("cx", function(d,i) {return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).cp2X;})
-		.attr("cy", function(d,i) {return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).cp2Y;});
-		*/
 
 	/*------------------------------------------------------------------
 	 * Drawing hyperbolic arcs within the vertices
@@ -553,8 +539,15 @@ function render(data){
 				.attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")";});
 
 				vertexGroupRotate
-				.attr("transform", function(d) {return "rotate(" + (d.spin || 0) + ")";}); //rotation by spin in coded in force TODO:FIX spin
-				/*.attr("transform", function(d) {return this.dataset.storedRotation });*/
+				.attr("transform", function(d) {
+					if (d.spin) {
+						return "rotate(" + (d.spin) + ")";
+					} else if (this.dataset.storedRotation) {
+						return this.dataset.storedRotation;
+					} else {
+						return "rotate(0)";
+					}
+				});
 
 				forceLink
 				.attr("x1", function(d) {return d.source.x;})
@@ -564,21 +557,16 @@ function render(data){
 
 				qaLink
 				.filter(function(d){return (d.topology == "planar");})
-				.attr("x1", function(d) {
-					return getAbsCoord(d.source.point).x;})
-				.attr("y1", function(d) {
-					return getAbsCoord(d.source.point).y;})
-				.attr("x2", function(d) {
-					return getAbsCoord(d.target.point).x;})
-				.attr("y2", function(d) {
-					return getAbsCoord(d.target.point).y;});
+				.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
+				.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
+				.attr("x2", function(d) {return getAbsCoord(d.target.point).x;})
+				.attr("y2", function(d) {return getAbsCoord(d.target.point).y;});
 
 				qaLink
 				.filter(function(d){return (d.topology == "spheric");})
 				.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
 				.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
-				.attr("x2", function(d) {
-					return (getAbsCoord(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND;})
+				.attr("x2", function(d) {return (getAbsCoord(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND;})
 				.attr("y2", function(d) {return (getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND;});
 
 				qaLinkLabel
@@ -590,7 +578,7 @@ function render(data){
 				storeLocalVertexPositionning(verticesbyHc); //store last vertex position and rotation
 				}
 			catch(error) {
-			//console.log("fantom !");
+			//console.log("phantom !");
 }
 			semaphore = true;
 } else {
@@ -868,25 +856,6 @@ function vertexToString(vertex, hash){
 		return vertexString;
 	}
 }
-/**
- * function for computing the arcs depending of points distance and points#
- * giving a nice shape and intersec vertex's circle
- *
- * @param pointSource {object:point} - point object from
- * @param pointTarget {object:point} - point object to
- * @returns {integer} numeric - A ratio based on proximity to apply to point
- */
-function ratioCtrlPtHyperArcs(pointSource, pointTarget){
-	var distance = Math.abs(pointTarget.index - pointSource.index);
-	if (distance==0){distance=1;}
-	if (distance==1){distance=1.2;}
-	var ratio = Math.min((0.8/distance) + (.2/Math.sqrt(pointSource.pc)), 1/distance, .9) + Math.random()*.1;
-	// flatening on larger vertex
-	if (pointSource.pc >= 80) {ratio = Math.min((ratio *= 2),.9);}
-	//ratio *= ratio;
-	console.log("ratio:", ratio, "pc:", pointSource.pc, "dist", distance, "idx1:", pointTarget.index,"idx2:", pointSource.index);
-	return ratio;
-}
 
 /**
  * function for computing the hyperbolics arcs
@@ -1018,10 +987,10 @@ function qa_linkPoints(links) {
   function getAbsTheta(point) {
 		var d = document.getElementById("grotate_" + point.hc);
 		if (!d) return 0;
-		var theta = Number(d.attributes.transform.value
-                               .replace("rotate(", "").replace(")",""));
+		var theta = Number(d.attributes.transform.value.replace("rotate(", "").replace(")",""));
+		if (isNaN(theta)) {theta = 0;};
 		theta /= 180.0; theta *= Math.PI;
-		theta += Math.atan2(point.cy, point.cx);
+		theta += Math.atan2(point.ptY, point.ptX);
 		return theta;
 }
 /** --------------------------------------------------------------------
@@ -1038,11 +1007,11 @@ function qa_linkPoints(links) {
 		};
 	  */
 
-      for (var i = 0; i < links.length; ++i) {
-        var f    = alpha * strengths[i];           /* force intensity */
-        var b    = bias[i];                              /* force bias */
-        var link = links[i], source = link.source, target = link.target;
-                                                         /* link data */
+    for (var i = 0; i < links.length; ++i) {
+      var f    = alpha * strengths[i];           /* force intensity */
+      var b    = bias[i];                              /* force bias */
+      var link = links[i], source = link.source, target = link.target;
+                                                       /* link data */
 		var d_tgt, d_src; try {
 			d_tgt = d3.select("#gvertex_"+target.hc).datum();
 			d_src = d3.select("#gvertex_"+source.hc).datum();
@@ -1054,8 +1023,8 @@ function qa_linkPoints(links) {
 		                                              /* point angles */
 		    xy_src  = getAbsCoord(source.point), xy_tgt  = getAbsCoord(target.point),
 		                                        /*  point coordinates */
-		    x       = xy_tgt.x + d_tgt.vx - xy_src.x - d_src.vx|| qa_jiggle(),
-			y       = xy_tgt.y + d_tgt.vy - xy_src.y - d_src.vy|| qa_jiggle();
+				x       = xy_tgt.x + d_tgt.vx - xy_src.x - d_src.vx|| qa_jiggle(),
+				y       = xy_tgt.y + d_tgt.vy - xy_src.y - d_src.vy|| qa_jiggle();
                                         /* point to point link vector */
 
 	    var l = Math.sqrt(x * x + y * y);           /*       distance */
@@ -1098,16 +1067,15 @@ function qa_linkPoints(links) {
 	    var flx = x * intensity, fly = y * intensity;  //force vector
 
 		// -------------------------------------------------------------
-	    d_tgt.vx -= flx * b ;
-        d_tgt.vy -= fly * b;
-	    d_src.vx += flx * (1 - b);
-		d_src.vy += fly * (1 - b);                      //link force
-
+			d_tgt.vx -= flx * b ;
+			d_tgt.vy -= fly * b;
+			d_src.vx += flx * (1 - b);
+			d_src.vy += fly * (1 - b);                      //link force
 
 	    d_tgt.spin -= vtt                              //target spin
 	    d_src.spin -= vst;                             //source spin
 
-		//console.log("[planar]", i, x,y, l, tgt_rot, src_rot, '[success]', d_tgt.vx, d_tgt.vy,  d_src.vx, d_src.vy);
+			//console.log("[planar]", i, x, y, l, tgt_rot, src_rot, '[success]', d_tgt.vx, d_tgt.vy, d_src.vx, d_src.vy);
       }
     }
 
