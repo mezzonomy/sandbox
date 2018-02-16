@@ -10,7 +10,7 @@
 
 .vertexCircleRotate {
 	opacity: 0;
-  fill: white; // fill is mandatory to event trigger
+	fill: white; // fill is mandatory to event trigger
 }
 
 .vertexCircle {
@@ -41,38 +41,38 @@
   stroke: black;
 }
 
-.label  {
+.edgeLbl  {
 	font-size: .6rem;
 	fill: black;
-  pointer-events: none;
-  user-select: none;
+	pointer-events: none;
+	user-select: none;
 	text-anchor: middle;
 }
 
-.hyperbolicLnk{
+path.hyperbolic{
 	fill: none;
 	stroke-width: 1px;
 	stroke: black;
-  pointer-events: none;
+	pointer-events: none;
 }
 
 line.planar{
 	fill: none;
 	stroke-width: 1px;
 	stroke: black;
-  pointer-events: none;
+	pointer-events: none;
 }
 
 line.spheric{
 	fill: none;
 	stroke-width: 1px;
 	stroke: black;
-  pointer-events: none;
+	pointer-events: none;
 }
 
 .arc{
 	stroke-width: 0px;
-  opacity: 1;
+	opacity: 1;
 }
 
 .notdisplayed{

@@ -8,7 +8,7 @@ const SCENE_COLOR = "none",
 			VERTEX_RADIUS = +30,
 			VERTEX_RADIUS_M = 10, //The vertex radius is multiplied by ((this ratio) * sqrt(point number))
 			VERTEX_COMPUTATION_MAX_ITERATION = 100, // Limits the vertex computation iterations
-			BEYOND=800, // to get infinite line for spheric links
+			BEYOND=800, // to get infinite line for spheric edges
 			ARC_INNER_RADIUS=.1, // Proportional to VERTEX_RADIUS. It is the radius of the inner donut circle of a selected vertex
 			AMEND_EDITZONE_ID = "amendment-editzone",
 			AMEND_TEMPLATE_T_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>",
@@ -234,8 +234,7 @@ function render(data){
 	 * #D3_PATTERN# synchronizing vertex
 	 */
 
-		// Entering a svg group for each vertex
-        // (for creating a logical group and a group drag behaviour)
+		// Entering a svg group for each vertex (for creating a logical group and a group drag behaviour)
 		// linking data
 
 		var newVertexGroup = container.selectAll(".gvertex")
@@ -312,7 +311,7 @@ function render(data){
 		}
 		d3.select(this).attr("transform", "rotate(" + (curRt + d3.event.wheelDelta) + ")");
 		d3.select(this).attr("data-storedRotation", "rotate(" + (curRt + d3.event.wheelDelta) + ")"); // store on vertex for simulation forces ticks
-		redrawLinksforOneVertex(this.id);
+		redrawEdgesforOneVertex(this.id);
 	});
 
 	// entering a dummy circle for rotation event handling
@@ -366,13 +365,13 @@ function render(data){
 	/*------------------------------------------------------------------
 	 * Drawing hyperbolic arcs within the vertices
 	 */
-	var hyperbolicLnk = vertexGroupRotate
-	.selectAll(".hyperbolicLnk")
+	var hyperbolic = vertexGroupRotate
+	.selectAll(".hyperbolic")
 	.data(function(d){return d.segments;}, function(d){return d.point;})
 	.enter()
 	.filter(function(d) {return (d.point.startsWith("T") && (d.topology == "hyperbolic"))})
 	.append("path")
-	.attr("class", "hyperbolicLnk")
+	.attr("class", "hyperbolic")
 		.attr("marker-end","url(#marker-end)")
 		.attr("marker-start","url(#marker-start)")
 	.attr("id", function(d) {return "arc_" + d.point;})
@@ -401,17 +400,17 @@ function render(data){
 	// Rendering planar edges
 	// ******************************************************
 	/*
-	 * Real qa links map
+	 * Edges map
 	 */
-	 // Creating a list of all links (only planar and spheric)
-	 // for drawing links & force simulation for positionning
+	 // Creating a list of all planar and spheric edges
+	 // for drawing links & force simulation
 	 // in d3 source/target format
 
-	 var qaLinks=[];
+	 var edges=[];
 
 	 pointsById.each(function(d){
 		var id="";
-		if (d.topology == "spheric") { //spheric link case
+		if (d.topology == "spheric") { //spheric edge case
 			var s = Object.assign({}, d);
  			var t = Object.assign({}, d); // new fictionnal point alone in deep universe
  				t.point = d.peer;
@@ -419,63 +418,64 @@ function render(data){
  				t.virtual = true;
  			id = d.topology + "_" + d.hc + "_" + d.point;
 		}
-		if (d.point.startsWith("T") && (d.topology == "planar")) { // planar link
+		if (d.point.startsWith("T") && (d.topology == "planar")) { // planar edge
 			var s = Object.assign({}, d);
 			var t = Object.assign({}, pointsById.get(d.peer));
 			id = d.topology + "_" + d.hc + "_" + t.hc + "_" + d.point;
 		}
-		if (id) {qaLinks.push({topology:d.topology, id:id, source:s, target:t});}
+		if (id) {edges.push({topology:d.topology, id:id, source:s, target:t});}
  	});
 
 	/*
-	 * #D3_PATTERN# Adding links
+	 * #D3_PATTERN# Adding edges
 	 */
 
-		 var newQaLink = container
-	 	.selectAll(".link")
-	 	.data(qaLinks, function(d){return d.id;});
+		 var newEdge = container
+	 	.selectAll(".edge")
+	 	.data(edges, function(d){return d.id;});
 
-	 	newQaLink.exit().remove();
+	 	newEdge.exit().remove();
 
-	 	newQaLink
+	 	newEdge
 	 	.enter()
 	 	.append("line")
-		.attr("class", function(d){return "link " + d.topology;})
+		.attr("class", function(d){return "edge " + d.topology;})
 	 	.attr("id", function(d){return d.id;})
 		.attr("marker-end","url(#marker-end)")
 		.attr("marker-start","url(#marker-start)");
-	 	var qaLink =  container.selectAll(".link");
+
+		var edge =  container.selectAll(".edge");
 
 	/*
-	 * #D3_PATTERN# Adding link labels
+	 * #D3_PATTERN# Adding edge labels
 	 */
 
-	 	var newQaLinkLabel = container
-	 	.selectAll(".linkLabel")
-	 	.data(qaLinks, function(d){return "label_" + d.id;});
+	 	var newEdgeLbl = container
+	 	.selectAll(".edgeLbl")
+	 	.data(edges, function(d){return "label_" + d.id;});
 
-	 	newQaLinkLabel.exit().remove();
+	 	newEdgeLbl.exit().remove();
 
-	 	newQaLinkLabel
+	 	newEdgeLbl
 	 	.enter()
-	 	.filter(function(d){return d.topology == "planar"}) //only planar links have labels
+	 	.filter(function(d){return d.topology == "planar"}) //only planar edges have labels
 	 	.append("text")
-	 	.attr("class", function(d) {return "linkLabel label " + d.topology;})
+	 	.attr("class", function(d) {return "edgeLbl " + d.topology;})
 	 	.attr("id", function(d){return "label_" + d.id;})
 		.attr("text-anchor", "middle")
 	 	.text(function(d) {
 			return d.source.info;
 			});
 
-	 	var qaLinkLabel =  container.selectAll(".linkLabel");
+	 	var edgeLbl =  container.selectAll(".edgeLbl");
 
 	/* -----------------------------------------------------------------
 
 			FORCES AND TICKS
 
     ------------------------------------------------------------------*/
-	// Link forces
-	verticesPositionning = qa_vertices_forces(qaLinks, vertices);
+	// Edge forces
+	verticesPositionning = qa_vertices_forces(edges, vertices);
 	verticesPositionning.on("tick", ticked).on("end", endTick);
 	verticesPositionning.restart(); //reinit forces
 
@@ -501,25 +501,25 @@ function render(data){
 					}
 				});
 
-				qaLink
+				edge
 				.filter(function(d){return (d.topology == "planar");})
 				.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
 				.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
 				.attr("x2", function(d) {return getAbsCoord(d.target.point).x;})
 				.attr("y2", function(d) {return getAbsCoord(d.target.point).y;});
 
-				qaLink
+				edge
 				.filter(function(d){return (d.topology == "spheric");})
 				.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
 				.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
 				.attr("x2", function(d) {return (getAbsCoord(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND;})
 				.attr("y2", function(d) {return (getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND;});
 
-				qaLinkLabel
+				edgeLbl
 				.filter(function(d){return (d.topology == "planar");})
 				.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
 				.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
-				.attr("transform", function(d) {return LnkLabelOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "label_"+d.id)});
+				.attr("transform", function(d) {return EdgeLabelOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "label_"+d.id)});
 
 				storeLocalVertexPositionning(verticesbyHc); //store last vertex position and rotation
 				}
@@ -541,23 +541,23 @@ function render(data){
 /***********************************************************************
 ***********************************************************************/
 
-function redrawLinksforOneVertex(vertexhc) {
+function redrawEdgesforOneVertex(vertexhc) {
 	var trueVertexhc=Number(vertexhc.replace("grotate_",""));
 
-	planarLink=d3.selectAll("line.planar")
+	planarEdge=d3.selectAll("line.planar")
 	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
 	.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
 	.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
 	.attr("x2", function(d) {return getAbsCoord(d.target.point).x;})
 	.attr("y2", function(d) {return getAbsCoord(d.target.point).y;});
 
-	planarLinkLabel=d3.selectAll("text.planar")
+	planarEdgeLabel=d3.selectAll("text.planar")
 	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
 	.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
 	.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
-	.attr("transform", function(d) {return LnkLabelOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "label_" + d.id)});
+	.attr("transform", function(d) {return EdgeLabelOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "label_" + d.id)});
 
-	sphericLink=d3.selectAll("line.spheric")
+	sphericEdge=d3.selectAll("line.spheric")
 	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
 	.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
 	.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
@@ -577,7 +577,7 @@ function redrawLinksforOneVertex(vertexhc) {
  * @returns {object} svg point - point coordinates {x,y}
  */
 function getAbsCoord(elt) {
-	if (svgScene.getElementById(elt)) { // to filter phantom links : TODO: improve by suppressing these fantom links
+	if (svgScene.getElementById(elt)) { // to filter phantom s : TODO: improve by suppressing these fantom Edges
 		var ptn = svgScene.getElementById(elt);
 		var matrixPt = ptn.getCTM(); //get current elt transformation on svg
 		var pt = svgScene.createSVGPoint(); //create new point on the svg
@@ -612,7 +612,7 @@ function getAbsCoord(elt) {
  * - computation of topology
  *
  * @param QApointsList {array} QApointsList - array of QApoints (point, next, peer, type)
- * @returns an array of vertex objectqaLinks with a sub array of segments : the points
+ * @returns an array of vertex objectedges with a sub array of segments : the points
  *          of the vertex
  */
 function vertexComputation(QApointsList){
@@ -690,9 +690,13 @@ function vertexComputation(QApointsList){
 	}
 
 	//oldest point (smallest number) of each vertex for managing positionning history of vertices
+	// + count points by type (for force computing)
 	for(var i=0, n=sr.length; i<n; i++){
 		var sortOldest=sr[i].segments.sort(function(a, b){return Number((a.point.match(/[0-9]/g)).join(''))-Number((b.point.match(/[0-9]/g)).join(''))});
 		sr[i].oldestPoint = sortOldest[0].point;
+		sr[i].pc_planars=sr[i].segments.filter(function(s) { return s.topology=="planar";}).length;
+		sr[i].pc_hyperbolics=sr[i].segments.filter(function(s) { return s.topology=="hyperbolic";}).length;
+		sr[i].pc_spherics=sr[i].segments.filter(function(s) { return s.topology=="spheric";}).length;
 	}
 
 	// logs TODO: remove
@@ -739,8 +743,9 @@ function selectVertex(vertex){
 function unselectVertices(){
 	d3.selectAll(".focused").classed("focused", false);
 	d3.selectAll(".arc").classed("notdisplayed", true);
-	d3.selectAll(".link").raise(); // raise links above vortices
-	d3.selectAll(".linkLabel").raise();
+	d3.selectAll(".gvertex").lower();
+	d3.selectAll(".egde").raise(); // raise edges above vortices
+	d3.selectAll(".edgeLbl").raise();
 }
 
 /**
@@ -810,7 +815,7 @@ function vertexToString(vertex, hash){
  *
  * @param s {object:point} - point object from
  * @param t {object:point} - point object to
- * @returns {string} - svg path for the bezier hyperlink
+ * @returns {string} - svg path for the bezier curve
  */
 function hyperArcs(s, t){
 	var path, cs = {x:0, y:0}, ct = {x:0, y:0};
@@ -820,7 +825,7 @@ function hyperArcs(s, t){
 	var a = -3 // angle correction coef of the bezier curve if 0, no impact, if > 0 close the angle, if <0 open it
 	if (distance == min_distance) {a = 0;} // for short distances, no angle correction
 	var da = (Math.PI / s.pc) * a; // angle reduction based on point#
-	var q = (1/Math.sqrt(distance)); // compute distance from center of the vertex. The higher q is, closer is the point to the circle
+	var q = (1/Math.sqrt(distance)); // compute distance from center of the vertex. The higher q is, closer is the ctrl point to the circle
 	var cdistance = Math.min((s.radius * q), (s.radius - 5)); // Compute distance from center of the vertex. Maximized at radius - 5px.
 	cs.x = Math.cos(s.startAngle - Math.PI * .5 + da) * cdistance;
 	ct.x = Math.cos(t.startAngle - Math.PI * .5 - da) * cdistance;
@@ -836,11 +841,11 @@ function hyperArcs(s, t){
 /**
  * function for computing label orientation of a line
  *
- * @param x1..y2 {num} - num - coordinates of the begin/end of the link
+ * @param x1..y2 {num} - num - coordinates of the begin/end of the edge
  * @param optional {labelId} - id - uid of the label to get correct positionning
  * @returns {string} - A SVG rotate transformation string
  */
-function LnkLabelOrientation(x1, y1, x2, y2, labelId) {
+function EdgeLabelOrientation(x1, y1, x2, y2, labelId) {
 	labelId = labelId || "";
 	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
 	if (Math.abs(rt) < 90) {
@@ -891,17 +896,17 @@ function storeLocalVertexPositionning(_verticesbyHc){
 	//			4. qa_linkPoints: edge-directed force and rotation
 	// ******************************************************
 
-function qa_vertices_forces(qaLinks, vertices) {
+function qa_vertices_forces(edges, vertices) {
 	var xc= scene.property("clientWidth") / 2;
 	var yc= scene.property("clientHeight") / 2;
 	forces = d3.forceSimulation()
-		//.alpha(def_alpha)
+	//.alpha(def_alpha)
 		.nodes(vertices)
 		.force("center", d3.forceCenter(xc,yc)) // force toward the center
-		.force("charge", d3.forceManyBody().strength(function(d){return d.radius * -1;}))  // Nodes attrating or reppelling each others (negative = repelling)
+		.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * -10;}))  // Nodes attracting or reppelling each others (negative = repelling)
 		.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;})) // collision detection
-		.force("link", qa_linkPoints().links(qaLinks).id(function(d) {return d.id;})) // customized force
-        ;
+		.force("link", qa_linkPoints().links(edges).id(function(d) {return d.id;})) // customized force
+		;
 	return forces
 }
 
