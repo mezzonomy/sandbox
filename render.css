@@ -42,8 +42,8 @@
 }
 
 .label  {
-	font-size: .4rem;
-	color: lightgrey;
+	font-size: .6rem;
+	fill: black;
   pointer-events: none;
   user-select: none;
 }
