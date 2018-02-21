@@ -1,4 +1,10 @@
 /**
+ * @file misc.js
+ * @copyright (c) 2014-2018, sarl mezzònomy
+ * @author mezzònomy
+ */
+ 
+/**
  * Open/close the current toolbox by changing classes on the element
  * css classed .closed and .opened must be defined
  *

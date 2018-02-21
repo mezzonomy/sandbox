@@ -131,6 +131,12 @@ svg {
 	font-weight: bold;
 }
 
+div.cols-two {
+	column-count: 2;
+	column-gap: 10px;
+  column-rule: 1px solid coral;
+}
+
 div.closed > .toolbox-header {
 	background-image: url(icon-open.png);
 	background-repeat: no-repeat;

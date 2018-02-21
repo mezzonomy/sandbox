@@ -1,5 +1,10 @@
 
 /*svg elements*/
+
+.draggable {
+	cursor: move;
+}
+
 #container {
 	opacity : .6;
 }

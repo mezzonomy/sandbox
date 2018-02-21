@@ -43,11 +43,11 @@
 <xsl:template name="perspective">
 	<xsl:variable name="toolbox_ID">perspective</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Perspective</xsl:variable>
-	<div id="{$toolbox_ID}" class="toolbox lower-left opened">
+	<div id="{$toolbox_ID}" class="toolbox lower-left closed">
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
-		<div id="{$toolbox_ID}-body" class="toolbox-body">
+		<div id="{$toolbox_ID}-body" class="toolbox-body cols-two">
 			<xsl:variable name="dictionary" select="@*"/>
 			<xsl:for-each select="bhb:unique(*/descendant::*)/@key">
 				<xsl:variable name="name" select="bhb:short_ns(.)"/>
