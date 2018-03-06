@@ -120,41 +120,8 @@ function render(data){
 
 	if (defs.empty()){
 		defs = scene.append("defs")
-		defs.append("marker")
-			.attr("id", "marker-end")
-			.attr("markerWidth", "10")
-			.attr("markerHeight", "10")
-			.attr("refX", "1")
-			.attr("refY", "5")
-			.attr("orient", "auto")
-			.append("path")
-			.attr("d", "M 0 5 L 10 5 L 0 5")
-			.attr("stroke","black");
-		defs.append("marker")
-			.attr("id", "marker-start")
-			.attr("markerWidth", "10")
-			.attr("markerHeight", "10")
-			.attr("refX", "9")
-			.attr("refY", "5")
-			.attr("orient", "auto")
-			.append("path")
-			.attr("d", "M 0 5 L 10 5 L 0 5")
-			.attr("stroke","black");
-		/** ------------------------------------------------------------
-			QUANTUM ALGEBRA MARKERS
-
-			TBD : change the marker of the view for user spot
-
-			<marker id="marker-end" markerWidth="10" markerHeight="10" refX="1" refY="5"
-		    	orient="auto">
-		  		<path stroke="black" d="M 0 5 L 10 5"/>
-			</marker>
-			<marker id="marker-start" markerWidth="10" markerHeight="10" refX="9" refY="5"
-		    	orient="auto">
-		  		<path stroke="black" d="M 0 5 L 10 5"/>
-			</marker>
-		**/
 	}
+
 	// ******************************************************
 	// container
 	// ******************************************************
@@ -210,7 +177,7 @@ function render(data){
 				localStorage.removeItem("vertexLastPosition_json");
 				//d3.selectAll(".container").remove();
 				unpinVertices();
-				scene.call(zoom.transform, d3.zoomIdentity);
+				//scene.call(zoom.transform, d3.zoomIdentity);
 				verticesPositionning.restart();
 				//render(data);
         return;
@@ -223,6 +190,72 @@ function render(data){
 			verticesPositionning.stop();
 			})
 	}
+	// ******************************************************
+	//	Dynamic colors and markers
+	// ******************************************************
+	// add a style id="sandbox-styles" section to the header
+	var local_style = d3.select("#sandbox-styles");
+
+	if (local_style.empty()){
+		d3.select("#head").append("style").attr("id", "sandbox-styles");
+	}
+
+	// define coloring scheme
+	var coloring_arcs = d3.scaleOrdinal(d3.schemeCategory20);
+	var coloring_tags = d3.scaleOrdinal(d3.schemeCategory20);
+
+	/*------------------------------------------------------------------
+	 * Map of tags color
+	 */
+	 var tagsColor=[];
+	 var tags = d3.select("#perspective").selectAll("span.badge");
+	 tags.each(function(d,i) {
+			tagsColor.push({tag:this.dataset.tagname.replace(":","_"), color:coloring_tags(i)})
+			d3.select(this).select("span.tag-legend").classed(this.dataset.tagname.replace(":","_"), true);
+			}
+		);
+		tagsColor.push({tag:"nocolor", color:"black"})
+
+		//create styles for coloring
+		addStyles(tagsColor);
+		//add defs with colors
+		var newStyledMarkerEnd = defs.selectAll("marker.end")
+		.data(tagsColor, function(d) {return d.tag;});
+
+		newStyledMarkerEnd.exit().remove();
+
+		newStyledMarkerEnd
+		.enter()
+		.append("marker")
+		.attr("id", function(d){return "marker-end-" + d.tag;})
+		.attr("class", function(d){return "end " + d.tag;})
+		.attr("markerWidth", "10")
+		.attr("markerHeight", "10")
+		.attr("refX", "1")
+		.attr("refY", "5")
+		.attr("orient", "auto")
+		.append("path")
+		.attr("d", "M 0 5 L 10 5 L 0 5")
+		.attr("class", function(d){return d.tag;});
+
+		var newStyledMarkerStart = defs.selectAll("marker.start")
+		.data(tagsColor, function(d) {return d.tag;});
+
+		newStyledMarkerStart.exit().remove();
+
+		newStyledMarkerStart
+		.enter()
+		.append("marker")
+		.attr("id", function(d){return "marker-start-" + d.tag;})
+		.attr("class", function(d){return "start " + d.tag;})
+		.attr("markerWidth", "10")
+		.attr("markerHeight", "10")
+		.attr("refX", "9")
+		.attr("refY", "5")
+		.attr("orient", "auto")
+		.append("path")
+		.attr("d", "M 0 5 L 10 5 L 0 5")
+		.attr("class", function(d){return d.tag;})
 
 	// ******************************************************
 	// Rendering vertices
@@ -232,7 +265,6 @@ function render(data){
 
 	var vertices = vertexComputation(data);
 	verticesbyHc = d3.map(vertices, function(d) {return d.hc;});
-
 
 	/*
 	 * #D3_PATTERN# synchronizing vertex
@@ -332,9 +364,6 @@ function render(data){
 	    .outerRadius(function(d){return d.radius;})
 	    .innerRadius(function(d){return d.radius * ARC_INNER_RADIUS;} );
 
-	var coloring_arcs = d3.scaleOrdinal(d3.schemeCategory20);
-	var coloring_tags = d3.scaleOrdinal(d3.schemeCategory20);
-
 	vertexGroupRotate
 	.selectAll(".arc")
 	.data(function(d){return d.segments;}, function(d) {return "arc_" + d.point;}) //pie calculation already in data (segment reconstruction), standard d3 pie() not used
@@ -365,17 +394,6 @@ function render(data){
 	var pointsById = d3.map(points, function(d) { return d.point; });
 
 	/*------------------------------------------------------------------
-	 * Map of tags color
-	 */
-	 var tagsColor=[];
-	 var tags = d3.select("#perspective").selectAll("p.tag");
-	 tags.each(function(d,i) {
-			tagsColor.push({tag:this.dataset.tagname, color:coloring_tags(this.dataset.tagname)})
-			this.style = "color:" + coloring_tags(this.dataset.tagname) +";";
-			}
-		);
-		var tagsColorByTag = d3.map(tagsColor, function(d){return d.tag})
-	/*------------------------------------------------------------------
 	 * Drawing hyperbolic arcs within the vertices
 	 */
 	vertexGroupRotate
@@ -384,11 +402,11 @@ function render(data){
 	.enter()
 	.filter(function(d) {return (d.point.startsWith("T") && (d.topology == "hyperbolic"))})
 	.append("path")
-	.attr("class", "hyperbolic")
-	.attr("marker-end","url(#marker-end)")
-	.attr("marker-start","url(#marker-start)")
+	.attr("class", function(d) {return "hyperbolic " + d.info.xsl_element.replace(":","_");})
+	.attr("marker-end",function(d){return "url(#marker-end-" + d.info.xsl_element.replace(":","_") + ")";})
+	.attr("marker-start",function(d){return "url(#marker-start-" + d.info.xsl_element.replace(":","_") + ")";})
 	.attr("id", function(d) {return "arc_" + d.point;})
-	.style("stroke", function(d) {return coloring_tags(d.info.xsl_element);})
+	//.style("stroke", function(d) {return coloring_tags(d.info.xsl_element);})
 	.attr("d", function(d){return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).path;})
 	.append("title")
 	.text(function(d){return d.info.xsl_element;});
@@ -454,11 +472,10 @@ function render(data){
 	 	newEdge
 	 	.enter()
 	 	.append("line")
-		.attr("class", function(d){return "edge " + d.topology;})
+		.attr("class", function(d){return "edge " + d.topology + " " + d.source.info.xsl_element.replace(":","_");})
 	 	.attr("id", function(d){return d.id;})
-		.style("stroke", function(d) {return coloring_tags(d.source.info.xsl_element);})
-		.attr("marker-end","url(#marker-end)")
-		.attr("marker-start","url(#marker-start)")
+		.attr("marker-end",function(d){return "url(#marker-end-" + d.source.info.xsl_element.replace(":","_") + ")";})
+		.attr("marker-start",function(d){return "url(#marker-start-" + d.source.info.xsl_element.replace(":","_") + ")";})
 		.append("title")
 		.text(function(d){return d.source.info.xsl_element;});
 
@@ -478,9 +495,8 @@ function render(data){
 	 	.enter()
 	 	.filter(function(d){return (d.topology == "planar" || d.topology == "spheric") }) //labels for planar & spherics
 	 	.append("text")
-	 	.attr("class", function(d) {return "edgeLbl " + d.topology;})
+	 	.attr("class", function(d) {return "edgeLbl " + d.topology + " " + d.source.info.xsl_element.replace(":","_");})
 	 	.attr("id", function(d){return "lbl_" + d.id;})
-		.style("stroke", function(d) {return coloring_tags(d.source.info.xsl_element);})
 		.attr("text-anchor", "middle")
 	 	.text(function(d) {
 			return d.source.info.xsl_element;
@@ -964,6 +980,25 @@ function storeLocalVertexPositionning(_verticesbyHc){
 	})
 }
 
+/**
+ * Add css classes in local document for coloring by tag
+ * The html header node "style" must be set before
+ *
+ * @param _tagsColor {array} - array {tag: color:}
+ * @returns {-} - add new classes on top
+ */
+function addStyles(_tagsColor) {
+	var styleSheet = document.querySelector('#sandbox-styles').sheet;
+	var rules = d3.entries(styleSheet.cssRules);
+	_tagsColor.forEach(function (elt) {
+				var ruleExists = rules.find(function(e){return e.value.selectorText == "." + elt.tag.replace(":","_")});
+				if (ruleExists) {styleSheet.deleteRule(Number(ruleExists.key));}
+				var colorStyle = '.' + elt.tag.replace(":","_") + ' { stroke: ' + elt.color + '; color: ' +  elt.color + '; }';
+				styleSheet.insertRule(colorStyle, 0); // index 0 to add on the top
+	});
+}
+
+
 	// ******************************************************					_______________________________
 	// Applying Forces to elements
 	//			1. forceCenter: center vertices                                   F O R C E S
@@ -1045,9 +1080,9 @@ function qa_linkPoints(links) {
 			continue;
 		}																				/* vertex d3 data */
 		if (link.topology=='spheric') continue;
-		var src_rot = getAbsTheta(source), 
-		    tgt_rot = getAbsTheta(target); 
-		var xy_src  = getAbsCoord(source.point), 
+		var src_rot = getAbsTheta(source),
+		    tgt_rot = getAbsTheta(target);
+		var xy_src  = getAbsCoord(source.point),
 		    xy_tgt  = getAbsCoord(target.point);
 		var x = xy_tgt.x + d_tgt.vx - xy_src.x - d_src.vx|| qa_jiggle(),
 		    y = xy_tgt.y + d_tgt.vy - xy_src.y - d_src.vy|| qa_jiggle();
@@ -1058,7 +1093,7 @@ function qa_linkPoints(links) {
 		vtt %= 2 * Math.PI; if (vtt > Math.PI) vtt -= 2 * Math.PI;
 		vst %= 2 * Math.PI; if (vst > Math.PI) vst -= 2 * Math.PI;
 		// link spin (beware of native multiplier 180. / TT)
-	    d_tgt.spin -= vtt ; d_src.spin -= vst ;                            
+	    d_tgt.spin -= vtt ; d_src.spin -= vst ;
 		// -------------------------------------------------------------
 		x   -=  distances[i] * Math.cos(src_rot);
 		y   -=  distances[i] * Math.sin(src_rot);
@@ -1066,7 +1101,7 @@ function qa_linkPoints(links) {
 	    var int = f * l, flx = x * int, fly = y * int;  /*force vector*/
 		// link force
 		d_tgt.vx -= flx * b; d_src.vx += flx * (1 - b);
-		d_tgt.vy -= fly * b; d_src.vy += fly * (1 - b); 
+		d_tgt.vy -= fly * b; d_src.vy += fly * (1 - b);
 		//console.log("[planar]", i, x, y, l, tgt_rot, src_rot, '[success]', d_tgt.vx, d_tgt.vy, d_src.vx, d_src.vy);
       }
     }

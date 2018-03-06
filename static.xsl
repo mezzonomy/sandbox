@@ -39,16 +39,15 @@
 	<xsl:param name="dictionary"/>
 	<xsl:param name="population"/>
 	<xsl:attribute name="data-tagname"><xsl:value-of select="$name"/></xsl:attribute>
-	<i>
+		<span class="tag-legend">&#9632;&#160;</span>
 		<xsl:choose>
 			<xsl:when test="$dictionary[ name()=$name]">
-				&#160;<xsl:value-of select="$dictionary[ name()=$name]"/>
+				<xsl:value-of select="$dictionary[ name()=$name]"/>
 			</xsl:when>
 			<xsl:otherwise>
-				&#160;<xsl:value-of select="$name"/>
+				<xsl:value-of select="$name"/>
 			</xsl:otherwise>
 		</xsl:choose>
-	</i>
 </xsl:template>
 
 
@@ -64,46 +63,46 @@
 			<xsl:variable name="top" select="*"/>
 			<xsl:variable name="inner" select="*/descendant::*"/>
 			<div>
-				<div><b>Bases</b></div>
+				<div>Bases</div>
 				<xsl:variable name="spheric" select="*"/>
 				<xsl:for-each select="bhb:unique($top)/@key">
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
-					<p class="tag">
-						<xsl:call-template name="tagname">
-							<xsl:with-param name="name" select="$name"/>
-							<xsl:with-param name="dictionary" select="$dictionary"/>
-							<xsl:with-param name="population" select="$top"/>
-						</xsl:call-template>
-					</p>					
+						<span class="badge badge-pill badge-spheric">
+							<xsl:call-template name="tagname">
+								<xsl:with-param name="name" select="$name"/>
+								<xsl:with-param name="dictionary" select="$dictionary"/>
+								<xsl:with-param name="population" select="$top"/>
+							</xsl:call-template>
+						</span>
 				</xsl:for-each>
 			</div>
 			<div>
-				<div><b>Déployés</b></div>
+				<div>Déployés</div>
 				<xsl:for-each select="bhb:unique($inner)/@key">
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
 					<xsl:if test="$perspective/@*[ name()=$name]='1'">
-						<p class="tag" onclick="{bhb:query(.,'0')}">
+						<span class="badge badge-pill badge-planar" onclick="{bhb:query(.,'0')}">
 							<xsl:call-template name="tagname">
 								<xsl:with-param name="name" select="$name"/>
 								<xsl:with-param name="dictionary" select="$dictionary"/>
 								<xsl:with-param name="population" select="$inner"/>
 							</xsl:call-template>
-						</p>					
+						</span>
 					</xsl:if>
 				</xsl:for-each>
 			</div>
 			<div>
-				<div><b>Compressés</b></div>
+				<div>Compressés</div>
 				<xsl:for-each select="bhb:unique(*/descendant::*)/@key">
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
 					<xsl:if test="not($perspective/@*[ name()=$name]='1')">
-						<p class="tag" onclick="{bhb:query(.,'1')}">
+						<span class="badge badge-pill badge-hyperbolic"  onclick="{bhb:query(.,'1')}">
 							<xsl:call-template name="tagname">
 								<xsl:with-param name="name" select="$name"/>
 								<xsl:with-param name="dictionary" select="$dictionary"/>
 								<xsl:with-param name="population" select="$inner"/>
 							</xsl:call-template>
-						</p>					
+						</span>
 					</xsl:if>
 				</xsl:for-each>
 			</div>
