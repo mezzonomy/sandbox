@@ -30,12 +30,6 @@
   -->
 <xsl:variable name="perspective" select="bhb:perspective($situation)"/>
 
-
-<xsl:template match="*" mode="info">
-	<xsl:variable name="name" select="name()"/>
-	<xsl:value-of select="$name"/>
-</xsl:template>
-
 <!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 	   S T A T I C
      = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
@@ -51,27 +45,22 @@
 			<xsl:variable name="dictionary" select="@*"/>
 			<xsl:for-each select="bhb:unique(*/descendant::*)/@key">
 				<xsl:variable name="name" select="bhb:short_ns(.)"/>
-				<p>
+				<p class="tag">
+					<xsl:attribute name="data-tagname"><xsl:value-of select="$name"/></xsl:attribute>
 					<xsl:choose>
 						<xsl:when test="$perspective/@*[ name()=$name]='1'">
-							<a onclick="{bhb:query(.,'0')}">
-								<!--<xsl:attribute name="id"><xsl:value-of select="$toolbox_ID"/>-<xsl:value-of select="$dictionary[ name()=$name]"/></xsl:attribute>-->&#x2611;
-							</a>
+							<a onclick="{bhb:query(.,'0')}">&#x2611;</a>
 						</xsl:when>
 						<xsl:otherwise>
-							<a onclick="{bhb:query(.,'1')}">
-								<!--<xsl:attribute name="id"><xsl:value-of select="$toolbox_ID"/>-<xsl:value-of select="$dictionary[ name()=$name]"/></xsl:attribute>-->&#x2610;
-							</a>
+							<a onclick="{bhb:query(.,'1')}">&#x2610;</a>
 						</xsl:otherwise>
 					</xsl:choose>
 					<xsl:choose>
 						<xsl:when test="$dictionary[ name()=$name]">
-							<xsl:value-of select="$dictionary[ name()=$name]"/>
+							&#160;<xsl:value-of select="$dictionary[ name()=$name]"/>
 						</xsl:when>
 						<xsl:otherwise>
-							<I>
-								<xsl:value-of select="$name"/>
-							</I>
+							<i>&#160;<xsl:value-of select="$name"/></i>
 						</xsl:otherwise>
 					</xsl:choose>
 				</p>

@@ -30,7 +30,7 @@
 }
 
 .point {
-	fill: green;
+	fill: none;
 	stroke-width: 0px;
 	stroke: none;
 }
@@ -54,26 +54,22 @@
 	text-anchor: middle;
 }
 
-path.hyperbolic{
+path {
 	fill: none;
 	stroke-width: 1px;
 	stroke: black;
-	pointer-events: none;
+	/*pointer-events: none;*/
 }
+.hyperbolic {}
 
-line.planar{
+line {
 	fill: none;
 	stroke-width: 1px;
 	stroke: black;
-	pointer-events: none;
+	/*pointer-events: none;*/
 }
-
-line.spheric{
-	fill: none;
-	stroke-width: 1px;
-	stroke: black;
-	pointer-events: none;
-}
+.planar {}
+.spheric{}
 
 .arc{
 	stroke-width: 0px;

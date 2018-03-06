@@ -12,8 +12,8 @@ const SCENE_COLOR = "none",
 			BEYOND=800, // to get infinite line for spheric edges
 			ARC_INNER_RADIUS=.1, // Proportional to VERTEX_RADIUS. It is the radius of the inner donut circle of a selected vertex
 			AMEND_EDITZONE_ID = "amendment-editzone",
-			AMEND_TEMPLATE_T_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>",
-			AMEND_TEMPLATE_B_X = "<bhb:link push='$ID'>\nINSERT XML\n</bhb:link>";
+			AMEND_TEMPLATE_T_X = "<bhb:link push='$ID'>\nINSERT XML\n</bhb:link>",
+			AMEND_TEMPLATE_B_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>";
 
 var scene, //d3 object select scene
 		svgScene, //dom object byid scene
@@ -332,7 +332,8 @@ function render(data){
 	    .outerRadius(function(d){return d.radius;})
 	    .innerRadius(function(d){return d.radius * ARC_INNER_RADIUS;} );
 
-	var coloring = d3.scaleOrdinal(d3.schemeCategory10);
+	var coloring_arcs = d3.scaleOrdinal(d3.schemeCategory20);
+	var coloring_tags = d3.scaleOrdinal(d3.schemeCategory20);
 
 	vertexGroupRotate
 	.selectAll(".arc")
@@ -342,7 +343,7 @@ function render(data){
 	.attr("class", "arc notdisplayed") //arcs are hidden by default
 	.attr("id", function(d) {return "arc_" + d.point;})
 	.attr("d", arcs)
-	.style("fill",function(d) {return coloring(d.point);});
+	.style("fill",function(d) {return coloring_arcs(d.point);});
 
 	// Entering points within vertex's group rotate (last added to be on top)
 	vertexGroupRotate
@@ -364,6 +365,17 @@ function render(data){
 	var pointsById = d3.map(points, function(d) { return d.point; });
 
 	/*------------------------------------------------------------------
+	 * Map of tags color
+	 */
+	 var tagsColor=[];
+	 var tags = d3.select("#perspective").selectAll("p.tag");
+	 tags.each(function(d,i) {
+			tagsColor.push({tag:this.dataset.tagname, color:coloring_tags(this.dataset.tagname)})
+			this.style = "color:" + coloring_tags(this.dataset.tagname) +";";
+			}
+		);
+		var tagsColorByTag = d3.map(tagsColor, function(d){return d.tag})
+	/*------------------------------------------------------------------
 	 * Drawing hyperbolic arcs within the vertices
 	 */
 	vertexGroupRotate
@@ -373,11 +385,13 @@ function render(data){
 	.filter(function(d) {return (d.point.startsWith("T") && (d.topology == "hyperbolic"))})
 	.append("path")
 	.attr("class", "hyperbolic")
-		.attr("marker-end","url(#marker-end)")
-		.attr("marker-start","url(#marker-start)")
+	.attr("marker-end","url(#marker-end)")
+	.attr("marker-start","url(#marker-start)")
 	.attr("id", function(d) {return "arc_" + d.point;})
-	// JUST AN EXAMPLE : TODO, remove
-	.attr("d", function(d){return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).path;});
+	.style("stroke", function(d) {return coloring_tags(d.info.xsl_element);})
+	.attr("d", function(d){return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).path;})
+	.append("title")
+	.text(function(d){return d.info.xsl_element;});
 
 	/*
 	 * Applying previous stored Positionning
@@ -398,7 +412,7 @@ function render(data){
 	}
 
 	// ******************************************************
-	// Rendering planar edges
+	// Rendering edges
 	// ******************************************************
 	/*
 	 * Edges map
@@ -442,8 +456,11 @@ function render(data){
 	 	.append("line")
 		.attr("class", function(d){return "edge " + d.topology;})
 	 	.attr("id", function(d){return d.id;})
+		.style("stroke", function(d) {return coloring_tags(d.source.info.xsl_element);})
 		.attr("marker-end","url(#marker-end)")
-		.attr("marker-start","url(#marker-start)");
+		.attr("marker-start","url(#marker-start)")
+		.append("title")
+		.text(function(d){return d.source.info.xsl_element;});
 
 		var edge =  container.selectAll(".edge");
 
@@ -459,13 +476,14 @@ function render(data){
 
 	 	newEdgeLbl
 	 	.enter()
-	 	.filter(function(d){return d.topology == "planar"}) //only planar edges have labels
+	 	.filter(function(d){return (d.topology == "planar" || d.topology == "spheric") }) //labels for planar & spherics
 	 	.append("text")
 	 	.attr("class", function(d) {return "edgeLbl " + d.topology;})
 	 	.attr("id", function(d){return "lbl_" + d.id;})
+		.style("stroke", function(d) {return coloring_tags(d.source.info.xsl_element);})
 		.attr("text-anchor", "middle")
 	 	.text(function(d) {
-			return d.source.info;
+			return d.source.info.xsl_element;
 			});
 
 	 	var edgeLbl =  container.selectAll(".edgeLbl");
@@ -509,6 +527,12 @@ function render(data){
 				.attr("x2", function(d) {return getAbsCoord(d.target.point).x;})
 				.attr("y2", function(d) {return getAbsCoord(d.target.point).y;});
 
+				edgeLbl
+				.filter(function(d){return (d.topology == "planar");})
+				.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
+				.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
+				.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "lbl_"+d.id, d.topology)});
+
 				edge
 				.filter(function(d){return (d.topology == "spheric");})
 				.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
@@ -517,10 +541,15 @@ function render(data){
 				.attr("y2", function(d) {return (getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND;});
 
 				edgeLbl
-				.filter(function(d){return (d.topology == "planar");})
+				.filter(function(d){return (d.topology == "spheric");})
 				.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
 				.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
-				.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "lbl_"+d.id)});
+				.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y,
+																																	(getAbsCoord(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND,
+																																	(getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND,
+																																	"lbl_"+d.id,
+																																	d.topology)});
+
 
 				//console.log("ticks done : ", Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay())));
 				//console.log("Total ticks number : ", Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay())));
@@ -557,18 +586,18 @@ function redrawEdgesforOneVertex(vertexhc) {
 	.attr("x2", function(d) {return getAbsCoord(d.target.point).x;})
 	.attr("y2", function(d) {return getAbsCoord(d.target.point).y;});
 
-	d3.selectAll("text.planar")
-	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
-	.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
-	.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
-	.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "lbl_" + d.id)});
-
 	d3.selectAll("line.spheric")
 	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
 	.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
 	.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
 	.attr("x2", function(d) {return (getAbsCoord(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND;})
 	.attr("y2", function(d) {return (getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND;});
+
+	d3.selectAll("text.edgeLbl")
+	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
+	.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
+	.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
+	.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "lbl_" + d.id, d.topology)});
 
 	//store last vertex position and rotation
 	var currentVertex = [];
@@ -689,6 +718,10 @@ function vertexComputation(QApointsList){
 			sr[i].segments[k].value = 1; //all arcs have the same weight
 			sr[i].segments[k].topology="hyperbolic"; //default topology
 			if (sr[i].segments[k].point == sr[i].segments[k].peer) {sr[i].segments[k].topology="spheric";}
+			// PGT: attention ! Ceci est la caractérisation des topologies "text".
+			// Cela fonctionne pour le moment car nous n'avons pas de "text".
+			// if (sr[i].segments[k].info.bhb_spheric) {sr[i].segments[k].topology="spheric";} // fallback for spheric TODO:fix
+			if (sr[i].segments[k].info.xsl_element == "spheric") {sr[i].segments[k].topology="spheric";}
 			if (sr[i].segments[k].hc != pointsById.get(sr[i].segments[k].peer).hc) {sr[i].segments[k].topology="planar";}
 		}
 	}
@@ -835,10 +868,36 @@ function hyperArcs(s, t){
 	ct.x = Math.cos(t.startAngle - Math.PI * .5 - da) * cdistance;
 	cs.y = Math.sin(s.startAngle - Math.PI * .5 + da) * cdistance;
 	ct.y = Math.sin(t.startAngle - Math.PI * .5 - da) * cdistance;
+	if (true) {
+		radius = Math.sqrt(s.ptX*s.ptX + s.ptY*s.ptY)
+		// With the help of Mr. Poincare
+		xm = (s.ptX + t.ptX)/2.
+		ym = (s.ptY + t.ptY)/2.
+		rm = Math.sqrt(xm*xm + ym*ym)
+		if (rm < 0.001) {
+			path =  "M" + s.ptX + "," + s.ptY
+			+ "L" + t.ptX + "," + t.ptY;
+			return {path:path, s:s, t:t, cp1X:cs.x, cp1Y:cs.y, cp2X:ct.x, cp2Y:ct.y};}
+		tm = Math.atan2(ym, xm)
+		rm = radius * radius / rm
+		xr = s.ptX - Math.cos(tm) * rm
+		yr = s.ptY - Math.sin(tm) * rm
+		rf = Math.sqrt(xr*xr + yr*yr)
+		if (Math.sin(t.startAngle - s.startAngle) < 0) {
+			path =  "M" + t.ptX + "," + t.ptY
+			+ "A " + rf + " " + rf + " 0 0 0"
+			+ " " + s.ptX + "," + s.ptY;
+		} else {
+			path =  "M" + s.ptX + "," + s.ptY
+			+ "A " + rf + " " + rf + " 0 0 0"
+			+ " " + t.ptX + "," + t.ptY;
+		}
+	} else {
 	path =  "M" + s.ptX + "," + s.ptY
 	+ "C" + cs.x + "," + cs.y
 	+ " " + ct.x + "," + ct.y
 	+ " " + t.ptX + "," + t.ptY;
+	}
 	return {path:path, s:s, t:t, cp1X:cs.x, cp1Y:cs.y, cp2X:ct.x, cp2Y:ct.y};
 }
 
@@ -846,16 +905,28 @@ function hyperArcs(s, t){
  * function for computing label orientation of a line
  *
  * @param x1..y2 {num} - num - coordinates of the begin/end of the edge
- * @param optional {lblId} - id - uid of the label to get correct positionning
+ * @param lblId optional {string} - id - uid of the label to get correct positionning
+ * @param topology {string} - Topology
  * @returns {string} - A SVG rotate transformation string
  */
-function EdgeLblOrientation(x1, y1, x2, y2, lblId) {
+function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
 	lblId = lblId || "";
 	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
-	if (Math.abs(rt) < 90) {
-		return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (x2-x1)/2 + "," + (-3) + ")";
-	} else {
-		return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + (x2-x1)/2 + "," + (-3) + ")";
+	var labelBox;
+	if (topology == "planar") {
+		if (Math.abs(rt) < 90) {
+			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 + Math.abs((y2-y1)/2)) + "," + (-3) + ")";
+		} else {
+			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 - Math.abs((y2-y1)/2)) + "," + (-3) + ")";
+		}
+	}
+	if (topology == "spheric") {
+		labelBoxW = document.getElementById(lblId).getBBox().width;
+		if (Math.abs(rt) < 90) {
+			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (labelBoxW) + "," + (-3) + ")";
+		} else {
+			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + (-labelBoxW) + "," + (-3) + ")";
+		}
 	}
 }
 
@@ -948,7 +1019,7 @@ function qa_linkPoints(links) {
 		theta /= 180.0; theta *= Math.PI;
 		theta += Math.atan2(point.ptY, point.ptX);
 		return theta;
-}
+	}
 /** --------------------------------------------------------------------
  * Defining a new force for vertices positioning driven by points' positions and links
  * Driven from original link function from d3 4.12.2 (https://d3js.org/)

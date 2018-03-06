@@ -113,6 +113,22 @@
 </xsl:template>
 
 <!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+	   N O D E   T R A N S C R I P T I O N
+     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
+
+<xsl:template match="*" mode="info">
+	<xsl:param name="spheric">0</xsl:param>
+	{"xsl_element": "<xsl:value-of select="name()"/>",
+	<xsl:if test="$spheric='1'">"bhb_spheric": "1",</xsl:if>
+	<xsl:apply-templates select="@*" mode="info"/>
+	}
+</xsl:template>
+
+<xsl:template match="@*" mode="info">
+	"<xsl:value-of select="translate(name(),':','_')"/>": "<xsl:value-of select="."/>",
+</xsl:template>
+
+<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 	   M O D A L   M A C H I N E R Y
      = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 
@@ -124,7 +140,7 @@
 {"point":"<xsl:value-of select="$point"/>",
 "next":"<xsl:value-of select="$next"/>",
 "peer":"<xsl:value-of select="$peer"/>",
-"info":"<xsl:value-of select="$info"/>",},
+"info":<xsl:value-of select="$info"/>,},
 	</xsl:template>
 
 	<xsl:template name="placeholder">
@@ -163,7 +179,11 @@
 			</xsl:choose>
 		</xsl:with-param>
 		<xsl:with-param name="peer" select="$bottom"/>
-		<xsl:with-param name="info">bhb:spheric</xsl:with-param>
+		<xsl:with-param name="info">
+			<xsl:apply-templates select="." mode="info">
+				<xsl:with-param name="bhb:spheric">1</xsl:with-param>
+			</xsl:apply-templates>
+		</xsl:with-param>
 	</xsl:call-template>
 	<xsl:apply-templates select="descendant::*" mode="alpha-rho"/>
 </xsl:template>
