@@ -48,6 +48,11 @@
 				&#160;<xsl:value-of select="$name"/>
 			</xsl:otherwise>
 		</xsl:choose>
+		<xsl:text> (</xsl:text>
+			<xsl:value-of select="
+			   count($population[ name()=$name][ not(@bhb:symbol)]) 
+			+  count($population[ name()=$name][ @bhb:symbol]) div 2"/>
+		<xsl:text>)</xsl:text>
 	</i>
 </xsl:template>
 
