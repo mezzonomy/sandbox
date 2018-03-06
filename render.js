@@ -1044,65 +1044,30 @@ function qa_linkPoints(links) {
 			//console.log("(error - data) i:", i, "id: ", links[i].id);
 			continue;
 		}																				/* vertex d3 data */
-
-		var src_rot = getAbsTheta(source), tgt_rot = getAbsTheta(target),
-																						/* point angles */
-		    xy_src  = getAbsCoord(source.point), xy_tgt  = getAbsCoord(target.point),
-																						/*  point coordinates */
-				x       = xy_tgt.x + d_tgt.vx - xy_src.x - d_src.vx|| qa_jiggle(),
-				y       = xy_tgt.y + d_tgt.vy - xy_src.y - d_src.vy|| qa_jiggle();
-																						/* point to point link vector */
-
-	    var l = Math.sqrt(x * x + y * y);			/* distance */
-												x /= l;
-												y /= l;							/* unit vector */
-
+		if (link.topology=='spheric') continue;
+		var src_rot = getAbsTheta(source), 
+		    tgt_rot = getAbsTheta(target); 
+		var xy_src  = getAbsCoord(source.point), 
+		    xy_tgt  = getAbsCoord(target.point);
+		var x = xy_tgt.x + d_tgt.vx - xy_src.x - d_src.vx|| qa_jiggle(),
+		    y = xy_tgt.y + d_tgt.vy - xy_src.y - d_src.vy|| qa_jiggle();
 		// -------------------------------------------------------------
-
-        /* SPHERIC LINK CASE */
-		if (link.topology=='spheric') {
-			//console.log("(spheric) i:", i, "id: ", links[i].id);
-			var vtt = tgt_rot + Math.PI;
-			vtt %= 2 * Math.PI; if(vtt > Math.PI) vtt -= 2 * Math.PI;
-			/*
-	        d_src.spin -= vtt       / 3;          /* bind theta to TT */
-			/*
-	        d_src.vx   -= (xy_tgt.x - x_min) / 3;    /* bind x to min */
-			continue;}
-
-		/* SOURCE SPIN */
-		vtt = tgt_rot - Math.atan2(y,x) + Math.PI;
-		vtt %= 2 * Math.PI; if(vtt > Math.PI) vtt -= 2 * Math.PI;
-		vtt *= f
-
-		/* TARGET SPIN */
-		var vst = src_rot - Math.atan2(y, x);
-		                             /* differential to expectation */
+		var angle = Math.atan2(y, x);
+		var vtt   = tgt_rot - angle + Math.PI,
+		    vst   = src_rot - angle;
+		vtt %= 2 * Math.PI; if (vtt > Math.PI) vtt -= 2 * Math.PI;
 		vst %= 2 * Math.PI; if (vst > Math.PI) vst -= 2 * Math.PI;
-                                               /* put it in [-TT, TT[ */
-		vtt *= f                         /* scale spin with intensity */
-
-		/* LINK FORCE */
-		/** may be improved by controling a vector rather than distance
-		    TBD : find the desired vector with source and target angle
-
-			(at the stage, could removed, replaced by standard force
-			 and subsequent code compression)
-         **/
-
-	    var intensity = f * (l - distances[i]);        //force intensity
-	    var flx = x * intensity, fly = y * intensity;  //force vector
-
+		// link spin (beware of native multiplier 180. / TT)
+	    d_tgt.spin -= vtt ; d_src.spin -= vst ;                            
 		// -------------------------------------------------------------
-			d_tgt.vx -= flx * b ;
-			d_tgt.vy -= fly * b;
-			d_src.vx += flx * (1 - b);
-			d_src.vy += fly * (1 - b);                      //link force
-
-	    d_tgt.spin -= vtt                              //target spin
-	    d_src.spin -= vst;                             //source spin
-
-			//console.log("[planar]", i, x, y, l, tgt_rot, src_rot, '[success]', d_tgt.vx, d_tgt.vy, d_src.vx, d_src.vy);
+		x   -=  distances[i] * Math.cos(src_rot);
+		y   -=  distances[i] * Math.sin(src_rot);
+	    var l = Math.sqrt(x * x + y * y); x /= l;y /= l; /*unit vector*/
+	    var int = f * l, flx = x * int, fly = y * int;  /*force vector*/
+		// link force
+		d_tgt.vx -= flx * b; d_src.vx += flx * (1 - b);
+		d_tgt.vy -= fly * b; d_src.vy += fly * (1 - b); 
+		//console.log("[planar]", i, x, y, l, tgt_rot, src_rot, '[success]', d_tgt.vx, d_tgt.vy, d_src.vx, d_src.vy);
       }
     }
 
