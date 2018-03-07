@@ -48,6 +48,12 @@
 				<xsl:value-of select="$name"/>
 			</xsl:otherwise>
 		</xsl:choose>
+		<xsl:text> (</xsl:text>
+			<xsl:value-of select="
+			   count($population[ name()=$name][ not(@bhb:symbol)]) 
+			+  count($population[ name()=$name][ @bhb:symbol]) div 2"/>
+		<xsl:text>)</xsl:text>
+	</span>
 </xsl:template>
 
 
@@ -96,12 +102,14 @@
 				<xsl:for-each select="bhb:unique(*/descendant::*)/@key">
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
 					<xsl:if test="not($perspective/@*[ name()=$name]='1')">
+
 						<span class="badge badge-pill badge-hyperbolic"  onclick="{bhb:query(.,'1')}">
 							<xsl:call-template name="tagname">
 								<xsl:with-param name="name" select="$name"/>
 								<xsl:with-param name="dictionary" select="$dictionary"/>
 								<xsl:with-param name="population" select="$inner"/>
 							</xsl:call-template>
+
 						</span>
 					</xsl:if>
 				</xsl:for-each>
