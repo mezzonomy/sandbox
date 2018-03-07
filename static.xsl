@@ -50,10 +50,9 @@
 		</xsl:choose>
 		<xsl:text> (</xsl:text>
 			<xsl:value-of select="
-			   count($population[ name()=$name][ not(@bhb:symbol)]) 
+			   count($population[ name()=$name][ not(@bhb:symbol)])
 			+  count($population[ name()=$name][ @bhb:symbol]) div 2"/>
 		<xsl:text>)</xsl:text>
-	</span>
 </xsl:template>
 
 
