@@ -46,19 +46,6 @@ p {
 	z-index: 4;
 }
 
-button, input[type="submit"]{
-	border-width: 0;
-	font: bold 13px "CartoGothic Std",sans-serif;
-	border-radius: 20px!important;
-	background-color: #e53;
-	color: #fff;
-	box-shadow: 1px 2px 2px 0 rgba(0,0,0,0.12);
-	text-shadow: 0 1px 2px rgba(34,0,1,0.6);
-	padding: 7px 48px;
-	position: relative;
-	border: none!important;
-	}
-
 div.upper-left {
 	position: absolute;
 	top:10px;
@@ -236,7 +223,7 @@ button {
 	font-family: inherit;
 }
 
-.btn {
+button, input[type="submit"], .btn {
 	display: inline-block;
 	font-weight: 400;
 	text-align: center;
@@ -252,6 +239,7 @@ button {
 	line-height: 1.5;
 	border-radius: .25rem;
 	transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+	margin-right: 5px;
 }
 
 .btn-primary { /*https://v4-alpha.getbootstrap.com/components/buttons/*/
@@ -310,6 +298,12 @@ table {
 	    white-space: nowrap;
 	    vertical-align: baseline;
 	    border-radius: .25rem;
+	}
+	.badge-clickable {
+		cursor:pointer;
+	}
+	.badge-clickable:hover {
+		opacity:.8;
 	}
 	.badge-notif {
 	    margin-left: 1px;

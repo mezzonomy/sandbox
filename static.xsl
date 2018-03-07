@@ -86,7 +86,7 @@
 				<xsl:for-each select="bhb:unique($inner)/@key">
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
 					<xsl:if test="$perspective/@*[ name()=$name]='1'">
-						<span class="badge badge-pill badge-planar" onclick="{bhb:query(.,'0')}">
+						<span class="badge badge-pill badge-planar badge-clickable" onclick="{bhb:query(.,'0')}">
 							<xsl:call-template name="tagname">
 								<xsl:with-param name="name" select="$name"/>
 								<xsl:with-param name="dictionary" select="$dictionary"/>
@@ -102,7 +102,7 @@
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
 					<xsl:if test="not($perspective/@*[ name()=$name]='1')">
 
-						<span class="badge badge-pill badge-hyperbolic"  onclick="{bhb:query(.,'1')}">
+						<span class="badge badge-pill badge-hyperbolic badge-clickable"  onclick="{bhb:query(.,'1')}">
 							<xsl:call-template name="tagname">
 								<xsl:with-param name="name" select="$name"/>
 								<xsl:with-param name="dictionary" select="$dictionary"/>
@@ -163,22 +163,22 @@
 			<p><xsl:value-of select="$toolbox_LBL"/> as <xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
-			<form id="amendment-valid-form" name="amendment-valid-form" action="javascript:void(0);">
+			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
 				<on:submit create="bhb:block">
-					<on:attribute name="body" script="_get('amendment-editzone').value"/>
+					<on:attribute name="body" script="_get('{$toolbox_ID}-editzone').value"/>
 					<bhb:copy-of select="bhb:parse(@body)"/>
 				</on:submit>
-				<input id="amendment-user" name="amendment-user" type="hidden" required="required">
+				<input id="{$toolbox_ID}-user" name="{$toolbox_ID}-user" type="hidden" required="required">
 					<xsl:attribute name="value"><xsl:value-of select="$perspective/@username"/></xsl:attribute>
 				</input>
-				<input id="amendment-role" name="amendment-role" type="hidden" required="required">
+				<input id="{$toolbox_ID}-role" name="{$toolbox_ID}-role" type="hidden" required="required">
 					<xsl:attribute name="value"><xsl:value-of select="$role"/></xsl:attribute>
 				</input>
-				<label for="amendment-editzone">Edit Amendment</label>
-				<textarea id="amendment-editzone" name="amendment-editzone" rows="10" class="form-control" placeholder="Please drop a vertex arc here to create a new amendment" spellcheck="false" required="required" oninput="validateAmendment('amendment-editzone')" onchange="validateAmendment('amendment-editzone')"/>
-				<div id="amendment-editinfo" class="alert"/>
+				<label for="{$toolbox_ID}-editzone">Edit Amendment</label>
+				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="10" class="form-control" placeholder="Please drop a vertex arc here to create a new amendment" spellcheck="false" required="required" oninput="validateAmendment('{$toolbox_ID}-editzone')" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
+				<div id="{$toolbox_ID}-editinfo" class="alert"/>
 				<!--<button type="button" id="amendment-checkbtn" name="amendment-checkbtn" class="btn btn-info left" onclick="validateAmendment('amendment-editzone')">check</button>-->
-				<button type="submit" form="amendment-valid-form" value="Submit" id="amendment-validbtn" name="amendment-validbtn" class="btn btn-primary right" disabled="disabled">validate</button>
+				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">validate</button>
 			</form>
 		</div>
 	</div>
@@ -190,6 +190,15 @@
 	<div id="{$toolbox_ID}" class="toolbox lower-right closed">
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
+		</div>
+		<div id="{$toolbox_ID}-body" class="toolbox-body">
+			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
+				<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value=""/>
+				<input id="{$toolbox_ID}-next" name="{$toolbox_ID}-next" type="hidden" value=""/>
+				<input id="{$toolbox_ID}-peer" name="{$toolbox_ID}-peer" type="hidden" value=""/>
+				<label for="{$toolbox_ID}-editzone">Content</label>
+				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="10" class="form-control" placeholder="Please select a point on a vertex to see content" spellcheck="false"/>
+			</form>
 		</div>
 	</div>
 </xsl:template>

@@ -5,6 +5,11 @@
 	cursor: move;
 }
 
+svg#scene {
+	cursor: -webkit-grab;
+	cursor: grab;
+}
+
 #container {
 	opacity : .6;
 }
@@ -33,8 +38,20 @@
 	fill: none;
 	stroke-width: 0px;
 	stroke: none;
+	pointer-events: none;
 }
-
+.point-displayed {
+	fill: lightgreen;
+	stroke-width: 3px;
+	stroke: lightgreen;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.point-displayed:hover {
+	fill: darkgreen;
+	stroke-width: 4px;
+	stroke: darkgreen;
+}
 .dragging {
 	fill: yellow;
 	stroke-width: 1px;
@@ -58,24 +75,30 @@ path {
 	fill: none;
 	stroke-width: 1px;
 	stroke: black;
-	/*pointer-events: none;*/
+	pointer-events: none;
 }
-.hyperbolic {}
-
-line {
-	fill: none;
-	stroke-width: 1px;
-	stroke: black;
-	/*pointer-events: none;*/
+.hyperbolic {
+	pointer-events: visible;
+	cursor: help;
 }
 .planar {}
 .spheric{}
+	
+path.selected{
+	stroke-width: 3px;
+}
+
 
 .arc{
 	stroke-width: 0px;
+	opacity: .8;
+	pointer-events: auto;
+}
+.arc:hover{
 	opacity: 1;
 }
 
 .notdisplayed{
   opacity: 0;
+	pointer-events: none;
 }

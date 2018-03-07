@@ -11,9 +11,12 @@ const SCENE_COLOR = "none",
 			VERTEX_COMPUTATION_MAX_ITERATION = 100, // Limits the vertex computation iterations
 			BEYOND=800, // to get infinite line for spheric edges
 			ARC_INNER_RADIUS=.1, // Proportional to VERTEX_RADIUS. It is the radius of the inner donut circle of a selected vertex
+			AMEND_TOOLBOX_ID = "amendment",
 			AMEND_EDITZONE_ID = "amendment-editzone",
 			AMEND_TEMPLATE_T_X = "<bhb:link push='$ID'>\nINSERT XML\n</bhb:link>",
-			AMEND_TEMPLATE_B_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>";
+			AMEND_TEMPLATE_B_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>",
+			TEXT_TOOLBOX_ID = "text",
+			TEXT_EDITZONE_ID = "text-editzone";
 
 var scene, //d3 object select scene
 		svgScene, //dom object byid scene
@@ -69,9 +72,9 @@ function arcDragged(d) {
 	} else {
 		d3.select("#" + AMEND_EDITZONE_ID).classed("zoom11", false);
 	}
-	if (d3.event.sourceEvent.target.id == "amendment") {
-		if (!d3.select("#amendment").classed("opened")) {
-			d3.select("#amendment").classed("opened", true).classed("closed", false);
+	if (d3.event.sourceEvent.target.id == AMEND_TOOLBOX_ID) {
+		if (!d3.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
+			d3.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
 		}
 	}
 	//d3.select(this).classed("dragging", true);
@@ -82,7 +85,7 @@ function arcDragEnded(d) {
 	//d3.select(this).classed("dragging", false);
 	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
 		alertInit();
-		var point = d3.event.subject.point.replace("T_","").replace("B_","");
+		var point = d3.event.subject.point.replace(/T_/,"").replace(/B_/,"");
 		if (d3.event.subject.point.startsWith("T_")){
 			document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE_T_X.replace("$ID",point);
 		}
@@ -120,6 +123,46 @@ function render(data){
 
 	if (defs.empty()){
 		defs = scene.append("defs")
+		defs.append("marker")
+			.attr("id", "marker-end")
+			.attr("markerWidth", "10")
+			.attr("markerHeight", "10")
+			.attr("refX", "1")
+			.attr("refY", "5")
+			.attr("orient", "auto")
+			.append("path")
+			.attr("d", "M 0 5 L 10 5")
+			.attr("stroke","black");
+		defs.append("marker")
+			.attr("id", "marker-start")
+			.attr("markerWidth", "10")
+			.attr("markerHeight", "10")
+			.attr("refX", "9")
+			.attr("refY", "5")
+			.attr("orient", "auto")
+			.append("path")
+			.attr("d", "M 0 5 L 10 5")
+			.attr("stroke","black");
+		defs.append("marker")
+			.attr("id", "marker-start-entry")
+			.attr("markerWidth", "30")
+			.attr("markerHeight", "30")
+			.attr("refX", "0")
+			.attr("refY", "10")
+			.attr("orient", "auto")
+			.append("path")
+			.attr("d", "M20 15 L0 10 L20 0")
+			.attr("stroke","black");
+		defs.append("marker")
+			.attr("id", "marker-end-entry")
+			.attr("markerWidth", "30")
+			.attr("markerHeight", "30")
+			.attr("refX", "0")
+			.attr("refY", "10")
+			.attr("orient", "auto")
+			.append("path")
+			.attr("d", "M20 15 L0 10 L20 0")
+			.attr("stroke","black");
 	}
 
 	// ******************************************************
@@ -235,7 +278,7 @@ function render(data){
 		.attr("refY", "5")
 		.attr("orient", "auto")
 		.append("path")
-		.attr("d", "M 0 5 L 10 5 L 0 5")
+		.attr("d", "M 0 5 L 10 5")
 		.attr("class", function(d){return d.tag;});
 
 		var newStyledMarkerStart = defs.selectAll("marker.start")
@@ -254,7 +297,7 @@ function render(data){
 		.attr("refY", "5")
 		.attr("orient", "auto")
 		.append("path")
-		.attr("d", "M 0 5 L 10 5 L 0 5")
+		.attr("d", "M 0 5 L 10 5")
 		.attr("class", function(d){return d.tag;})
 
 	// ******************************************************
@@ -394,7 +437,7 @@ function render(data){
 	var pointsById = d3.map(points, function(d) { return d.point; });
 
 	/*------------------------------------------------------------------
-	 * Drawing hyperbolic arcs within the vertices
+	 * Drawing hyperbolic edges within the vertices
 	 */
 	vertexGroupRotate
 	.selectAll(".hyperbolic")
@@ -402,12 +445,12 @@ function render(data){
 	.enter()
 	.filter(function(d) {return (d.point.startsWith("T") && (d.topology == "hyperbolic"))})
 	.append("path")
-	.attr("class", function(d) {return "hyperbolic " + d.info.xsl_element.replace(":","_");})
+	.attr("class", function(d) {return "edges hyperbolic " + d.info.xsl_element.replace(":","_");})
 	.attr("marker-end",function(d){return "url(#marker-end-" + d.info.xsl_element.replace(":","_") + ")";})
 	.attr("marker-start",function(d){return "url(#marker-start-" + d.info.xsl_element.replace(":","_") + ")";})
-	.attr("id", function(d) {return "arc_" + d.point;})
+	.attr("id", function(d) {return "hyperbolic_" + d.point;})
 	//.style("stroke", function(d) {return coloring_tags(d.info.xsl_element);})
-	.attr("d", function(d){return hyperArcs(pointsById.get(d.point), pointsById.get(d.peer)).path;})
+	.attr("d", function(d){return drawHyperbolic(pointsById.get(d.point), pointsById.get(d.peer)).path;})
 	.append("title")
 	.text(function(d){return d.info.xsl_element;});
 
@@ -456,7 +499,7 @@ function render(data){
 			t = Object.assign({}, pointsById.get(d.peer));
 			id = d.topology + "_" + d.hc + "_" + t.hc + "_" + d.point;
 		}
-		if (id) {edges.push({topology:d.topology, id:id, source:s, target:t});}
+		if (id) {edges.push({topology:d.topology, id:id, source:s, target:t, point:d.point, peer:d.peer});}
  	});
 
 	/*
@@ -471,8 +514,8 @@ function render(data){
 
 	 	newEdge
 	 	.enter()
-	 	.append("line")
-		.attr("class", function(d){return "edge " + d.topology + " " + d.source.info.xsl_element.replace(":","_");})
+	 	.append("path")
+		.attr("class", function(d){return "edges edge " + d.topology + " " + d.source.info.xsl_element.replace(":","_");})
 	 	.attr("id", function(d){return d.id;})
 		.attr("marker-end",function(d){return "url(#marker-end-" + d.source.info.xsl_element.replace(":","_") + ")";})
 		.attr("marker-start",function(d){return "url(#marker-start-" + d.source.info.xsl_element.replace(":","_") + ")";})
@@ -538,10 +581,7 @@ function render(data){
 
 				edge
 				.filter(function(d){return (d.topology == "planar");})
-				.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
-				.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
-				.attr("x2", function(d) {return getAbsCoord(d.target.point).x;})
-				.attr("y2", function(d) {return getAbsCoord(d.target.point).y;});
+				.attr("d", function(d){return drawPlanar(d.source.point, d.target.point).path;})
 
 				edgeLbl
 				.filter(function(d){return (d.topology == "planar");})
@@ -551,10 +591,7 @@ function render(data){
 
 				edge
 				.filter(function(d){return (d.topology == "spheric");})
-				.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
-				.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
-				.attr("x2", function(d) {return (getAbsCoord(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND;})
-				.attr("y2", function(d) {return (getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND;});
+				.attr("d", function(d){return drawSpheric(d.source.point, "gvertex_" + d.source.hc).path;})
 
 				edgeLbl
 				.filter(function(d){return (d.topology == "spheric");})
@@ -595,19 +632,13 @@ function render(data){
 function redrawEdgesforOneVertex(vertexhc) {
 	var trueVertexhc=Number(vertexhc.replace("grotate_",""));
 
-	d3.selectAll("line.planar")
+	d3.selectAll("path.planar")
 	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
-	.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
-	.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
-	.attr("x2", function(d) {return getAbsCoord(d.target.point).x;})
-	.attr("y2", function(d) {return getAbsCoord(d.target.point).y;});
+	.attr("d", function(d){return drawPlanar(d.source.point, d.target.point).path;});
 
-	d3.selectAll("line.spheric")
+	d3.selectAll("path.spheric")
 	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
-	.attr("x1", function(d) {return getAbsCoord(d.source.point).x;})
-	.attr("y1", function(d) {return getAbsCoord(d.source.point).y;})
-	.attr("x2", function(d) {return (getAbsCoord(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND;})
-	.attr("y2", function(d) {return (getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND;});
+	.attr("d", function(d){return drawSpheric(d.source.point, "gvertex_" + d.target.hc).path;})
 
 	d3.selectAll("text.edgeLbl")
 	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
@@ -640,7 +671,8 @@ function getAbsCoord(elt) {
 		ptt.y = (ptt.y - zm.y) / zm.k; // reverse the zoom translation on y
 		return {
 			x: ptt.x,
-			y: ptt.y
+			y: ptt.y,
+			pxy: ptt.x + " " + ptt.y
 		};
 	} else {
 			//console.log ("Internal Error: ", "getAbsCoord()", " While trying to found elt position of: ", elt); // not logged
@@ -769,13 +801,19 @@ function selectVertex(vertex){
 	// 2. select current vertex or unpin and unselect
 	var vtx = d3.select(vertex);
 	var arc = vtx.selectAll(".arc");
+	var edges = d3.selectAll(".edges");
+	var point = vtx.selectAll(".point");
 	vtx.raise();
+	edges.raise();
+	point.raise();
 	if (!vtx.classed("focused")){
 		vtx.classed("focused", true);
 		arc.classed("notdisplayed", false).classed("draggable", true);
+		point.classed("point-displayed", true);
 	} else {
 		vtx.classed("focused", false);
 		arc.classed("notdisplayed", true);
+		point.classed("point-displayed", false);
 		vtx.fx=null;
 		vtx.fy=null;
 		vtx.classed("pinned", false);
@@ -785,6 +823,45 @@ function selectVertex(vertex){
 				.on("start", arcDragStarted)
 				.on("drag", arcDragged)
 				.on("end", arcDragEnded));
+
+	point.on("click", function(d) {
+		d3.selectAll("path.selected").classed("selected",false); // reinit selected
+		console.log("click on point ",d.point, ": ", d);
+		if (!d3.select("#" + TEXT_TOOLBOX_ID).classed("opened")) {
+			d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
+		}
+		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = d.point;
+		document.getElementById(TEXT_TOOLBOX_ID + "-next").value = d.next;
+		document.getElementById(TEXT_TOOLBOX_ID + "-peer").value = d.peer;
+		document.getElementById(TEXT_EDITZONE_ID).value = readInfo(d.info);
+		var selectedEdge = d3.selectAll("path.edges").filter(function(l){return (l.point == d.point || l.peer == d.point);});
+		selectedEdge.classed("selected",true);
+		if (selectedEdge.datum().point == d.point) {
+			//selectedEdge.attr("marker-start",function(d){return "url(#marker-start-" + d.info.xsl_element.replace(":","_") + ")";})
+			selectedEdge.attr("marker-start",function(d){return "url(#marker-start-entry)";})
+		} else {
+			//selectedEdge.attr("marker-end",function(d){return "url(#marker-end-" + d.info.xsl_element.replace(":","_") + ")";})
+			selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
+		}
+	});
+}
+
+/**
+ * print out info on point
+ * @param {_info} - info object - point info
+ * @returns a string with data
+ */
+function readInfo(_info){
+	var t = Object.entries(_info);
+	var tagidx = t.findIndex(function(s){return s[0].endsWith("_element");});
+	if (tagidx > -1) {var tag = t.splice(tagidx, 1);}
+	var output = "";
+	if (tag) {output += "<" + tag[0][0].split("_" , 1) + ":" + tag[0][1];} // TODO: fix: "_" is not a good joker !
+	for(var i=0, n=t.length; i<n; i++){
+		output += " " + t[i][0].replace(/_/, ":") + "=" + '"' + t[i][1] + '"';
+	}
+	if (tag) {output += "/>";}
+	return output;
 }
 
 /**
@@ -795,6 +872,7 @@ function selectVertex(vertex){
 function unselectVertices(){
 	d3.selectAll(".focused").classed("focused", false);
 	d3.selectAll(".arc").classed("notdisplayed", true).classed("draggable", false);
+	d3.selectAll(".point-displayed").classed("point-displayed", false).on("click", "");
 	d3.selectAll(".gvertex").lower();
 	d3.selectAll(".egde").raise(); // raise edges above vortices
 	d3.selectAll(".edgeLbl").raise();
@@ -863,28 +941,37 @@ function vertexToString(vertex, hash){
 }
 
 /**
+ * function for computing the planar Edges
+ *
+ * @param s {string:point id} - point object from
+ * @param t {string:point id} - point object to
+ * @returns {string} - svg path for the edge
+ */
+function drawPlanar(s, t){
+	path="M" + getAbsCoord(s).pxy + "L" + getAbsCoord(t).pxy;
+	return {path:path};
+}
+
+/**
+ * function for computing the spheric Edges
+ *
+ * @param s {string:point id} - point object from
+ * @param v {string:vertex id} - point object to
+ * @returns {string} - svg path for the edge
+ */
+function drawSpheric(s, v){
+	path="M" + getAbsCoord(s).pxy + "L" + ((getAbsCoord(s).x - getAbsCoord(v).x) * BEYOND) + " " + ((getAbsCoord(s).y - getAbsCoord(v).y) * BEYOND);
+	return {path:path};
+}
+
+/**
  * function for computing the hyperbolics arcs
  *
  * @param s {object:point} - point object from
  * @param t {object:point} - point object to
  * @returns {string} - svg path for the bezier curve
  */
-function hyperArcs(s, t){
-	var path, cs = {x:0, y:0}, ct = {x:0, y:0};
-	var distance, min_distance = 1.3; // minimum distance, also prevents 0
-	if (t.index < s.index) {t.index += (s.pc + 1);} // to manage the circleling index in the vertex
-	distance = Math.max(t.index - s.index,  min_distance);
-	var a = -3 // angle correction coef of the bezier curve if 0, no impact, if > 0 close the angle, if <0 open it
-	if (s.pc < 15) {a = 2;}
-	if (distance == min_distance) {a = 0;} // for short distances, no angle correction
-	var da = (Math.PI / s.pc) * a; // angle reduction based on point#
-	var q = (1/Math.sqrt(distance)); // compute distance from center of the vertex. The higher q is, closer is the ctrl point to the circle
-	var cdistance = Math.min((s.radius * q), (s.radius - 5)); // Compute distance from center of the vertex. Maximized at radius - 5px.
-	cs.x = Math.cos(s.startAngle - Math.PI * .5 + da) * cdistance;
-	ct.x = Math.cos(t.startAngle - Math.PI * .5 - da) * cdistance;
-	cs.y = Math.sin(s.startAngle - Math.PI * .5 + da) * cdistance;
-	ct.y = Math.sin(t.startAngle - Math.PI * .5 - da) * cdistance;
-	if (true) {
+function drawHyperbolic(s, t) {
 		radius = Math.sqrt(s.ptX*s.ptX + s.ptY*s.ptY)
 		// With the help of Mr. Poincare
 		xm = (s.ptX + t.ptX)/2.
@@ -908,13 +995,7 @@ function hyperArcs(s, t){
 			+ "A " + rf + " " + rf + " 0 0 0"
 			+ " " + t.ptX + "," + t.ptY;
 		}
-	} else {
-	path =  "M" + s.ptX + "," + s.ptY
-	+ "C" + cs.x + "," + cs.y
-	+ " " + ct.x + "," + ct.y
-	+ " " + t.ptX + "," + t.ptY;
-	}
-	return {path:path, s:s, t:t, cp1X:cs.x, cp1Y:cs.y, cp2X:ct.x, cp2Y:ct.y};
+	return {path:path};
 }
 
 /**
@@ -991,9 +1072,9 @@ function addStyles(_tagsColor) {
 	var styleSheet = document.querySelector('#sandbox-styles').sheet;
 	var rules = d3.entries(styleSheet.cssRules);
 	_tagsColor.forEach(function (elt) {
-				var ruleExists = rules.find(function(e){return e.value.selectorText == "." + elt.tag.replace(":","_")});
+				var ruleExists = rules.find(function(e){return e.value.selectorText == "." + elt.tag.replace(/:/,"_")});
 				if (ruleExists) {styleSheet.deleteRule(Number(ruleExists.key));}
-				var colorStyle = '.' + elt.tag.replace(":","_") + ' { stroke: ' + elt.color + '; color: ' +  elt.color + '; }';
+				var colorStyle = '.' + elt.tag.replace(/:/,"_") + ' { stroke: ' + elt.color + '; color: ' +  elt.color + '; }';
 				styleSheet.insertRule(colorStyle, 0); // index 0 to add on the top
 	});
 }
