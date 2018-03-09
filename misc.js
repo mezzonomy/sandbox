@@ -3,7 +3,7 @@
  * @copyright (c) 2014-2018, sarl mezzònomy
  * @author mezzònomy
  */
- 
+
 /**
  * Open/close the current toolbox by changing classes on the element
  * css classed .closed and .opened must be defined
@@ -19,6 +19,22 @@ function ui_tlbx_toggle(tlbx) {
     d3.select(tlbx).classed("closed", false).classed("opened", true);
   }
 }
+
+/**
+ * Simulate a click event.
+ * @public
+ * @param {Element} elem  the element to simulate a click on
+ */
+var simulateClick = function (elem) {
+	// Create our event (with options)
+	var evt = new MouseEvent('click', {
+		bubbles: true,
+		cancelable: true,
+		view: window
+	});
+	// If cancelled, don't dispatch our event
+	var canceled = !elem.dispatchEvent(evt);
+};
 
 /**
  * complete amendment for xml wellformedness

@@ -83,11 +83,10 @@ path {
 }
 .planar {}
 .spheric{}
-	
-path.selected{
+
+path.selected {
 	stroke-width: 3px;
 }
-
 
 .arc{
 	stroke-width: 0px;

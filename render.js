@@ -145,23 +145,23 @@ function render(data){
 			.attr("stroke","black");
 		defs.append("marker")
 			.attr("id", "marker-start-entry")
-			.attr("markerWidth", "30")
-			.attr("markerHeight", "30")
-			.attr("refX", "0")
-			.attr("refY", "10")
+			.attr("markerWidth", "40")
+			.attr("markerHeight", "40")
+			.attr("refX", "10")
+			.attr("refY", "20")
 			.attr("orient", "auto")
 			.append("path")
-			.attr("d", "M20 15 L0 10 L20 0")
+			.attr("d", "M35 35 L5 20 L35 5")
 			.attr("stroke","black");
 		defs.append("marker")
 			.attr("id", "marker-end-entry")
-			.attr("markerWidth", "30")
-			.attr("markerHeight", "30")
-			.attr("refX", "0")
-			.attr("refY", "10")
+			.attr("markerWidth", "40")
+			.attr("markerHeight", "40")
+			.attr("refX", "30")
+			.attr("refY", "20")
 			.attr("orient", "auto")
 			.append("path")
-			.attr("d", "M20 15 L0 10 L20 0")
+			.attr("d", "M5 35 L35 20 L5 5")
 			.attr("stroke","black");
 	}
 
@@ -237,9 +237,9 @@ function render(data){
 	//	Dynamic colors and markers
 	// ******************************************************
 	// add a style id="sandbox-styles" section to the header
-	var local_style = d3.select("#sandbox-styles");
+	var style = d3.select("#sandbox-styles");
 
-	if (local_style.empty()){
+	if (style.empty()){
 		d3.select("#head").append("style").attr("id", "sandbox-styles");
 	}
 
@@ -248,7 +248,7 @@ function render(data){
 	var coloring_tags = d3.scaleOrdinal(d3.schemeCategory20);
 
 	/*------------------------------------------------------------------
-	 * Map of tags color
+	 * Map of tags color and add selection on hover
 	 */
 	 var tagsColor=[];
 	 var tags = d3.select("#perspective").selectAll("span.badge");
@@ -259,8 +259,18 @@ function render(data){
 		);
 		tagsColor.push({tag:"nocolor", color:"black"})
 
+		tags.on("mouseover", function(d){
+			d3.selectAll(".edges").classed("selected", false);
+			var currentTag =  this.dataset.tagname.replace(":","_");
+			d3.selectAll(".edges").filter(function(e){return e.tagnet == currentTag;}).classed("selected", true);}
+		);
+		tags.on("mouseout", function(d){
+			d3.selectAll(".edges").classed("selected", false);}
+		);
+
 		//create styles for coloring
 		addStyles(tagsColor);
+
 		//add defs with colors
 		var newStyledMarkerEnd = defs.selectAll("marker.end")
 		.data(tagsColor, function(d) {return d.tag;});
@@ -445,9 +455,9 @@ function render(data){
 	.enter()
 	.filter(function(d) {return (d.point.startsWith("T") && (d.topology == "hyperbolic"))})
 	.append("path")
-	.attr("class", function(d) {return "edges hyperbolic " + d.info.xsl_element.replace(":","_");})
-	.attr("marker-end",function(d){return "url(#marker-end-" + d.info.xsl_element.replace(":","_") + ")";})
-	.attr("marker-start",function(d){return "url(#marker-start-" + d.info.xsl_element.replace(":","_") + ")";})
+	.attr("class", function(d) {return "edges hyperbolic " + d.tagnet;})
+	.attr("marker-end",function(d){return "url(#marker-end-" + d.tagnet + ")";})
+	.attr("marker-start",function(d){return "url(#marker-start-" + d.tagnet + ")";})
 	.attr("id", function(d) {return "hyperbolic_" + d.point;})
 	//.style("stroke", function(d) {return coloring_tags(d.info.xsl_element);})
 	.attr("d", function(d){return drawHyperbolic(pointsById.get(d.point), pointsById.get(d.peer)).path;})
@@ -492,6 +502,8 @@ function render(data){
  				t.point = d.peer;
  				t.peer = d.point;
  				t.virtual = true;
+				t.tagnet = d.tagnet;
+				t.tagraw = d.tagraw;
  			id = d.topology + "_" + d.hc + "_" + d.point;
 		}
 		if (d.point.startsWith("T") && (d.topology == "planar")) { // planar edge
@@ -499,7 +511,7 @@ function render(data){
 			t = Object.assign({}, pointsById.get(d.peer));
 			id = d.topology + "_" + d.hc + "_" + t.hc + "_" + d.point;
 		}
-		if (id) {edges.push({topology:d.topology, id:id, source:s, target:t, point:d.point, peer:d.peer});}
+		if (id) {edges.push({topology:d.topology, id:id, source:s, target:t, point:d.point, peer:d.peer, tagnet:d.tagnet, tagraw:d.tagraw});}
  	});
 
 	/*
@@ -515,10 +527,10 @@ function render(data){
 	 	newEdge
 	 	.enter()
 	 	.append("path")
-		.attr("class", function(d){return "edges edge " + d.topology + " " + d.source.info.xsl_element.replace(":","_");})
+		.attr("class", function(d){return "edges edge " + d.topology + " " + d.source.tagnet;})
 	 	.attr("id", function(d){return d.id;})
-		.attr("marker-end",function(d){return "url(#marker-end-" + d.source.info.xsl_element.replace(":","_") + ")";})
-		.attr("marker-start",function(d){return "url(#marker-start-" + d.source.info.xsl_element.replace(":","_") + ")";})
+		.attr("marker-end",function(d){return "url(#marker-end-" + d.source.tagnet + ")";})
+		.attr("marker-start",function(d){return "url(#marker-start-" + d.source.tagnet + ")";})
 		.append("title")
 		.text(function(d){return d.source.info.xsl_element;});
 
@@ -538,7 +550,7 @@ function render(data){
 	 	.enter()
 	 	.filter(function(d){return (d.topology == "planar" || d.topology == "spheric") }) //labels for planar & spherics
 	 	.append("text")
-	 	.attr("class", function(d) {return "edgeLbl " + d.topology + " " + d.source.info.xsl_element.replace(":","_");})
+	 	.attr("class", function(d) {return "edgeLbl " + d.topology + " " + d.source.tagnet;})
 	 	.attr("id", function(d){return "lbl_" + d.id;})
 		.attr("text-anchor", "middle")
 	 	.text(function(d) {
@@ -765,6 +777,8 @@ function vertexComputation(QApointsList){
 			sr[i].segments[k].padAngle = 0; //no pading between arcs
 			sr[i].segments[k].value = 1; //all arcs have the same weight
 			sr[i].segments[k].topology="hyperbolic"; //default topology
+			sr[i].segments[k].tagraw=sr[i].segments[k].info.xsl_element;
+			sr[i].segments[k].tagnet=sr[i].segments[k].info.xsl_element.replace(":","_");
 			if (sr[i].segments[k].point == sr[i].segments[k].peer) {sr[i].segments[k].topology="spheric";}
 			// PGT: attention ! Ceci est la caractérisation des topologies "text".
 			// Cela fonctionne pour le moment car nous n'avons pas de "text".
@@ -801,7 +815,7 @@ function selectVertex(vertex){
 	// 2. select current vertex or unpin and unselect
 	var vtx = d3.select(vertex);
 	var arc = vtx.selectAll(".arc");
-	var edges = d3.selectAll(".edges");
+	var edges = d3.selectAll(".edge").filter(function(d){return (d.source.hc == vtx.datum().hc || d.target.hc == vtx.datum().hc);}); // raise the proper external edges
 	var point = vtx.selectAll(".point");
 	vtx.raise();
 	edges.raise();
@@ -825,34 +839,52 @@ function selectVertex(vertex){
 				.on("end", arcDragEnded));
 
 	point.on("click", function(d) {
-		d3.selectAll("path.selected").classed("selected",false); // reinit selected
+		d3.event.stopPropagation();
 		console.log("click on point ",d.point, ": ", d);
-		if (!d3.select("#" + TEXT_TOOLBOX_ID).classed("opened")) {
-			d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
-		}
+		// populates hidden inputs for dummy navbar
 		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = d.point;
 		document.getElementById(TEXT_TOOLBOX_ID + "-next").value = d.next;
 		document.getElementById(TEXT_TOOLBOX_ID + "-peer").value = d.peer;
-		document.getElementById(TEXT_EDITZONE_ID).value = readInfo(d.info);
+		document.getElementById(TEXT_TOOLBOX_ID + "-before").value = d3.selectAll(".point").filter(function(s){return s.next == d.point;}).datum().point;
+		text_nav(d);
+		// reinit prevously selected point
+		d3.selectAll("path.selected").classed("selected",false);
+		d3.selectAll("path.start").attr("marker-start", function(d){return "url(#marker-start-" + d.tagnet + ")";}).classed("start",false);
+		d3.selectAll("path.end").attr("marker-end", function(d){return "url(#marker-end-" + d.tagnet + ")";}).classed("end",false);
+		// open text toolbox and poupulates edit zone
+		if (!d3.select("#" + TEXT_TOOLBOX_ID).classed("opened")) {
+			d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
+		}
+		document.getElementById(TEXT_EDITZONE_ID).value = text_readInfo(d);
 		var selectedEdge = d3.selectAll("path.edges").filter(function(l){return (l.point == d.point || l.peer == d.point);});
+		// select Edge and style it with the wiev marker
 		selectedEdge.classed("selected",true);
 		if (selectedEdge.datum().point == d.point) {
-			//selectedEdge.attr("marker-start",function(d){return "url(#marker-start-" + d.info.xsl_element.replace(":","_") + ")";})
-			selectedEdge.attr("marker-start",function(d){return "url(#marker-start-entry)";})
+			selectedEdge.classed("start", true);
+			if (selectedEdge.datum().toplogy == "hyperbolic") {
+				selectedEdge.attr("marker-start",function(d){return "url(#marker-end-entry)";})
+			} else {
+				selectedEdge.attr("marker-start",function(d){return "url(#marker-start-entry)";})
+			}
 		} else {
-			//selectedEdge.attr("marker-end",function(d){return "url(#marker-end-" + d.info.xsl_element.replace(":","_") + ")";})
-			selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
+			selectedEdge.classed("end", true);
+			if (selectedEdge.datum().toplogy == "hyperbolic") {
+				selectedEdge.attr("marker-end",function(d){return "url(#marker-start-entry)";})
+			} else {
+				selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
+			}
 		}
 	});
 }
 
 /**
  * print out info on point
- * @param {_info} - info object - point info
- * @returns a string with data
+ * @param {_datum} - d3 datum object - point
+ * @returns a xml node string with the info
  */
-function readInfo(_info){
-	var t = Object.entries(_info);
+function text_readInfo(_datum){
+	var info=_datum.info;
+	var t = Object.entries(info);
 	var tagidx = t.findIndex(function(s){return s[0].endsWith("_element");});
 	if (tagidx > -1) {var tag = t.splice(tagidx, 1);}
 	var output = "";
@@ -862,6 +894,43 @@ function readInfo(_info){
 	}
 	if (tag) {output += "/>";}
 	return output;
+}
+
+/**
+ * print out info on point
+ * @param {_datum} - d3 datum object - point
+ * @returns a navbar (does it once for all, if the navbar is drawn, it won't be again)
+ */
+function text_nav(_datum){
+	//nav buttons
+	var navTool = d3.select("#" + TEXT_TOOLBOX_ID + "-pointnavtool");
+	var btnNextPt = navTool.select("#" + TEXT_TOOLBOX_ID + "-btnNextPt");
+	if (!btnNextPt.empty()) {return;} // Exits if already drawned
+	// creates nav buttons
+	navTool.append("button")
+	.attr("type","button")
+	.attr("class","btn btn-info")
+	.attr("id",TEXT_TOOLBOX_ID + "-btnBeforePt")
+	.text(String.fromCharCode("8592"))
+	.attr("title", "Before")
+	.attr("accessKey", "f")
+	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-before").value));');
+	navTool.append("button")
+	.attr("type","button")
+	.attr("class","btn btn-info")
+	.attr("id",TEXT_TOOLBOX_ID + "-btnPeerPt")
+	.text(String.fromCharCode("8597"))
+	.attr("title", "Peer")
+	.attr("accessKey", "38")
+	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-peer").value));');
+	navTool.append("button")
+	.attr("type","button")
+	.attr("class","btn btn-info")
+	.attr("id",TEXT_TOOLBOX_ID + "-btnNextPt")
+	.text(String.fromCharCode("8594"))
+	.attr("title", "Next")
+	.attr("accessKey", "39")
+	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-next").value));');
 }
 
 /**
