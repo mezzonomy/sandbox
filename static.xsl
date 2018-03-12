@@ -168,6 +168,8 @@
 					<on:attribute name="body" script="_get('{$toolbox_ID}-editzone').value"/>
 					<bhb:copy-of select="bhb:parse(@body)"/>
 				</on:submit>
+				<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value=""/>
+				<input id="{$toolbox_ID}-next" name="{$toolbox_ID}-next" type="hidden" value=""/>
 				<input id="{$toolbox_ID}-user" name="{$toolbox_ID}-user" type="hidden" required="required">
 					<xsl:attribute name="value"><xsl:value-of select="$perspective/@username"/></xsl:attribute>
 				</input>

@@ -76,6 +76,7 @@ div.lower-right {
 
 .zoom11 {
     transform: scale(1.1);
+		opacity:.5;
 }
 
 /* layout */
@@ -269,10 +270,11 @@ table {
 	border-collapse:collapse;
 	border : 2px grey solid;
 	}
+
 	/*badges*/
 	.badge-planar {
 	    color: #fff;
-	    background-color: #17a2b8;
+	    background-color: #28a745;
 	}
 	.badge-spheric {
 	    color: darkgrey;
@@ -280,7 +282,7 @@ table {
 	}
 	.badge-hyperbolic {
 			color: #fff;
-			background-color: #6610f2;
+			background-color: #6c757d;
 	}
 	.badge-pill {
 	    padding-right: .6em;
@@ -302,12 +304,13 @@ table {
 	.badge-clickable {
 		cursor:pointer;
 	}
-	.badge-clickable:hover {
-		opacity:.8;
-	}
 	.badge-notif {
 	    margin-left: 1px;
 	    vertical-align: super;
 	    color: white;
 	    background-color: inherit;
+	}
+	.badge.selected , .badge-clickable:hover {
+			background-color: black;
+	    color: white;
 	}

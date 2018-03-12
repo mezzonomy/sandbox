@@ -25,12 +25,12 @@ svg#scene {
 
 .vertexCircle {
 	fill-opacity: 1;
-	stroke-width: 2px;
-	stroke: grey;
+	stroke-width: 1px;
+	stroke: black;
 }
 
 .pinned {
-  stroke-width: 3px;
+  stroke-width: 2px;
   stroke: black;
 }
 
@@ -41,16 +41,21 @@ svg#scene {
 	pointer-events: none;
 }
 .point-displayed {
-	fill: lightgreen;
-	stroke-width: 3px;
-	stroke: lightgreen;
+	fill: red;
+	stroke-width: 2px;
+	stroke: red;
 	cursor: pointer;
 	pointer-events: auto;
 }
 .point-displayed:hover {
-	fill: darkgreen;
+	fill: darkred;
 	stroke-width: 4px;
-	stroke: darkgreen;
+	stroke: darkred;
+}
+circle.viewed {
+	fill: black;
+	stroke-width: 4px;
+	stroke: black;
 }
 .dragging {
 	fill: yellow;
@@ -87,12 +92,19 @@ path {
 path.selected {
 	stroke-width: 3px;
 }
-
+path.viewed {
+	stroke-width: 3px;
+}
 .arc{
 	stroke-width: 0px;
-	opacity: .8;
+	opacity: .5;
 	pointer-events: auto;
 }
+path.edited {
+	stroke-width: 2px;
+	opacity: 1;
+}
+
 .arc:hover{
 	opacity: 1;
 }
