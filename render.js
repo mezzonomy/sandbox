@@ -964,7 +964,7 @@ function text_nav(_datum){
 	// creates nav buttons
 	navTool.append("button")
 	.attr("type","button")
-	.attr("class","btn btn-info")
+	.attr("class","btn btn-primary")
 	.attr("id",TEXT_TOOLBOX_ID + "-btnBeforePt")
 	.text(String.fromCharCode(8634)) //8592
 	.attr("title", "Before")
@@ -973,21 +973,40 @@ function text_nav(_datum){
 
 	navTool.append("button") //twoclicks, one to select a new vertex, one to select the point
 	.attr("type","button")
-	.attr("class","btn btn-info")
+	.attr("class","btn btn-primary")
 	.attr("id",TEXT_TOOLBOX_ID + "-btnPeerPt")
-	.text(String.fromCharCode(8645)) //8597
+	.text(String.fromCharCode(8645)) //8645 8597
 	.attr("title", "Peer")
 	.attr("accessKey", "38")
 	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-peer").value)); simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-peer").value));');
 
 	navTool.append("button")
 	.attr("type","button")
-	.attr("class","btn btn-info")
+	.attr("class","btn btn-primary")
 	.attr("id",TEXT_TOOLBOX_ID + "-btnNextPt")
 	.text(String.fromCharCode(8635)) // 8594
 	.attr("title", "Next")
 	.attr("accessKey", "39")
 	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-next").value));');
+
+	navTool.append("button")
+	.attr("type","button")
+	.attr("class","btn btn-secondary")
+	.attr("id",TEXT_TOOLBOX_ID + "-unselect")
+	.text(String.fromCharCode(215))
+	.attr("title", "unselect")
+	.attr("onClick", function(d) {
+		d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", false).classed("closed", true);
+		/*document.getElementById(TEXT_EDITZONE_ID).value = null;
+		d3.selectAll(".viewed").classed("viewed",false);
+		if (!edgesColored) {
+			d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
+			d3.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
+		} else {
+			d3.selectAll("path.start").attr("marker-start", function(d){return "url(#marker-start-" + d.tagnet + ")";}).classed("start",false);
+			d3.selectAll("path.end").attr("marker-end", function(d){return "url(#marker-end-" + d.tagnet + ")";}).classed("end",false);
+		}*/
+	});
 }
 
 /**
@@ -1098,7 +1117,6 @@ function drawSpheric(s, v){
  * @returns {string} - svg path for the bezier curve
  */
 function drawHyperbolic(s, t) {
-		var path = "";
 		var radius = Math.sqrt(s.ptX*s.ptX + s.ptY*s.ptY)
 		// With the help of Mr. Poincare
 		var xm = (s.ptX + t.ptX)/2.
@@ -1107,9 +1125,9 @@ function drawHyperbolic(s, t) {
 		if (rm < 0.001) {
 			path =  "M" + s.ptX + "," + s.ptY
 			+ "L" + t.ptX + "," + t.ptY;
-			return {path:path, s:s, t:t, cp1X:cs.x, cp1Y:cs.y, cp2X:ct.x, cp2Y:ct.y};}
+			return {path:path};}
 		var tm = Math.atan2(ym, xm)
-		rm = radius * radius / rm
+	 	rm = radius * radius / rm
 		var xr = s.ptX - Math.cos(tm) * rm
 		var yr = s.ptY - Math.sin(tm) * rm
 		var rf = Math.sqrt(xr*xr + yr*yr)
@@ -1136,6 +1154,7 @@ function drawHyperbolic(s, t) {
 function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
 	lblId = lblId || "";
 	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
+	var labelBox;
 	if (topology == "planar") {
 		if (Math.abs(rt) < 90) {
 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 + Math.abs((y2-y1)/2)) + "," + (-3) + ")";
@@ -1144,7 +1163,7 @@ function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
 		}
 	}
 	if (topology == "spheric") {
-		var labelBoxW = document.getElementById(lblId).getBBox().width;
+		labelBoxW = document.getElementById(lblId).getBBox().width;
 		if (Math.abs(rt) < 90) {
 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (labelBoxW) + "," + (-3) + ")";
 		} else {

@@ -243,16 +243,38 @@ button, input[type="submit"], .btn {
 	margin-right: 5px;
 }
 
-.btn-primary { /*https://v4-alpha.getbootstrap.com/components/buttons/*/
-	color: #fff;
-	background-color: #007bff;
-	border-color: #007bff;
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.btn-primary:hover {
+    color: #fff;
+    background-color: #0069d9;
+    border-color: #0062cc;
 }
 
-.btn-info { /*https://v4-alpha.getbootstrap.com/components/buttons/*/
+.btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+.btn-secondary:hover {
+    color: #fff;
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-info {
 	color: #fff;
 	background-color: #5bc0de;
 	border-color: #5bc0de;
+}
+
+.btn-info:hover {
+    color: #fff;
+    background-color: #138496;
+    border-color: #117a8b;
 }
 
 .btn.disabled, .btn:disabled {
