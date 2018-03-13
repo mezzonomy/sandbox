@@ -27,8 +27,14 @@
 	<bhb:resources>
 		<html>
 			<head>
-				<link type="text/css" rel="stylesheet" 
-					href="sandbox/sandbox.css" charset="utf-8"/>
+				<title>mezzonomy</title>
+				<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8" />
+				<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8" />
+				<link type="text/css" rel="stylesheet" href="sandbox/render.css" charset="utf-8" />
+				<script src="sandbox/d3.js" type="text/javascript"></script>
+				<script src="sandbox/render.js" type="text/javascript"></script>
+				<script src="sandbox/d3-scale-chromatic.js" type="text/javascript"></script>
+				<script src="sandbox/misc.js" type="text/javascript"></script>
 			</head>
 			<body background="sandbox/mezzonomy-logo-large.png">
 				<div id="popup">
@@ -36,11 +42,13 @@
 					<div>Mot de passe:</div><input id="passwd" type="password"/>
 					<button style="padding: 7px 24px" 
 							onclick="_snd({bhb:'authentify',
-							login:  _get('login').value, passwd: _get('passwd').value,
+							login:  _get('login').value, 
+							passwd: _get('passwd').value,
+							location: document.location,
 							})">Se connecter</button>
 		</div></body></html>
 		<on:authentify user="login-passwd" create="bhb:display"
-			href="bhb://{@user}@{@subscribed}">
+			href="bhb://{@user}@{@subscribed}{@path}">
 			<on:create    method="choose-document"/>
 			<on:refresh   method="diff"/>
 			<on:paraph    method="ask-signature"/>  
