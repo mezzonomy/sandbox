@@ -114,6 +114,7 @@ function arcDragEnded(d) {
  * @param data {array} Array of QA points
  * @returns a svg display of the vertices
  */
+
 function render(data){
 	// ******************************************************
 	// Scene definition
@@ -213,7 +214,7 @@ function render(data){
 	var btnResetZoom = div_perspective.select("#btnReset-zoom");
 	if (btnResetZoom.empty()) {
 			//reset zoom
-			btnResetZoom = div_perspective.append("button").attr("type","button").attr("class","btn btn-info").attr("id","btnReset-zoom").text("zoom");
+			btnResetZoom = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-zoom").text("zoom");
 			btnResetZoom.on("click", function(){
 				scene.transition()
 				.duration(750)
@@ -223,7 +224,7 @@ function render(data){
 	var btnResetPosHistory = div_perspective.select("#btnReset-posHistory");
 	if (btnResetPosHistory.empty()) {
 			//reset zoom
-			btnResetPosHistory = div_perspective.append("button").attr("type","button").attr("class","btn btn-info").attr("id","btnReset-posHistory").text("reset");
+			btnResetPosHistory = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-posHistory").text("reset");
 			btnResetPosHistory.on("click", function(){
 				verticesPositionning.stop();
 				localStorage.removeItem("vertexLastPosition_json");
@@ -231,13 +232,13 @@ function render(data){
 				unpinVertices();
 				//scene.call(zoom.transform, d3.zoomIdentity);
 				verticesPositionning.restart();
-				//render(data);
+				//mainRender(data);
         return;
 			})
 	}
 	var btnstopAnimation = div_perspective.select("#btn-stop-animation");
 	if (btnstopAnimation.empty()) {
-		btnstopAnimation = div_perspective.append("button").attr("type","button").attr("class","btn btn-info").attr("id","btn-stop-animation").attr("value","stop").text("freeze");
+		btnstopAnimation = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-stop-animation").attr("value","stop").text("freeze");
 		btnstopAnimation.on("click", function(){
 			verticesPositionning.stop();
 		})
@@ -248,11 +249,11 @@ function render(data){
 		btnEdgesColored.on("click", function(){
 			if (btnEdgesColored.attr("value") == "uncolored") {
 				edgesColored=true;
-				render(data);
+				mainRender(data);
 				btnEdgesColored.attr("value","colored").text("Uncolored Edges");
 			} else {
 				edgesColored=false;
-				render(data);
+				mainRender(data);
 				btnEdgesColored.attr("value","uncolored").text("Color Edges");
 			}
 		})
@@ -995,9 +996,9 @@ function text_nav(_datum){
 	.attr("id",TEXT_TOOLBOX_ID + "-unselect")
 	.text(String.fromCharCode(215))
 	.attr("title", "unselect")
-	.attr("onClick", function(d) {
+	.on("click", function(d) {
 		d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", false).classed("closed", true);
-		/*document.getElementById(TEXT_EDITZONE_ID).value = null;
+		document.getElementById(TEXT_EDITZONE_ID).value = null;
 		d3.selectAll(".viewed").classed("viewed",false);
 		if (!edgesColored) {
 			d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
@@ -1005,7 +1006,7 @@ function text_nav(_datum){
 		} else {
 			d3.selectAll("path.start").attr("marker-start", function(d){return "url(#marker-start-" + d.tagnet + ")";}).classed("start",false);
 			d3.selectAll("path.end").attr("marker-end", function(d){return "url(#marker-end-" + d.tagnet + ")";}).classed("end",false);
-		}*/
+		}
 	});
 }
 

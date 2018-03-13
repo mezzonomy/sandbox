@@ -4,6 +4,28 @@
  * @author mezzònomy
  */
 
+
+ /**
+  * Init Loader by adding a loader image in the loader div
+  *
+  * @param none
+  * @returns Displays a loader image
+  */
+function initLoader() {
+    var loader ='<img src="sandbox/loader1.gif" alt="loading..." width="42" height="42" style="position: absolute; left: 50%; top: 50%;"/>';
+    document.getElementById('loader').innerHTML = loader;
+}
+
+/**
+ * Close loader
+ *
+ * @param none
+ * @returns Release loader
+ */
+function closeLoader() {
+  document.getElementById('loader').classList.add("hidden");
+}
+
 /**
  * Open/close the current toolbox by changing classes on the element
  * css classed .closed and .opened must be defined

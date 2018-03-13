@@ -94,12 +94,13 @@
 			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8" />
 			<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8" />
 			<link type="text/css" rel="stylesheet" href="sandbox/render.css" charset="utf-8" />
-			<script src="sandbox/d3.js" type="text/javascript"></script>
-			<script src="sandbox/render.js" type="text/javascript"></script>
-			<script src="sandbox/d3-scale-chromatic.js" type="text/javascript"></script>
 			<script src="sandbox/misc.js" type="text/javascript"></script>
+			<script src="sandbox/d3.js" type="text/javascript"></script>
+			<script src="sandbox/d3-scale-chromatic.js" type="text/javascript"></script>
+			<script src="sandbox/render.js" type="text/javascript"></script>
 		</head>
 		<body>
+			<div id="loader" style="z-index: 1072; overflow-x: hidden; overflow-y: auto; position: fixed;top: 0; right: 0; bottom: 0; left: 0; display: block; background-color: rgb(0,0,0); background-color: rgba(33,33,33,.6);"/>
 			<div id="universe">
 				<xsl:call-template name="explorer"/>
 				<xsl:call-template name="perspective"/>
@@ -152,12 +153,28 @@
 			<xsl:processing-instruction name="js">
 				<xsl:text>data=[</xsl:text>
 				<xsl:value-of select="normalize-space($js)"/>
-				<xsl:text>];
-				try{render(data)}catch(error)
-				{if (error instanceof ReferenceError) {
-					console.log(error);
-					setTimeout(function(){render(data)}, 200);
-				} else {throw error}};</xsl:text>
+				<xsl:text>];</xsl:text>
+				<xsl:text>
+					function wait4loader() {
+					    if (typeof initLoader != 'undefined') {
+					        initLoader();
+					    }
+					    else {
+					        setTimeout(wait4loader, 50);
+					    }
+					}
+					function wait4render() {
+					    if (typeof render != 'undefined') {
+								closeLoader();
+								render(data);
+					    }
+					    else {
+					        setTimeout(wait4render, 1000);
+					    }
+					}
+					wait4loader();
+					wait4render();
+				 </xsl:text>
 			</xsl:processing-instruction>
 		</div>
 	</xsl:template>
