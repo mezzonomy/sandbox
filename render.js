@@ -593,8 +593,6 @@ function render(data){
 
 	 	var edgeLbl =  container.selectAll(".edgeLbl");
 
-		/* Reselect the Edited point if any*/
-
 		if (edgesColored) {
 			d3.selectAll(".edges")
 			.attr("class", function(d) {return this.classList.toString() + " " + d.tagnet;})
@@ -604,8 +602,12 @@ function render(data){
 			.attr("class", function(d) {return this.classList.toString() + " " + d.tagnet;});
 		}
 
+		/* Reselect the Edited point if any*/
 		if (document.getElementById(TEXT_EDITZONE_ID).value) {
-			simulateClick(document.getElementById(document.getElementById(TEXT_TOOLBOX_ID + "-point").value));
+			var ptId = document.getElementById(TEXT_TOOLBOX_ID + "-point").value;
+			var vtxId = "gvertex_" + d3.select("#" + ptId).datum().hc;
+			simulateClick(document.getElementById(vtxId));
+			simulateClick(document.getElementById(ptId));
 		}
 
 	/* -----------------------------------------------------------------
@@ -896,9 +898,6 @@ function selectVertex(vertex){
 	point.on("click", function(d) {
 		d3.event.stopPropagation();
 		console.log("click on point ",d.point, ": ", d);
-		// Select vertex if not selected (case when navigation from point to point when the vertex is changing)
-		vtx=d3.select("#gvertex_" + d.hc);
-		if (!vtx.classed("focused")) {selectVertex("gvertex_" + d.hc);}
 		// populates hidden inputs for dummy navbar
 		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = d.point;
 		document.getElementById(TEXT_TOOLBOX_ID + "-next").value = d.next;
@@ -970,15 +969,21 @@ function text_nav(_datum){
 	var navTool = d3.select("#" + TEXT_TOOLBOX_ID + "-pointnavtool");
 	var btnNextPt = navTool.select("#" + TEXT_TOOLBOX_ID + "-btnNextPt");
 	if (!btnNextPt.empty()) {return;} // Exits if already drawned
-	// creates nav buttons
+
+	// creates dynamic nav buttons
 	navTool.append("button")
 	.attr("type","button")
 	.attr("class","btn btn-primary")
 	.attr("id",TEXT_TOOLBOX_ID + "-btnBeforePt")
 	.text(String.fromCharCode(8634)) //8592
 	.attr("title", "Before")
-	.attr("accessKey", "f")
-	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-before").value));');
+	.attr("accessKey", "b")
+	.on("click", function(d) {
+		var beforePtId = document.getElementById(TEXT_TOOLBOX_ID + "-before").value;
+		var beforeVtxId = "gvertex_" + d3.select("#" + beforePtId).datum().hc;
+		simulateClick(document.getElementById(beforeVtxId));
+		simulateClick(document.getElementById(beforePtId));
+	});
 
 	navTool.append("button")
 	.attr("type","button")
@@ -986,8 +991,13 @@ function text_nav(_datum){
 	.attr("id",TEXT_TOOLBOX_ID + "-btnPeerPt")
 	.text(String.fromCharCode(8645)) //8645 8597
 	.attr("title", "Peer")
-	.attr("accessKey", "38")
-	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-peer").value));');
+	.attr("accessKey", "p")
+	.on("click", function(d) {
+		var peerPtId = document.getElementById(TEXT_TOOLBOX_ID + "-peer").value;
+		var peerVtxId = "gvertex_" + d3.select("#" + peerPtId).datum().hc;
+		simulateClick(document.getElementById(peerVtxId));
+		simulateClick(document.getElementById(peerPtId));
+	});
 
 	navTool.append("button")
 	.attr("type","button")
@@ -995,8 +1005,13 @@ function text_nav(_datum){
 	.attr("id",TEXT_TOOLBOX_ID + "-btnNextPt")
 	.text(String.fromCharCode(8635)) // 8594
 	.attr("title", "Next")
-	.attr("accessKey", "39")
-	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-next").value));');
+	.attr("accessKey", "n")
+	.on("click", function(d) {
+		var nextPtId = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
+		var nextVtxId = "gvertex_" + d3.select("#" + nextPtId).datum().hc;
+		simulateClick(document.getElementById(nextVtxId));
+		simulateClick(document.getElementById(nextPtId));
+	});
 
 	navTool.append("button")
 	.attr("type","button")
