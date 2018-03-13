@@ -95,8 +95,7 @@
 			<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8" />
 			<link type="text/css" rel="stylesheet" href="sandbox/render.css" charset="utf-8" />
 			<script src="sandbox/misc.js" type="text/javascript"></script>
-			<script src="sandbox/d3.js" type="text/javascript"></script>
-			<script src="sandbox/d3-scale-chromatic.js" type="text/javascript"></script>
+			<script src="sandbox/d3-wlibrairies.js" type="text/javascript"></script>
 			<script src="sandbox/render.js" type="text/javascript"></script>
 		</head>
 		<body>
@@ -164,7 +163,7 @@
 					    }
 					}
 					function wait4render() {
-					    if (typeof render != 'undefined') {
+					    if (typeof d3 != 'undefined' || typeof render != 'undefined') {
 								closeLoader();
 								render(data);
 					    }

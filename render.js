@@ -161,7 +161,7 @@ function render(data){
 			.attr("refY", "20")
 			.attr("orient", "auto")
 			.append("path")
-			.attr("d", "M35 35 L5 20 L35 5")
+			.attr("d", "M35 35 L5 20 L35 5 M5 20 L10 20")
 			.attr("stroke","black");
 		defs.append("marker")
 			.attr("id", "marker-end-entry")
@@ -171,7 +171,7 @@ function render(data){
 			.attr("refY", "20")
 			.attr("orient", "auto")
 			.append("path")
-			.attr("d", "M5 35 L35 20 L5 5")
+			.attr("d", "M5 35 L35 20 L5 5 M35 20 L30 20")
 			.attr("stroke","black");
 	}
 
@@ -487,8 +487,14 @@ function render(data){
 	.attr("marker-start", "url(#marker-start)")
 	.attr("id", function(d) {return "hyperbolic_" + d.point;})
 	.attr("d", function(d){return drawHyperbolic(pointsById.get(d.point), pointsById.get(d.peer)).path;})
-	.on("mouseover", function(d){d3.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", true);})
-	.on("mouseout", function(d){d3.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", false);})
+	.on("mouseover", function(d){
+			d3.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", true);
+			d3.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", true);
+		})
+		.on("mouseout", function(d){
+			d3.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", false);
+			d3.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", false);
+		})
 	;
 
 	/*
@@ -599,8 +605,7 @@ function render(data){
 		}
 
 		if (document.getElementById(TEXT_EDITZONE_ID).value) {
-			simulateClick(document.getElementById(document.getElementById(TEXT_TOOLBOX_ID + "-point").value)); //once to select verrtex
-			simulateClick(document.getElementById(document.getElementById(TEXT_TOOLBOX_ID + "-point").value)); //once to select point
+			simulateClick(document.getElementById(document.getElementById(TEXT_TOOLBOX_ID + "-point").value));
 		}
 
 	/* -----------------------------------------------------------------
@@ -891,6 +896,9 @@ function selectVertex(vertex){
 	point.on("click", function(d) {
 		d3.event.stopPropagation();
 		console.log("click on point ",d.point, ": ", d);
+		// Select vertex if not selected (case when navigation from point to point when the vertex is changing)
+		vtx=d3.select("#gvertex_" + d.hc);
+		if (!vtx.classed("focused")) {selectVertex("gvertex_" + d.hc);}
 		// populates hidden inputs for dummy navbar
 		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = d.point;
 		document.getElementById(TEXT_TOOLBOX_ID + "-next").value = d.next;
@@ -972,14 +980,14 @@ function text_nav(_datum){
 	.attr("accessKey", "f")
 	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-before").value));');
 
-	navTool.append("button") //twoclicks, one to select a new vertex, one to select the point
+	navTool.append("button")
 	.attr("type","button")
 	.attr("class","btn btn-primary")
 	.attr("id",TEXT_TOOLBOX_ID + "-btnPeerPt")
 	.text(String.fromCharCode(8645)) //8645 8597
 	.attr("title", "Peer")
 	.attr("accessKey", "38")
-	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-peer").value)); simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-peer").value));');
+	.attr("onClick", 'simulateClick(document.getElementById(document.getElementById("' + TEXT_TOOLBOX_ID + '-peer").value));');
 
 	navTool.append("button")
 	.attr("type","button")
