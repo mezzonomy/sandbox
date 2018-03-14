@@ -58,6 +58,7 @@
 	<on:block     method="virtual"/>
 	<on:promote   method="virtual"/>
 	<on:subscribe method="register"/>
+	<on:signature method="put-signature"     select="."/>
 	<on:update    method="refresh"           update="no"/>
 	<on:request   method="check"             update="no"/>
 </bhb:consensus>

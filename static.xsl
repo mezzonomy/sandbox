@@ -177,6 +177,7 @@
 			</table>
 		</div>
 	</div>
+	</div>
 </xsl:template>
 
 <xsl:template match="bhb:document" mode="history">
