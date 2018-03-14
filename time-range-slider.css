@@ -1,0 +1,57 @@
+/* slider ------------------------------ */
+
+.ticks {
+  font-size: .5rem;
+  font-weight: 100;
+}
+
+.track,
+.track-inset,
+.track-overlay {
+  stroke-linecap: round;
+}
+
+.track {
+  stroke: black;
+  stroke-width: 3px;
+}
+
+.track-overlay {
+  pointer-events: stroke;
+  stroke-width: 50px;
+}
+
+.sel-range{
+  stroke: #9CCC65;
+  stroke-width: 3px;
+  cursor: crosshair;
+}
+
+.sel-range:active{
+  stroke: tomato;
+  stroke-width: 4px;
+}
+
+.handle {
+  fill: #9CCC65;
+  stroke: none;
+  cursor: crosshair;
+}
+.handle:hover{
+	fill: #B2EBF2;
+}
+.handle.active {
+  fill: tomato;
+}
+circle.handle-label {
+  fill: tomato;
+  stroke: none;
+}
+polygon.handle-label {
+  fill: tomato;
+  stroke: none;
+}
+text.handle-label {
+  font-size: .6rem;
+  color:black;
+}
