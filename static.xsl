@@ -127,6 +127,12 @@
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
+			<div id="{$toolbox_ID}-time-slider"/>
+			<input id="{$toolbox_ID}-from-date" name="{$toolbox_ID}-from-date" type="text" value=""/>
+			<input id="{$toolbox_ID}-to-date" name="{$toolbox_ID}-to-date" type="text" value=""/>
+			<input id="{$toolbox_ID}-from-date-ISO8601" name="{$toolbox_ID}-from-date-ISO8601" type="text" value=""/>
+			<input id="{$toolbox_ID}-to-date-ISO8601" name="{$toolbox_ID}-to-date-ISO8601" type="text" value=""/>
+			<div id="slider1"/>
 			<xsl:variable name="dictionary" select="@*"/>
 			<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}link')/@key">
 				<xsl:variable name="name" select="bhb:short_ns(.)"/>
