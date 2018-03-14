@@ -946,11 +946,18 @@ function selectVertex(vertex){
  * @returns a xml node string with the info
  */
 function text_readInfo(_datum){
+	var output = "";
+  // Add point info :
+	output += "Point: " + document.getElementById(TEXT_TOOLBOX_ID + "-point").value + "\r\n";
+	output += "Before: " + document.getElementById(TEXT_TOOLBOX_ID + "-before").value + "\r\n";
+	output += "Peer: " + document.getElementById(TEXT_TOOLBOX_ID + "-peer").value + "\r\n";
+	output += "Next: " + document.getElementById(TEXT_TOOLBOX_ID + "-next").value + "\r\n";
+	output += "\r\n";
+	// tag value
 	var info=_datum.info;
 	var t = Object.entries(info);
 	var tagidx = t.findIndex(function(s){return s[0].endsWith("_element");});
 	if (tagidx > -1) {var tag = t.splice(tagidx, 1);}
-	var output = "";
 	if (tag) {output += "<" + tag[0][0].split("_" , 1) + ":" + tag[0][1];} // TODO: fix: "_" is not a good joker !
 	for(var i=0, n=t.length; i<n; i++){
 		output += " " + t[i][0].replace(/_/, ":") + "=" + '"' + t[i][1] + '"';
