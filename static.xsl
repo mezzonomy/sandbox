@@ -101,14 +101,12 @@
 				<xsl:for-each select="bhb:unique(*/descendant::*)/@key">
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
 					<xsl:if test="not($perspective/@*[ name()=$name]='1')">
-
 						<span class="badge badge-pill badge-hyperbolic badge-clickable"  onclick="{bhb:query(.,'1')}">
 							<xsl:call-template name="tagname">
 								<xsl:with-param name="name" select="$name"/>
 								<xsl:with-param name="dictionary" select="$dictionary"/>
 								<xsl:with-param name="population" select="$inner"/>
 							</xsl:call-template>
-
 						</span>
 					</xsl:if>
 				</xsl:for-each>
@@ -126,7 +124,7 @@
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
-		<div id="{$toolbox_ID}-body" class="toolbox-body">
+		<div id="{$toolbox_ID}-checkbox" class="toolbox-body">
 			<xsl:variable name="dictionary" select="@*"/>
 			<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}link')/@key">
 				<xsl:variable name="name" select="bhb:short_ns(.)"/>
@@ -151,7 +149,39 @@
 				</p>
 			</xsl:for-each>
 		</div>
+		<div id="{$toolbox_ID}-input" class="toolbox-body">
+			<table>
+				<xsl:for-each select="bhb:key(
+					'{bhb://the.hypertext.blockchain}from',
+					'{bhb://the.hypertext.blockchain}to'
+					)/@key">
+					<tr><td><xsl:value-of select="bhb:short_ns(.)"/>
+					</td><td>
+						<select id="{local-name()}-history" onchange="{bhb:query(.,'0')}">
+							<xsl:for-each select="$perspective/bhb:solid/bhb:signet">
+								<xsl:apply-templates select="bhb:block(@id)" mode="history">
+									<xsl:with-param name="from" select="$perspective/@bhb:from"/>
+									<xsl:with-param name="to" select="$perspective/@bhb:to"/>
+								</xsl:apply-templates>
+							</xsl:for-each>
+						</select>
+					</td></tr>
+				</xsl:for-each>
+			</table>
+		</div>
 	</div>
+</xsl:template>
+
+<xsl:template match="bhb:document" mode="history">
+	<option value="0">
+		<xsl:text>Genesis</xsl:text>
+	</option>
+</xsl:template>
+
+<xsl:template match="bhb:block" mode="history">
+	<option value="{@on:clock}">
+		<xsl:value-of select="@on:clock"/>
+	</option>
 </xsl:template>
 
 <xsl:template name="amendment">
