@@ -137,10 +137,14 @@
 
 	<xsl:template name="matrix-line">
 		<xsl:param name="point"/>
+		<xsl:param name="path"/>
+		<xsl:param name="order"/>
 		<xsl:param name="next"/>
 		<xsl:param name="peer"/>
 		<xsl:param name="info"/>
 {"point":"<xsl:value-of select="$point"/>",
+"path":"<xsl:value-of select="$path"/>",
+"order":"<xsl:value-of select="$order"/>",
 "next":"<xsl:value-of select="$next"/>",
 "peer":"<xsl:value-of select="$peer"/>",
 "info":<xsl:value-of select="$info"/>,},
@@ -231,6 +235,7 @@
 	<xsl:variable name="push">
 		<xsl:choose>
 			<xsl:when test="@bhb:symbol">
+				<!-- only first symbol is processed -->
 				<xsl:variable name="symbol" select="@bhb:symbol"/>
 				<xsl:variable name="peer" select="following::*[ @bhb:symbol=$symbol]"/>
 				<xsl:choose>
@@ -255,15 +260,61 @@
 		</xsl:choose>
 	</xsl:variable>
 
+	<xsl:variable name="path">
+		<xsl:value-of select="@on:id"/>
+	</xsl:variable>
+
+	<xsl:variable name="peer-path">
+		<xsl:choose>
+			<xsl:when test="@bhb:symbol">
+				<!-- only first symbol is processed -->
+				<xsl:variable name="symbol" select="@bhb:symbol"/>
+				<xsl:variable name="peer" select="following::*[ @bhb:symbol=$symbol]"/>
+				<xsl:value-of select="$peer/@on:id"/>
+			</xsl:when>
+			<xsl:otherwise>
+		<xsl:value-of select="@on:id"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+
+	<xsl:variable name="order">
+		<xsl:text>push</xsl:text>
+	</xsl:variable>
+
+	<xsl:variable name="peer-order">
+		<xsl:variable name="symbol" select="@bhb:symbol"/>
+		<xsl:choose>
+			<xsl:when test="$symbol and following::*[ @bhb:symbol=$symbol][ @on:id]">
+				<!-- only first symbol is processed -->
+				<xsl:text>push</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:text>after</xsl:text>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+
 	<xsl:variable name="name" select="name()"/>
 	<xsl:variable name="planar">
 			<xsl:value-of select="$perspective/@*[ name()=$name]"/>
 	</xsl:variable>
+	<!-- 
+		<?before?>
+		<element > //top
+		  <?push?>
+		  <?children *?>
+		  <?append?>
+		</element> //bottom
+		<?after?>
+	  -->
 	<xsl:choose>
 		<xsl:when test="$planar='1'">
 			<!-- planar -->
 			<xsl:call-template name="matrix-line">
 				<xsl:with-param name="point" select="$top"/>
+				<xsl:with-param name="path" select="$path"/>
+				<xsl:with-param name="order" select="$order"/>
 				<xsl:with-param name="next" select="$after"/>
 				<xsl:with-param name="peer" select="$bottom"/>
 				<xsl:with-param name="info">
@@ -272,6 +323,8 @@
 			</xsl:call-template>
 			<xsl:call-template name="matrix-line">
 				<xsl:with-param name="point" select="$bottom"/>
+				<xsl:with-param name="path" select="$peer-path"/>
+				<xsl:with-param name="order" select="$peer-order"/>
 				<xsl:with-param name="next" select="$push"/>
 				<xsl:with-param name="peer" select="$top"/>
 				<xsl:with-param name="info">
@@ -283,6 +336,8 @@
 			<!-- hyperbolic -->
 			<xsl:call-template name="matrix-line">
 				<xsl:with-param name="point" select="$top"/>
+				<xsl:with-param name="path" select="$path"/>
+				<xsl:with-param name="order" select="$order"/>
 				<xsl:with-param name="next" select="$push"/>
 				<xsl:with-param name="peer" select="$bottom"/>
 				<xsl:with-param name="info">
@@ -291,6 +346,8 @@
 			</xsl:call-template>
 			<xsl:call-template name="matrix-line">
 				<xsl:with-param name="point" select="$bottom"/>
+				<xsl:with-param name="path" select="$peer-path"/>
+				<xsl:with-param name="order" select="$peer-order"/>
 				<xsl:with-param name="next" select="$after"/>
 				<xsl:with-param name="peer" select="$top"/>
 				<xsl:with-param name="info">
@@ -302,6 +359,7 @@
 </xsl:template>
 
 <xsl:template match="*[ preceding::*/@bhb:symbol=current()/@bhb:symbol]" mode="alpha-rho"/>
+<!-- only first symbol is processed -->
 
 <!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 	   N A M I N G   S T R A T E G Y
