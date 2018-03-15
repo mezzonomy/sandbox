@@ -1146,24 +1146,19 @@ function drawHyperbolic(s, t) {
 		var xm = (s.ptX + t.ptX)/2.
 		var ym = (s.ptY + t.ptY)/2.
 		var rm = Math.sqrt(xm*xm + ym*ym)
+		path =  "M" + s.ptX + "," + s.ptY
 		if (rm < 0.001) {
-			path =  "M" + s.ptX + "," + s.ptY
-			+ "L" + t.ptX + "," + t.ptY;
+			path += "L" + t.ptX + "," + t.ptY;
 			return {path:path};}
 		var tm = Math.atan2(ym, xm)
-	 	rm = radius * radius / rm
+	 	    rm = radius * radius / rm
 		var xr = s.ptX - Math.cos(tm) * rm
 		var yr = s.ptY - Math.sin(tm) * rm
 		var rf = Math.sqrt(xr*xr + yr*yr)
-		if (Math.sin(t.startAngle - s.startAngle) < 0) {
-			path =  "M" + t.ptX + "," + t.ptY
-			+ "A " + rf + " " + rf + " 0 0 0"
-			+ " " + s.ptX + "," + s.ptY;
-		} else {
-			path =  "M" + s.ptX + "," + s.ptY
-			+ "A " + rf + " " + rf + " 0 0 0"
-			+ " " + t.ptX + "," + t.ptY;
-		}
+		kind   = (Math.sin(t.startAngle - s.startAngle) < 0) ? 
+			" 0 0 1" : " 0 0 0"
+		path   += "A " + rf + " " + rf + kind;
+		path   += " " + t.ptX + "," + t.ptY;
 	return {path:path};
 }
 
