@@ -464,7 +464,8 @@ function render(data){
 	.attr("id", function(d) {return d.point;})
 	.attr("r", POINT_RADIUS)
 	.attr("cx", function(d,i) {return d.ptX;})
-	.attr("cy", function(d,i) {return d.ptY;});
+	.attr("cy", function(d,i) {return d.ptY;})
+	.append("title").text(function(d){return "point: " + d.point + " peer: " + d.peer + " next: " + d.next;});
 
 	// Create a map of points across the vertices
 	var points=[];
@@ -924,18 +925,10 @@ function selectVertex(vertex){
 		selectedEdge.classed("viewed",true);
 		if (selectedEdge.datum().point == d.point) {
 			selectedEdge.classed("start", true);
-			if (selectedEdge.datum().toplogy == "hyperbolic") {
-				selectedEdge.attr("marker-start",function(d){return "url(#marker-end-entry)";})
-			} else {
-				selectedEdge.attr("marker-start",function(d){return "url(#marker-start-entry)";})
-			}
+			selectedEdge.attr("marker-start",function(d){return "url(#marker-start-entry)";})
 		} else {
 			selectedEdge.classed("end", true);
-			if (selectedEdge.datum().toplogy == "hyperbolic") {
-				selectedEdge.attr("marker-end",function(d){return "url(#marker-start-entry)";})
-			} else {
-				selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
-			}
+			selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
 		}
 	});
 }

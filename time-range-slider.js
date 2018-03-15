@@ -105,13 +105,13 @@ function startDrag(d){
   var ptx = d3.event.x;
   slider.append("circle")
     .attr("class", "handle-label")
-    .attr("cy", -38)
+    .attr("cy", -34)
     .attr("cx", ptx)
-    .attr("r", 30);
+    .attr("r", 25);
   slider.append("text")
     .attr("text-anchor", "middle")
     .attr("class", "handle-label part1")
-    .attr("y", -35)
+    .attr("y", -38)
     .attr("x", ptx)
     .text(formatDateP1(x.invert(ptx)))
   slider.append("text")
