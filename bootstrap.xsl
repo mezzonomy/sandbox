@@ -97,8 +97,8 @@
 			<link type="text/css" rel="stylesheet" href="sandbox/time-range-slider.css" charset="utf-8" />
 			<script src="sandbox/misc.js" type="text/javascript"></script>
 			<script src="sandbox/d3-wlibrairies.js" type="text/javascript"></script>
-			<script src="sandbox/render.js" type="text/javascript"></script>
-			<script src="sandbox/time-range-slider.js" type="text/javascript"></script>
+			<script src="sandbox/render.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/time-range-slider.js" type="text/javascript" defer="defer"></script>
 		</head>
 		<body>
 			<div id="loader" style="z-index: 1072; overflow-x: hidden; overflow-y: auto; position: fixed;top: 0; right: 0; bottom: 0; left: 0; display: block; background-color: rgb(0,0,0); background-color: rgba(33,33,33,.6);"/>

@@ -26,7 +26,10 @@ var scene, //d3 object select scene
 		vertexLastPosition=[],
 		verticesbyHc=[],
 		verticesPositionning,
-		edgesColored = false;
+		edgesColored = false,
+		longclick_limit=1000,
+		longclick_timer,
+		navPointStop=false;
 
 function dragstarted(d) {
 	d3.event.sourceEvent.stopPropagation();
@@ -865,13 +868,13 @@ function vertexComputation(QApointsList){
  * Select a vertex, and change the layout.
  * If the vertex is already selected, unpin and unselect the vertex
  *
- * @param {vertex} - dom element object - must be a root group of a vertex
+ * @param {_vertex} - dom element object - must be a root group of a vertex
  * @returns nothing (select the vertex)
  */
-function selectVertex(vertex){
+function selectVertex(_vertex){
 	unselectVertices(); // 1. unselect all
 	// 2. select current vertex or unpin and unselect
-	var vtx = d3.select(vertex);
+	var vtx = d3.select(_vertex);
 	var arc = vtx.selectAll(".arc");
 	var edges = d3.selectAll(".edge").filter(function(d){return (d.source.hc == vtx.datum().hc || d.target.hc == vtx.datum().hc);}); // raise the proper external edges
 	var point = vtx.selectAll(".point");
@@ -898,40 +901,53 @@ function selectVertex(vertex){
 
 	point.on("click", function(d) {
 		d3.event.stopPropagation();
-		console.log("click on point ",d.point, ": ", d);
-		// populates hidden inputs for dummy navbar
-		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = d.point;
-		document.getElementById(TEXT_TOOLBOX_ID + "-next").value = d.next;
-		document.getElementById(TEXT_TOOLBOX_ID + "-peer").value = d.peer;
-		document.getElementById(TEXT_TOOLBOX_ID + "-before").value = d3.selectAll(".point").filter(function(s){return s.next == d.point;}).datum().point;
-		text_nav(d);
-		// reinit prevously selected point
-		d3.selectAll(".viewed").classed("viewed",false);
-		if (!edgesColored) {
-			d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
-			d3.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
-		} else {
-			d3.selectAll("path.start").attr("marker-start", function(d){return "url(#marker-start-" + d.tagnet + ")";}).classed("start",false);
-			d3.selectAll("path.end").attr("marker-end", function(d){return "url(#marker-end-" + d.tagnet + ")";}).classed("end",false);
-		}
-		// open text toolbox and poupulates edit zone
-		if (!d3.select("#" + TEXT_TOOLBOX_ID).classed("opened")) {
-			d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
-		}
-		document.getElementById(TEXT_EDITZONE_ID).value = text_readInfo(d);
-		var selectedEdge = d3.selectAll("path.edges").filter(function(l){return (l.point == d.point || l.peer == d.point);});
-		// select Point, Edge and style them it with the wiev marker
-		d3.select(this).classed("viewed",true);
-		selectedEdge.classed("viewed",true);
-		if (selectedEdge.datum().point == d.point) {
-			selectedEdge.classed("start", true);
-			selectedEdge.attr("marker-start",function(d){return "url(#marker-start-entry)";})
-		} else {
-			selectedEdge.classed("end", true);
-			selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
-		}
+		selectPoint(d.point);
 	});
 }
+/**
+ * Selects a point and edit it
+ *
+ * @param {_pt} - dom element object - must be a root group of a vertex
+ * @returns {pt.datum()} (select the point and populates & open text nav)
+ */
+function selectPoint(_pt) {
+	pt = d3.select("#" + _pt).datum();
+	console.log("click on point ",pt.point, ": ", pt);
+	// populates hidden inputs for dummy navbar
+	document.getElementById(TEXT_TOOLBOX_ID + "-point").value = pt.point;
+	document.getElementById(TEXT_TOOLBOX_ID + "-next").value = pt.next;
+	document.getElementById(TEXT_TOOLBOX_ID + "-peer").value = pt.peer;
+	var ptbefore = d3.selectAll(".point").filter(function(s){return s.next == pt.point;}).datum();
+	document.getElementById(TEXT_TOOLBOX_ID + "-before").value = ptbefore.point;
+	text_nav(pt);
+	// reinit prevously selected point
+	d3.selectAll(".viewed").classed("viewed",false);
+	if (!edgesColored) {
+		d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
+		d3.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
+	} else {
+		d3.selectAll("path.start").attr("marker-start", function(d){return "url(#marker-start-" + pt.tagnet + ")";}).classed("start",false);
+		d3.selectAll("path.end").attr("marker-end", function(d){return "url(#marker-end-" + pt.tagnet + ")";}).classed("end",false);
+	}
+	// open text toolbox and poupulates edit zone
+	if (!d3.select("#" + TEXT_TOOLBOX_ID).classed("opened")) {
+		d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
+	}
+	document.getElementById(TEXT_EDITZONE_ID).value = text_readInfo(pt);
+	var selectedEdge = d3.selectAll("path.edges").filter(function(l){return (l.point == pt.point || l.peer == pt.point);});
+	// select Point, Edge and style them it with the wiev marker
+	d3.select("#" + pt.point).classed("viewed",true);
+	selectedEdge.classed("viewed",true);
+	if (selectedEdge.datum().point == pt.point) {
+		selectedEdge.classed("start", true);
+		selectedEdge.attr("marker-start",function(d){return "url(#marker-start-entry)";})
+	} else {
+		selectedEdge.classed("end", true);
+		selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
+	}
+	return Object.assign(pt, {topology:selectedEdge.datum().topology});
+}
+
 
 /**
  * print out info on point
@@ -971,19 +987,37 @@ function text_nav(_datum){
 	if (!btnNextPt.empty()) {return;} // Exits if already drawned
 
 	// creates dynamic nav buttons
+
 	navTool.append("button")
 	.attr("type","button")
 	.attr("class","btn btn-primary")
-	.attr("id",TEXT_TOOLBOX_ID + "-btnBeforePt")
-	.text(String.fromCharCode(8634)) //8592
-	.attr("title", "Before")
-	.attr("accessKey", "b")
+	.attr("id",TEXT_TOOLBOX_ID + "-btnNextPt")
+	.text(String.fromCharCode(8635)) // 8594
+	.attr("title", "Next")
+	.attr("accessKey", "n")
 	.on("click", function(d) {
-		var beforePtId = document.getElementById(TEXT_TOOLBOX_ID + "-before").value;
-		var beforeVtxId = "gvertex_" + d3.select("#" + beforePtId).datum().hc;
-		simulateClick(document.getElementById(beforeVtxId));
-		simulateClick(document.getElementById(beforePtId));
-	});
+		var nextPtId = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
+		var nextVtxId = "gvertex_" + d3.select("#" + nextPtId).datum().hc;
+		simulateClick(document.getElementById(nextVtxId));
+		simulateClick(document.getElementById(nextPtId));
+	})
+	.on("mouseup", function(){
+		clearTimeout(longclick_timer);
+		navPointStop=true;
+	})
+	.on("mousedown", function(){
+  	longclick_timer = window.setTimeout(function(){
+			console.log("longclick detected");
+			navPointStop=false;
+			var pt = document.getElementById(TEXT_TOOLBOX_ID + "-point").value;
+				var autonav = setInterval(function(){
+					if (navPointStop) {clearInterval(autonav);}
+					pt = selectPoint(pt).next;
+					if (pt.topology=="planar") {clearInterval(autonav);}
+				},500);
+		},longclick_limit);
+	})
+	;
 
 	navTool.append("button")
 	.attr("type","button")
@@ -1001,16 +1035,16 @@ function text_nav(_datum){
 
 	navTool.append("button")
 	.attr("type","button")
-	.attr("class","btn btn-primary")
-	.attr("id",TEXT_TOOLBOX_ID + "-btnNextPt")
-	.text(String.fromCharCode(8635)) // 8594
-	.attr("title", "Next")
-	.attr("accessKey", "n")
+	.attr("class","btn btn-secondary")
+	.attr("id",TEXT_TOOLBOX_ID + "-btnBeforePt")
+	.text(String.fromCharCode(8634)) //8592
+	.attr("title", "Before")
+	.attr("accessKey", "b")
 	.on("click", function(d) {
-		var nextPtId = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
-		var nextVtxId = "gvertex_" + d3.select("#" + nextPtId).datum().hc;
-		simulateClick(document.getElementById(nextVtxId));
-		simulateClick(document.getElementById(nextPtId));
+		var beforePtId = document.getElementById(TEXT_TOOLBOX_ID + "-before").value;
+		var beforeVtxId = "gvertex_" + d3.select("#" + beforePtId).datum().hc;
+		simulateClick(document.getElementById(beforeVtxId));
+		simulateClick(document.getElementById(beforePtId));
 	});
 
 	navTool.append("button")
@@ -1030,6 +1064,7 @@ function text_nav(_datum){
 			d3.selectAll("path.start").attr("marker-start", function(d){return "url(#marker-start-" + d.tagnet + ")";}).classed("start",false);
 			d3.selectAll("path.end").attr("marker-end", function(d){return "url(#marker-end-" + d.tagnet + ")";}).classed("end",false);
 		}
+		unselectVertices()
 	});
 }
 
@@ -1155,7 +1190,7 @@ function drawHyperbolic(s, t) {
 		var xr = s.ptX - Math.cos(tm) * rm
 		var yr = s.ptY - Math.sin(tm) * rm
 		var rf = Math.sqrt(xr*xr + yr*yr)
-		kind   = (Math.sin(t.startAngle - s.startAngle) < 0) ? 
+		kind   = (Math.sin(t.startAngle - s.startAngle) < 0) ?
 			" 0 0 1" : " 0 0 0"
 		path   += "A " + rf + " " + rf + kind;
 		path   += " " + t.ptX + "," + t.ptY;
