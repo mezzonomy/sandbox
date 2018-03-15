@@ -27,9 +27,11 @@ var scene, //d3 object select scene
 		verticesbyHc=[],
 		verticesPositionning,
 		edgesColored = false,
-		longclick_limit=1000,
+		longclick_limit=500,
 		longclick_timer,
+		autonav_interval=300,
 		navPointStop=false;
+
 
 function dragstarted(d) {
 	d3.event.sourceEvent.stopPropagation();
@@ -90,14 +92,14 @@ function arcDragEnded(d) {
 	//d3.select(this).classed("dragging", false);
 	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
 		alertInit();
-		var point = d3.event.subject.point.replace(/T_/,"").replace(/B_/,"");
+		var path = d3.event.subject.path;
 		document.getElementById(AMEND_TOOLBOX_ID + "-point").value = d.point;
 		document.getElementById(AMEND_TOOLBOX_ID + "-next").value = d.next;
 		if (d3.event.subject.point.startsWith("T_")){
-			document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE_T_X.replace("$ID",point);
+			document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE_T_X.replace("$ID",path);
 		}
 		if (d3.event.subject.point.startsWith("B_")){
-			document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE_B_X.replace("$ID",point);
+			document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE_B_X.replace("$ID",path);
 		}
 	}
 	d3.select("#" + AMEND_EDITZONE_ID)
@@ -1014,7 +1016,7 @@ function text_nav(_datum){
 					if (navPointStop) {clearInterval(autonav);}
 					pt = selectPoint(pt).next;
 					if (pt.topology=="planar") {clearInterval(autonav);}
-				},500);
+				},autonav_interval);
 		},longclick_limit);
 	})
 	;

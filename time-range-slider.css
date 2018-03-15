@@ -3,12 +3,19 @@
 .ticks {
   font-size: .5rem;
   font-weight: 100;
+  pointer-events: none;
+  user-select: none;
 }
 
 .track,
 .track-inset,
 .track-overlay {
   stroke-linecap: round;
+}
+
+.evts {
+  stroke: none;
+  fill: silver;
 }
 
 .track {
@@ -46,10 +53,12 @@
 circle.handle-label {
   fill: tomato;
   stroke: none;
+  opacity: .8;
 }
 polygon.handle-label {
   fill: tomato;
   stroke: none;
+  opacity: .8;
 }
 text.handle-label {
   font-size: .6rem;

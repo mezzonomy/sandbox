@@ -125,58 +125,68 @@
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
-			<div id="{$toolbox_ID}-time-slider"/>
-			<input id="{$toolbox_ID}-from-date" name="{$toolbox_ID}-from-date" type="text" value=""/>
-			<input id="{$toolbox_ID}-to-date" name="{$toolbox_ID}-to-date" type="text" value=""/>
-			<input id="{$toolbox_ID}-from-date-ISO8601" name="{$toolbox_ID}-from-date-ISO8601" type="text" value=""/>
-			<input id="{$toolbox_ID}-to-date-ISO8601" name="{$toolbox_ID}-to-date-ISO8601" type="text" value=""/>
-			<div id="slider1"/>
-		<div id="{$toolbox_ID}-checkbox" class="toolbox-body">
-			<xsl:variable name="dictionary" select="@*"/>
-			<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}link')/@key">
-				<xsl:variable name="name" select="bhb:short_ns(.)"/>
-				<p class="tag">
-					<xsl:attribute name="data-tagname"><xsl:value-of select="$name"/></xsl:attribute>
-					<xsl:choose>
-						<xsl:when test="$perspective/@*[ name()=$name]='1'">
-							<a onclick="{bhb:query(.,'0')}">&#x2611;</a>
-						</xsl:when>
-						<xsl:otherwise>
-							<a onclick="{bhb:query(.,'1')}">&#x2610;</a>
-						</xsl:otherwise>
-					</xsl:choose>
-					<xsl:choose>
-						<xsl:when test="$dictionary[ name()=$name]">
-							&#160;<xsl:value-of select="$dictionary[ name()=$name]"/>
-						</xsl:when>
-						<xsl:otherwise>
-							<i>&#160;<xsl:value-of select="$name"/></i>
-						</xsl:otherwise>
-					</xsl:choose>
-				</p>
-			</xsl:for-each>
-		</div>
-		<div id="{$toolbox_ID}-input" class="toolbox-body">
-			<table>
-				<xsl:for-each select="bhb:key(
-					'{bhb://the.hypertext.blockchain}from',
-					'{bhb://the.hypertext.blockchain}to'
-					)/@key">
-					<tr><td><xsl:value-of select="bhb:short_ns(.)"/>
-					</td><td>
-						<select id="{local-name()}-history" onchange="{bhb:query(.,'0')}">
-							<xsl:for-each select="$perspective/bhb:solid/bhb:signet">
-								<xsl:apply-templates select="bhb:block(@id)" mode="history">
-									<xsl:with-param name="from" select="$perspective/@bhb:from"/>
-									<xsl:with-param name="to" select="$perspective/@bhb:to"/>
-								</xsl:apply-templates>
-							</xsl:for-each>
-						</select>
-					</td></tr>
+			<div id="{$toolbox_ID}-checkbox" class="toolbox-body">
+				<xsl:variable name="dictionary" select="@*"/>
+				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}link')/@key">
+					<xsl:variable name="name" select="bhb:short_ns(.)"/>
+					<p class="tag">
+						<xsl:attribute name="data-tagname"><xsl:value-of select="$name"/></xsl:attribute>
+						<xsl:choose>
+							<xsl:when test="$perspective/@*[ name()=$name]='1'">
+								<a onclick="{bhb:query(.,'0')}">&#x2611;</a>
+							</xsl:when>
+							<xsl:otherwise>
+								<a onclick="{bhb:query(.,'1')}">&#x2610;</a>
+							</xsl:otherwise>
+						</xsl:choose>
+						<xsl:choose>
+							<xsl:when test="$dictionary[ name()=$name]">
+								&#160;<xsl:value-of select="$dictionary[ name()=$name]"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<i>&#160;<xsl:value-of select="$name"/></i>
+							</xsl:otherwise>
+						</xsl:choose>
+					</p>
 				</xsl:for-each>
-			</table>
+			</div>
+			<div id="{$toolbox_ID}-time-slider"/>
+			<input id="{$toolbox_ID}-from-date" type="hidden" value=""/>
+			<input id="{$toolbox_ID}-to-date" type="hidden" value=""/>
+			<input id="{$toolbox_ID}-from-date-ISO8601" type="hidden" value=""/>
+			<input id="{$toolbox_ID}-to-date-ISO8601" type="hidden" value=""/>
+			<input id="{$toolbox_ID}-from-date-bhb" type="text" value="" onchange="{bhb:query(.,'0')}"/>
+			<input id="{$toolbox_ID}-to-date-bhb" type="text" value="" onchange="{bhb:query(.,'0')}"/>
+			<!--<div id="{$toolbox_ID}-input" class="toolbox-body">
+				<table>
+					<xsl:for-each select="bhb:key(
+						'{bhb://the.hypertext.blockchain}from',
+						'{bhb://the.hypertext.blockchain}to'
+						)/@key">
+						<tr><td><xsl:value-of select="bhb:short_ns(.)"/>
+						</td><td>
+							<select id="{local-name()}-history" onchange="{bhb:query(.,'0')}">
+								<xsl:for-each select="$perspective/bhb:solid/bhb:signet">
+									<xsl:apply-templates select="bhb:block(@id)" mode="history">
+										<xsl:with-param name="from" select="$perspective/@bhb:from"/>
+										<xsl:with-param name="to" select="$perspective/@bhb:to"/>
+									</xsl:apply-templates>
+								</xsl:for-each>
+							</select>
+						</td></tr>
+					</xsl:for-each>
+				</table>
+			</div>-->
+			<ol style="display:none">
+				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from')/@key">
+					<xsl:for-each select="$perspective/bhb:solid/bhb:signet">
+						<xsl:apply-templates select="bhb:block(@id)" mode="history-ol">
+							<xsl:with-param name="toolbox_ID" select="$toolbox_ID"/>
+						</xsl:apply-templates>
+					</xsl:for-each>
+				</xsl:for-each>
+			</ol>
 		</div>
-	</div>
 	</div>
 </xsl:template>
 
@@ -190,6 +200,11 @@
 	<option value="{@on:clock}">
 		<xsl:value-of select="@on:clock"/>
 	</option>
+</xsl:template>
+
+<xsl:template match="bhb:block" mode="history-ol">
+		<xsl:param name="toolbox_ID"/>
+		<li class="{$toolbox_ID}-history-date"><xsl:value-of select="@on:clock"/></li>
 </xsl:template>
 
 <xsl:template name="amendment">
