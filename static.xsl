@@ -151,12 +151,10 @@
 				</xsl:for-each>
 			</div>
 			<div id="{$toolbox_ID}-time-slider"/>
-			<input id="{$toolbox_ID}-from-date" type="hidden" value=""/>
-			<input id="{$toolbox_ID}-to-date" type="hidden" value=""/>
 			<input id="{$toolbox_ID}-from-date-ISO8601" type="hidden" value=""/>
 			<input id="{$toolbox_ID}-to-date-ISO8601" type="hidden" value=""/>
-			<input id="{$toolbox_ID}-from-date-bhb" type="text" value="" onchange="{bhb:query(.,'0')}"/>
-			<input id="{$toolbox_ID}-to-date-bhb" type="text" value="" onchange="{bhb:query(.,'0')}"/>
+			<input id="{$toolbox_ID}-from-date-bhb" type="hidden" value="" onchange="{bhb:query(.,'0')}"/>
+			<input id="{$toolbox_ID}-to-date-bhb" type="hidden" value="" onchange="{bhb:query(.,'0')}"/>
 			<!--<div id="{$toolbox_ID}-input" class="toolbox-body">
 				<table>
 					<xsl:for-each select="bhb:key(

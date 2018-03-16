@@ -31,7 +31,7 @@
 .sel-range{
   stroke: #9CCC65;
   stroke-width: 3px;
-  cursor: crosshair;
+  cursor: grab;
 }
 
 .sel-range:active{
@@ -42,13 +42,14 @@
 .handle {
   fill: #9CCC65;
   stroke: none;
-  cursor: crosshair;
+  cursor: grab;
 }
 .handle:hover{
 	fill: #B2EBF2;
 }
 .handle.active {
   fill: tomato;
+  cursor: grabbing;
 }
 circle.handle-label {
   fill: tomato;
@@ -62,5 +63,6 @@ polygon.handle-label {
 }
 text.handle-label {
   font-size: .6rem;
-  color:black;
+  font-weight: bold;
+  fill:black;
 }
