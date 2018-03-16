@@ -116,7 +116,45 @@
 </xsl:template>
 
 <!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	   N O D E   T R A N S C R I P T I O N
+	   J A V A S C R I P T   I N T E R F A C E
+     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
+
+<xsl:template name="placeholder">
+	<div id="placeholder" class="render-scene">
+		<xsl:variable name="js">
+			<xsl:apply-templates mode="root"/>
+		</xsl:variable>
+		<xsl:processing-instruction name="js">
+			<xsl:text>data=[</xsl:text>
+			<xsl:value-of select="normalize-space($js)"/>
+			<xsl:text>];</xsl:text>
+			<xsl:text>
+				function wait4loader() {
+				    if (typeof initLoader != 'undefined') {
+				        initLoader();
+				    }
+				    else {
+				        setTimeout(wait4loader, 50);
+				    }
+				}
+				function wait4render() {
+				    if (typeof d3 != 'undefined' || typeof render != 'undefined') {
+							closeLoader();
+							render(data);
+				    }
+				    else {
+				        setTimeout(wait4render, 1000);
+				    }
+				}
+				wait4loader();
+				wait4render();
+			 </xsl:text>
+		</xsl:processing-instruction>
+	</div>
+</xsl:template>
+
+<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+	   M O D A L   M A C H I N E R Y
      = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 
 <xsl:template match="*" mode="info">
@@ -126,71 +164,34 @@
 	<xsl:apply-templates select="@*" mode="info"/>
 	}
 </xsl:template>
-
 <xsl:template match="@*" mode="info">
 	"<xsl:value-of select="translate(name(),':','_')"/>": "<xsl:value-of select="."/>",
 </xsl:template>
 
-<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	   M O D A L   M A C H I N E R Y
-     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
-
-	<xsl:template name="matrix-line">
-		<xsl:param name="point"/>
-		<xsl:param name="path"/>
-		<xsl:param name="order"/>
-		<xsl:param name="next"/>
-		<xsl:param name="peer"/>
-		<xsl:param name="info"/>
+<xsl:template name="matrix-line">
+	<xsl:param name="point"/>
+	<xsl:param name="path"/>
+	<xsl:param name="order"/>
+	<xsl:param name="next"/>
+	<xsl:param name="peer"/>
+	<xsl:param name="info"/>
 {"point":"<xsl:value-of select="$point"/>",
 "path":"<xsl:value-of select="$path"/>",
 "order":"<xsl:value-of select="$order"/>",
 "next":"<xsl:value-of select="$next"/>",
 "peer":"<xsl:value-of select="$peer"/>",
 "info":<xsl:value-of select="$info"/>,},
-	</xsl:template>
+</xsl:template>
 
-	<xsl:template name="placeholder">
-		<div id="placeholder" class="render-scene">
-			<xsl:variable name="js">
-				<xsl:apply-templates mode="root"/>
-			</xsl:variable>
-			<xsl:processing-instruction name="js">
-				<xsl:text>data=[</xsl:text>
-				<xsl:value-of select="normalize-space($js)"/>
-				<xsl:text>];</xsl:text>
-				<xsl:text>
-					function wait4loader() {
-					    if (typeof initLoader != 'undefined') {
-					        initLoader();
-					    }
-					    else {
-					        setTimeout(wait4loader, 50);
-					    }
-					}
-					function wait4render() {
-					    if (typeof d3 != 'undefined' || typeof render != 'undefined') {
-								closeLoader();
-								render(data);
-					    }
-					    else {
-					        setTimeout(wait4render, 1000);
-					    }
-					}
-					wait4loader();
-					wait4render();
-				 </xsl:text>
-			</xsl:processing-instruction>
-		</div>
-	</xsl:template>
-
-<xsl:template match="*[not( self::bhb:source)][not( self::bhb:link)]" mode="root">
-	<!-- noeud racine est en omega -->
+<xsl:template match="*[not( self::bhb:*)]" mode="root">
+	<!-- noeud racine est en omega, tous ces fils sont sphériques -->
 	<xsl:variable name="bottom">
 		<xsl:apply-templates select="." mode="bottom-alpha"/>
 	</xsl:variable>
 	<xsl:call-template name="matrix-line">
 		<xsl:with-param name="point" select="$bottom"/>
+		<xsl:with-param name="path" select="@on:id"/>
+		<xsl:with-param name="order">push</xsl:with-param>
 		<xsl:with-param name="next">
 			<xsl:choose>
 				<xsl:when test="child::*">
