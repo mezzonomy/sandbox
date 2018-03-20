@@ -74,6 +74,40 @@ var simulateOnchange = function (elem) {
 	var canceled = !elem.dispatchEvent(evt);
 };
 
+function openModal (_text, _title, _style){
+var universe = document.getElementById('universe');
+var modal =
+  '<div id="modal-js-generated" class="modal show" tabindex="-1" role="dialog"> \
+    <div class="modal-dialog" tabindex="-1" role="document"> \
+      <div class="modal-content"> \
+        <div class="modal-header"> \
+          <h5 class="modal-title"> \
+            <h1>'
++ _title +
+            '</h1> \
+          </h5> \
+          <button type="button" class="close" onclick="removeModal();">  \
+      		  <span>&#215;</span> \
+      		</button> \
+        </div> \
+        <div class="modal-body">'
++ _text +
+        '</div> \
+        <div class="modal-footer"> \
+        </div> \
+      </div> \
+    </div> \
+  </div>';
+  universe.insertAdjacentHTML('beforeend', modal);
+}
+
+function removeModal (){
+  var modal = document.getElementById("modal-js-generated");
+  modal.parentNode.removeChild(modal);
+  return false;
+}
+
+
 /**
  * complete amendment for xml wellformedness
  * and send validation code

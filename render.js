@@ -15,8 +15,10 @@ const SCENE_COLOR = "none",
 			AMEND_EDITZONE_ID = "amendment-editzone",
 			AMEND_TEMPLATE_T_X = "<bhb:link push='$ID'>\nINSERT XML\n</bhb:link>",
 			AMEND_TEMPLATE_B_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>",
-			TEXT_TOOLBOX_ID = "text",
-			TEXT_EDITZONE_ID = "text-editzone";
+			TEXT_TOOLBOX_ID = "text";
+
+const BHB_QUERY_POSITION = 	"_snd({bhb:'query', ['{bhb://the.hypertext.blockchain}position']:'$ID'})";
+
 
 var scene, //d3 object select scene
 		svgScene, //dom object byid scene
@@ -634,7 +636,7 @@ function render(data){
 		}
 
 		/* Reselect the Edited point if any*/
-		if (document.getElementById(TEXT_EDITZONE_ID).value) {
+		if (document.getElementById(TEXT_TOOLBOX_ID + "-point").value) {
 			var ptId = document.getElementById(TEXT_TOOLBOX_ID + "-point").value;
 			var vtxId = "gvertex_" + d3.select("#" + ptId).datum().hc;
 			simulateClick(document.getElementById(vtxId));
@@ -934,13 +936,13 @@ function selectVertex(_vertex){
  */
 function selectPoint(_pt) {
 	pt = d3.select("#" + _pt).datum();
-	console.log("click on point ",pt.point, ": ", pt);
 	// populates hidden inputs for dummy navbar
 	document.getElementById(TEXT_TOOLBOX_ID + "-point").value = pt.point;
 	document.getElementById(TEXT_TOOLBOX_ID + "-next").value = pt.next;
 	document.getElementById(TEXT_TOOLBOX_ID + "-peer").value = pt.peer;
 	var ptbefore = d3.selectAll(".point").filter(function(s){return s.next == pt.point;}).datum();
 	document.getElementById(TEXT_TOOLBOX_ID + "-before").value = ptbefore.point;
+	console.log("click on point ",pt.point,text_readInfo(pt), ": ", pt);
 	text_nav(pt);
 	// reinit prevously selected point
 	d3.selectAll(".viewed").classed("viewed",false);
@@ -955,7 +957,6 @@ function selectPoint(_pt) {
 	if (!d3.select("#" + TEXT_TOOLBOX_ID).classed("opened")) {
 		d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
 	}
-	document.getElementById(TEXT_EDITZONE_ID).value = text_readInfo(pt);
 	var selectedEdge = d3.selectAll("path.edges").filter(function(l){return (l.point == pt.point || l.peer == pt.point);});
 	// select Point, Edge and style them it with the wiev marker
 	d3.select("#" + pt.point).classed("viewed",true);
@@ -967,6 +968,8 @@ function selectPoint(_pt) {
 		selectedEdge.classed("end", true);
 		selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
 	}
+	//send bhb query position
+	//eval(BHB_QUERY_POSITION.replace("$ID", pt.point));
 	return Object.assign(pt, {topology:selectedEdge.datum().topology});
 }
 
@@ -978,12 +981,6 @@ function selectPoint(_pt) {
  */
 function text_readInfo(_datum){
 	var output = "";
-  // Add point info :
-	output += "Point: " + document.getElementById(TEXT_TOOLBOX_ID + "-point").value + "\r\n";
-	output += "Before: " + document.getElementById(TEXT_TOOLBOX_ID + "-before").value + "\r\n";
-	output += "Peer: " + document.getElementById(TEXT_TOOLBOX_ID + "-peer").value + "\r\n";
-	output += "Next: " + document.getElementById(TEXT_TOOLBOX_ID + "-next").value + "\r\n";
-	output += "\r\n";
 	// tag value
 	var info=_datum.info;
 	var t = Object.entries(info);
@@ -1077,7 +1074,7 @@ function text_nav(_datum){
 	.attr("title", "unselect")
 	.on("click", function(d) {
 		d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", false).classed("closed", true);
-		document.getElementById(TEXT_EDITZONE_ID).value = null;
+		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = null;
 		d3.selectAll(".viewed").classed("viewed",false);
 		if (!edgesColored) {
 			d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);

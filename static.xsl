@@ -153,26 +153,6 @@
 			<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from', '{bhb://the.hypertext.blockchain}to')/@key">
 				<input id="{$toolbox_ID}-{translate(bhb:short_ns(.),':','-')}" type="hidden" value="" onchange="{bhb:query(.,'0')}"/>
 			</xsl:for-each>
-			<!--<div id="{$toolbox_ID}-input" class="toolbox-body">
-				<table>
-					<xsl:for-each select="bhb:key(
-						'{bhb://the.hypertext.blockchain}from',
-						'{bhb://the.hypertext.blockchain}to'
-						)/@key">
-						<tr><td><xsl:value-of select="bhb:short_ns(.)"/>
-						</td><td>
-							<select id="{local-name()}-history" onchange="{bhb:query(.,'0')}">
-								<xsl:for-each select="$perspective/bhb:solid/bhb:signet">
-									<xsl:apply-templates select="bhb:block(@id)" mode="history">
-										<xsl:with-param name="from" select="$perspective/@bhb:from"/>
-										<xsl:with-param name="to" select="$perspective/@bhb:to"/>
-									</xsl:apply-templates>
-								</xsl:for-each>
-							</select>
-						</td></tr>
-					</xsl:for-each>
-				</table>
-			</div>-->
 			<ol style="display:none">
 				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from')/@key">
 					<xsl:for-each select="$perspective/bhb:solid/bhb:signet">
@@ -244,28 +224,23 @@
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
 			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
-				<!--this.parentNode-->
+				<h6>Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;" onclick="openModal(document.getElementById('{$toolbox_ID}-bhb-content').innerHTML,'Content','','{$toolbox_ID}-modal-text');">
+				<span>&#8599;</span>
+				</button>
+				</h6>
+				<div id="{$toolbox_ID}-bhb-content" class="content-xml">
+					<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
+				</div>
+				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}position')/@key">
+					<xsl:variable name="oracle">$ID</xsl:variable>
+					<span id="{$toolbox_ID}-bhb-position-querystring" data-bhb-querystring="{bhb:query(., $oracle)}"/>
+				</xsl:for-each>
 				<div id="{$toolbox_ID}-pointnavtool">
-					<!--this.parentNode.children[0]-->
-					<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value="">
-						<!--this.parentNode.children[0].children[0]-->
-						<!--@value set by render.js javascript -->
-					</input>
+					<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-next" name="{$toolbox_ID}-next" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-peer" name="{$toolbox_ID}-peer" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-before" name="{$toolbox_ID}-before" type="hidden" value=""/>
 				</div>
-				<label for="{$toolbox_ID}-editzone">Content</label>
-				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="7" class="form-control" placeholder="Please select a point on a vertex to see content" spellcheck="false"/>
-				<div>
-					<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
-				</div>
-				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}position')/@key">
-					<xsl:variable name="oracle">[this.parentNode.children[0].children[0].value]</xsl:variable>
-					<input id="{$toolbox_ID}-button" type="button" text="XML" onclick="{bhb:query(., $oracle)}">
-						<!--this-->
-					</input>
-				</xsl:for-each>
 			</form>
 		</div>
 	</div>
