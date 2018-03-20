@@ -67,7 +67,7 @@
 			<xsl:variable name="top" select="*"/>
 			<xsl:variable name="inner" select="*/descendant::*"/>
 			<div>
-				<div>Bases</div>
+				<div><h6>Bases</h6></div>
 				<xsl:variable name="spheric" select="*"/>
 				<xsl:for-each select="bhb:unique($top)/@key">
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
@@ -81,7 +81,7 @@
 				</xsl:for-each>
 			</div>
 			<div>
-				<div>Déployés</div>
+				<div><h6>Déployés<i class="small">&#160;(Cliquer pour compresser)</i></h6></div>
 				<xsl:for-each select="bhb:unique($inner)/@key">
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
 					<xsl:if test="$perspective/@*[ name()=$name]='1'">
@@ -96,7 +96,7 @@
 				</xsl:for-each>
 			</div>
 			<div>
-				<div>Compressés</div>
+				<div><h6>Compressés<i class="small">&#160;(Cliquer pour déployer)</i></h6></div>
 				<xsl:for-each select="bhb:unique(*/descendant::*)/@key">
 					<xsl:variable name="name" select="bhb:short_ns(.)"/>
 					<xsl:if test="not($perspective/@*[ name()=$name]='1')">
@@ -150,10 +150,9 @@
 				</xsl:for-each>
 			</div>
 			<div id="{$toolbox_ID}-time-slider"/>
-			<input id="{$toolbox_ID}-from-date-ISO8601" type="hidden" value=""/>
-			<input id="{$toolbox_ID}-to-date-ISO8601" type="hidden" value=""/>
-			<input id="{$toolbox_ID}-from-date-bhb" type="hidden" value="" onchange="{bhb:query(.,'0')}"/>
-			<input id="{$toolbox_ID}-to-date-bhb" type="hidden" value="" onchange="{bhb:query(.,'0')}"/>
+			<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from', '{bhb://the.hypertext.blockchain}to')/@key">
+				<input id="{$toolbox_ID}-{translate(bhb:short_ns(.),':','-')}" type="hidden" value="" onchange="{bhb:query(.,'0')}"/>
+			</xsl:for-each>
 			<!--<div id="{$toolbox_ID}-input" class="toolbox-body">
 				<table>
 					<xsl:for-each select="bhb:key(
@@ -227,7 +226,7 @@
 					<xsl:attribute name="value"><xsl:value-of select="$role"/></xsl:attribute>
 				</input>
 				<label for="{$toolbox_ID}-editzone">Edit Amendment</label>
-				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="10" class="form-control" placeholder="Please drop a vertex arc here to create a new amendment" spellcheck="false" required="required" oninput="validateAmendment('{$toolbox_ID}-editzone')" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
+				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="7" class="form-control" placeholder="Please drop a vertex arc here to create a new amendment" spellcheck="false" required="required" oninput="validateAmendment('{$toolbox_ID}-editzone')" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
 				<div id="{$toolbox_ID}-editinfo" class="alert"/>
 				<!--<button type="button" id="amendment-checkbtn" name="amendment-checkbtn" class="btn btn-info left" onclick="validateAmendment('amendment-editzone')">check</button>-->
 				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">validate</button>
@@ -252,7 +251,7 @@
 					<input id="{$toolbox_ID}-before" name="{$toolbox_ID}-before" type="hidden" value=""/>
 				</div>
 				<label for="{$toolbox_ID}-editzone">Content</label>
-				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="10" class="form-control" placeholder="Please select a point on a vertex to see content" spellcheck="false"/>
+				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="7" class="form-control" placeholder="Please select a point on a vertex to see content" spellcheck="false"/>
 				<div>
 					<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
 				</div>

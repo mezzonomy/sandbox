@@ -5,7 +5,7 @@
  */
 
 const SCENE_COLOR = "none",
-			POINT_RADIUS = +1,
+			POINT_RADIUS = +0,
 			VERTEX_RADIUS = +30,
 			VERTEX_RADIUS_M = 10, //The vertex radius is multiplied by ((this ratio) * sqrt(point number))
 			VERTEX_COMPUTATION_MAX_ITERATION = 100, // Limits the vertex computation iterations
@@ -68,6 +68,7 @@ function arcDragStarted(d) {
 	d3.select("#" + AMEND_EDITZONE_ID).attr("placeholder","drag the selected arc here to amend it !");
 	d3.select(this).classed("dragging",true)
 	d3.select("#" + AMEND_EDITZONE_ID).classed("targeted", true);
+	selectPoint(d.point);
 	// TODO: fix adding dataTransfert API to drag/drop outside the browser
 	//console.log("arcDragStarted started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
@@ -121,6 +122,11 @@ function arcDragEnded(d) {
  */
 
 function render(data){
+	// ******************************************************
+	// Toolbox init
+	// ******************************************************
+	init_timeRangeSlider();
+
 	// ******************************************************
 	// Scene definition
 	// ******************************************************
@@ -675,10 +681,10 @@ function render(data){
 
 				//console.log("ticks done : ", Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay())));
 				//console.log("Total ticks number : ", Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay())));
-
-				if (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50 == 0) { //save positionning every 50 ticks
+				//TODO : fix : OK at first iteration KO after dragging
+				//if (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50 == 0) { //save positionning every 50 ticks
 					storeLocalVertexPositionning(verticesbyHc); //store last vertex position and rotation
-				}
+				//}
 			}
 			catch(error) {
 			//console.log("shadow tick !");
@@ -897,6 +903,7 @@ function selectVertex(_vertex){
 	}
 	arc.call(d3.drag() //add edit arc listener
 				.filter(function(d){return !this.classList.contains("notdisplayed");}) //not fired if arc is not displayed (removing the handler is buggy)
+				.clickDistance(10)
 				.on("start", arcDragStarted)
 				.on("drag", arcDragged)
 				.on("end", arcDragEnded));
@@ -1235,6 +1242,7 @@ function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
  * @returns {-} - Stores positionning as a json string in nav's localStorage
  */
 function storeLocalVertexPositionning(_verticesbyHc){
+	//console.log("store positionning");
 	var tf_vtx, tf_vtxRt;
 	var vtxLastPosbyPt = d3.map(vertexLastPosition, function(d) {return d.oPt});
 	_verticesbyHc.each(function (d) {

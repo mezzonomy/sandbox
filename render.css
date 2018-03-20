@@ -41,11 +41,11 @@ svg#scene {
 	pointer-events: none;
 }
 .point-displayed {
-	fill: red;
-	stroke-width: 2px;
-	stroke: red;
-	cursor: pointer;
-	pointer-events: auto;
+	fill: none;
+	stroke-width: 0px;
+	stroke: none;
+	/*cursor: pointer;
+	pointer-events: auto;*/
 }
 .point-displayed:hover {
 	fill: darkred;

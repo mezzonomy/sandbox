@@ -5,65 +5,68 @@
  */
 
 // Time formaters & parsers
+
+const bhb_date_format = "%Y-%m-%dT%H:%M:%SZ"
 var formatDate = d3.timeFormat("%a %_d %b %Y");
 var formatDateP1 = d3.timeFormat("%a %_d");
-var formatDateP2 = d3.timeFormat("%b %y");
+var formatDateP2 = d3.timeFormat("%b %Y");
 var formatDateP3 = d3.timeFormat("%H:%M");
 var formatDateP = d3.timeFormat("%a %_d %b %y %H:%M:%S")
 var formatDateMonth = d3.timeFormat("%b %Y");
-var formatDateBhb = d3.timeFormat("%Y%m%d:%H%M%S");
-var parseDateBhb = d3.timeParse("%Y%m%d:%H%M%S");
+var formatDateBhb = d3.timeFormat(bhb_date_format);
+var parseDateBhb = d3.timeParse(bhb_date_format);
 
-// Construct time array
-var historyDates=[];
-d3.selectAll(".explorer-history-date").each(function() {historyDates.push({date:parseDateBhb(this.innerText)});});
 
-// Render the slider
-// 1. domain
-var minDate = new Date(historyDates[0].date);
-var maxDate = Date.now();
-// 2. sliders
-var startDate = minDate;
-var endDate = new Date(historyDates[historyDates.length -1].date);
-// 3. render the slider
-timeRangeSlider(startDate, endDate, minDate, maxDate, updateDates, "explorer-time-slider");
-
+function init_timeRangeSlider() {
+  //delete previous slider
+  d3.select("#explorer-time-slider").select("svg").remove();
+  // Construct time array
+  var historyDates=[];
+  d3.selectAll(".explorer-history-date").each(function() {historyDates.push({date:parseDateBhb(this.innerText)});});
+  if (historyDates.length > 0) { // Case no evts
+    // Render the slider
+    // 1. domain
+    var minDate = new Date(historyDates[0].date);
+    var maxDate = Date.now();
+    // 2. sliders
+    var startDate = minDate;
+    var endDate = new Date(historyDates[historyDates.length -1].date);
+    // 3. render the slider
+    var divId = "explorer-time-slider";
+    var width = document.getElementById(divId).parentNode.parentNode.clientWidth - 10;
+    timeRangeSlider(historyDates, startDate, endDate, minDate, maxDate, updateDates, divId, width);
+  }
+}
 /**
  * Function to update the explorer toolbox from a time range slider
- * @param _d1 {string}  from date format
- * @param _d2 {string}  to date format
- * @param _dmin {string}  Minimum range value to date format
- * @param _dmax {string}  Maximum range value to date format
- * @param _action
- * @param _divId
- * @returns {nothing} draw a slider
+ * @param _from {string}  from date format
+ * @param _to {string}  to date format
+ * @returns {nothing} updates bhb
  */
 function updateDates(_from, _to){
    var from= new Date(_from);
    var to=new Date(_to);
-   document.getElementById("explorer-from-date-ISO8601").value=from.toISOString();
-   document.getElementById("explorer-to-date-ISO8601").value=to.toISOString();
-   document.getElementById("explorer-from-date-bhb").value=formatDateBhb(from);
-   document.getElementById("explorer-to-date-bhb").value=formatDateBhb(to);
-   //document.getElementById("explorer-from-date-bhb").onchange() // TODO : does not fire
-   //eval(document.getElementById("explorer-from-date-bhb").attributes.onchange.value);
-   //TODO : refresh data
-   simulateOnchange(document.getElementById("explorer-from-date-bhb"));
+   document.getElementById("explorer-bhb-from").value=formatDateBhb(from);
+   document.getElementById("explorer-bhb-to").value=formatDateBhb(to);
+   simulateOnchange(document.getElementById("explorer-bhb-from"));
+   simulateOnchange(document.getElementById("explorer-bhb-to"));
 }
 
  /**
   * Function to setup a dual range slider
+  * @param _evts {array}  array of {dates}
   * @param _d1 {string}  from date format
   * @param _d2 {string}  to date format
   * @param _dmin {string}  Minimum range value to date format
   * @param _dmax {string}  Maximum range value to date format
-  * @param _action
-  * @param _divId
+  * @param _action {string}  function on update
+  * @param _divId {string}  DOM Id of the container
+  * @param _width {number}  width of the placeholder to draw the slider slider
   * @returns {nothing} draw a slider
   */
-function timeRangeSlider(_d1, _d2, _dmin, _dmax, _action, _divId){
+function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width){
   var sliderVals=[_d1, _d2];
-  var width = 140; // TODO:fix width = document.getElementById(_divId).clientWidth,
+  var width = _width - 60;
 
   var x = d3.scaleTime()
   .domain([_dmin, _dmax])
@@ -88,34 +91,16 @@ function timeRangeSlider(_d1, _d2, _dmin, _dmax, _action, _divId){
   .attr("x1", x.range()[0])
   .attr("x2", x.range()[1]);
 
-  /*slider.insert("g", ".track-overlay")
-  .attr("class", "ticks")
-  .attr("transform", "translate(10,24)")
-  .selectAll("text")
-  .data(x.ticks(3))
-    .enter().append("text")
-    .attr("x", x)
-    .attr("y", -10)
-    .attr("text-anchor", "middle")
-    .attr("class", "ticks")
-    .text(function(d) { return formatDateMonth(d); });*/
-
-  var ghandle = slider.selectAll("g.handle")
+  var ghandle = slider.selectAll("g.ghandle")
   .data([0, 1])
   .enter().append("g")
-  .attr("class", "handle")
+  .attr("class", "ghandle")
   .attr("transform", function(d) {return "translate(" + x(sliderVals[d])+ ",0)"})
   .call(d3.drag()
     .on("start", startDragHandle)
     .on("drag", dragHandle)
     .on("end", endDragHandle)
   );
-
-  ghandle.append("circle")
-  .attr("class", "track-overlay handle")
-  .attr("cy", 0)
-  .attr("cx", 0)
-  .attr("r", 5);
 
   ghandle.append("circle")
   .attr("class", "handle-label")
@@ -146,7 +131,7 @@ function timeRangeSlider(_d1, _d2, _dmin, _dmax, _action, _divId){
 
   ghandle.append("polygon")
   .attr("class", "handle-label")
-  .attr("points", function(d) {return (x(sliderVals[d])) + ",-5 " + (x(sliderVals[d]) -5) + ",-10 " + (x(sliderVals[d]) +5) + ",-10";});
+  .attr("points", "0,-5 -5,-10 5,-10");
 
   var selRange = slider.append("line")
   .attr("class", "sel-range")
@@ -166,7 +151,7 @@ function timeRangeSlider(_d1, _d2, _dmin, _dmax, _action, _divId){
   .attr("transform", "translate(0,-65)");
 
   gevts.selectAll(".evts")
-  .data(historyDates, function(d){return d.date})
+  .data(_evts, function(d){return d.date})
   .enter()
   .append("circle")
   .attr("class", "evts")
@@ -174,17 +159,17 @@ function timeRangeSlider(_d1, _d2, _dmin, _dmax, _action, _divId){
   .attr("cx", function(d){return x(d.date);})
   .append("title").text(function(d){return formatDateP(d.date);});
 
+  // select an history date
   slider.selectAll(".evts").on("click", function(d){
     var ptx = +d3.select(this).attr("cx");
-    var date = d3.select(this).datum().date;
-    slider.selectAll("g.handle").attr("transform", "translate(" + ptx +",0)");
+    var date = d.date;
+    slider.selectAll("g.ghandle").attr("transform", "translate(" + ptx +",0)");
     slider.select("line.sel-range").attr("x1", ptx).attr("x2", ptx);
     sliderVals = [date, date];
     _action(date,date);
   });
 
   function startDragHandle(d){
-    d3.event.sourceEvent.stopPropagation();
     d3.select(this).raise().classed("active", true);
   }
 
@@ -213,7 +198,7 @@ function timeRangeSlider(_d1, _d2, _dmin, _dmax, _action, _divId){
   }
 
   function startDragRange(){
-  d3.select(this).classed("active", true);
+  d3.select(this).raise().classed("active", true);
   }
 
   function dragRange(){
@@ -237,7 +222,9 @@ function timeRangeSlider(_d1, _d2, _dmin, _dmax, _action, _divId){
   var elt=d3.select(this);
   var v1=Math.min(vx1, vx2);
   var v2=Math.max(vx1, vx2);
+  ghandle.attr("transform", function(d,i){return "translate(" + (i==0?ox1:ox2) + ",0)";});
   elt.classed("active", false);
+  sliderVals = [v1, v2];
   _action(v1,v2);
   }
 }

@@ -1,36 +1,3 @@
-body {
-	margin: 0;
-	font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-	font-size: 1rem;
-	font-weight: 400;
-}
-
-p {
-	margin-top: 0;
-	margin-bottom: 1rem;
-}
-
-.left {
-	float: left;
-}
-
-.right {
-	float: right;
-}
-
-#sign {
-	color: #fff;
-	font: 14px;
-	line-height: 1.45em;
-	text-shadow: 0 1px 2px rgba(34,0,1,0.6);
-	height: 180px;
-	width: 180px;
-	position:fixed;
-	top:35px;
-	left:240px;
-	z-index: 4;
-}
-
 #popup {
 	color: #fff;
 	font: 14px "Bree Rg",sans-serif;
@@ -46,6 +13,97 @@ p {
 	z-index: 4;
 }
 
+
+body {
+	margin: 0;
+	font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.5;
+  text-align: left;
+  background-color: #fff; /*hint: bg color*/
+}
+
+.left {
+	float: left;
+}
+
+.right {
+	float: right;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    margin-bottom: .5rem;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.2;
+    color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    margin-bottom: .5rem;
+}
+.h1, h1 {
+    font-size: 2.5rem;
+}
+.h2, h2 {
+    font-size: 2rem;
+}
+.h3, h3 {
+    font-size: 1.75rem;
+}
+.h4, h4 {
+    font-size: 1.5rem;
+}
+.h5, h5 {
+    font-size: 1.25rem;
+}
+.h6, h6 {
+    font-size: 1rem;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+i, cite, em, var, address, dfn {
+    font-style: italic;
+}
+.small, small {
+    font-size: 60%;
+    font-weight: 200;
+}
+.text-muted {
+    color: #6c757d!important;
+}
+.mb-2, .my-2 {
+    margin-bottom: .5rem!important;
+}
+.flex-row {
+    -webkit-box-orient: horizontal!important;
+    -webkit-box-direction: normal!important;
+    -ms-flex-direction: row!important;
+    flex-direction: row!important;
+}
+.flex-column {
+    -webkit-box-orient: vertical!important;
+    -webkit-box-direction: normal!important;
+    -ms-flex-direction: column!important;
+    flex-direction: column!important;
+}
+
+span.braille-sign {
+	    width: 8.4em;
+	    height: 5.5em;
+	    word-wrap: break-word;
+	    line-height: 1.3;
+	    display: block;
+	    margin-left: 9rem;
+	    background-color: #8bc34a;
+}
+
+
 div.upper-left {
 	position: absolute;
 	top:10px;
@@ -60,7 +118,6 @@ div.upper-right {
 }
 
 div.lower-left {
-	margin:10px;
 	position: absolute;
 	bottom:10px;
 	left:10px;
@@ -127,6 +184,92 @@ div.hidden{
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(33,33,33,.6); /* Black w/ opacity */
+}
+
+@media (min-width: 576px)
+.modal-dialog {
+    max-width: 500px;
+    margin: 1.75rem auto;
+}
+.modal-dialog {
+    margin: 15% auto; /* 15% from the top and centered */
+    max-width: 50%;
+    min-width: 25rem;
+    pointer-events: none;
+}
+.modal-content {
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 100%;
+    pointer-events: auto;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: .3rem;
+    outline: 0;
+}
+.modal-header {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: start;
+    -ms-flex-align: start;
+    align-items: flex-start;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    border-top-left-radius: .3rem;
+    border-top-right-radius: .3rem;
+}
+.modal-body {
+    position: relative;
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    padding: 1rem;
+}
+.modal-footer {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: end;
+    -ms-flex-pack: end;
+    justify-content: flex-end;
+    padding: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+.close:not(:disabled):not(.disabled) {
+    cursor: pointer;
+}
+.modal-header .close {
+    padding: 1rem;
+    margin: -1rem -1rem -1rem auto;
+}
+button.close {
+    padding: 0;
+    background-color: transparent;
+    border: 0;
+    -webkit-appearance: none;
+}
+.close {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .5;
 }
 
 /* divs / toolbox */

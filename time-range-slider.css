@@ -15,7 +15,8 @@
 
 .evts {
   stroke: none;
-  fill: silver;
+  fill: black;
+  opacity:.5;
 }
 
 .track {
@@ -29,7 +30,7 @@
 }
 
 .sel-range{
-  stroke: #9CCC65;
+  stroke: #8BC34B;
   stroke-width: 3px;
   cursor: grab;
 }
@@ -39,8 +40,12 @@
   stroke-width: 4px;
 }
 
+.ghandle {
+  fill: none;
+}
+
 .handle {
-  fill: #9CCC65;
+  fill: #8BC34B;
   stroke: none;
   cursor: grab;
 }
@@ -48,21 +53,21 @@
 	fill: #B2EBF2;
 }
 .handle.active {
-  fill: tomato;
+  fill: black;
   cursor: grabbing;
 }
 circle.handle-label {
-  fill: tomato;
+  fill: black;
   stroke: none;
   opacity: .8;
 }
 polygon.handle-label {
-  fill: tomato;
+  fill: black;
   stroke: none;
   opacity: .8;
 }
 text.handle-label {
   font-size: .6rem;
-  font-weight: bold;
-  fill:black;
+  font-weight: normal;
+  fill:white;
 }
