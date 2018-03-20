@@ -243,6 +243,7 @@ function render(data){
 				//d3.selectAll(".container").remove();
 				unpinVertices();
 				//scene.call(zoom.transform, d3.zoomIdentity);
+				verticesPositionning.alpha(1);
 				verticesPositionning.restart();
 				//mainRender(data);
         return;
@@ -257,15 +258,17 @@ function render(data){
 	}
 	var btnToggleCollide = div_perspective.select("#btn-toggle-collide");
 	if (btnToggleCollide.empty()) {
-		btnstopAnimation = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-collide").attr("value","stop").text("collide:off");
+		btnToggleCollide = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-collide").attr("value","stop").text("collide:off");
 		btnToggleCollide.on("click", function(){
-			if (btnstopAnimation.attr("value") == "stop") {
+			if (btnToggleCollide.attr("value") == "stop") {
 				verticesPositionning.force("collide", null);
-				btnstopAnimation.attr("value","start").text("collide:on");
+				btnToggleCollide.attr("value","start").text("collide:on");
 			} else {
 				verticesPositionning.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;}));
-				btnstopAnimation.attr("value","stop").text("collide:off");
+				btnToggleCollide.attr("value","stop").text("collide:off");
 			}
+			verticesPositionning.alpha(1);
+			verticesPositionning.restart();
 		});
 	}
 	/*var btnEdgesColored = div_perspective.select("#btn-edgesColored");
