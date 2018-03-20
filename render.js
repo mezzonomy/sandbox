@@ -59,7 +59,8 @@ function dragended(d) {
 	d.fx = d.x;
 	d.fy = d.y;
 	d3.select(this).classed("dragging", false);
-	d3.select(this).select(".vertexCircle").classed("pinned", true);
+	pinVertex(this.id);
+	//d3.select(this).select(".vertexCircle").classed("pinned", true);
 	//console.log("VertexDragEvent ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 
@@ -522,7 +523,9 @@ function render(data){
 				d.fx=storedVertex.oX;
 				d.fy=storedVertex.oY;
 				d3.select("#grotate_" + d.hc).attr("data-storedRotation",storedVertex.oRt); // reinitiated by force simulation, hence stored in local dataset replayed in ticks
-				d3.select("#gvertex_"+ d.hc).select(".vertexCircle").classed("pinned", true);
+				pinVertex("gvertex_"+ d.hc);
+				//d3.select("#gvertex_"+ d.hc).select(".vertexCircle").classed("pinned", true);
+				//d3.select("#gvertex_"+ d.hc).append("image").attr("xlink:href", "/sandbox/pinned3.png").attr("x",-25).attr("y",-25).attr("height","50px").attr("width","50px");
 			}
 		})
 	}
@@ -880,38 +883,31 @@ function vertexComputation(QApointsList){
  * @returns nothing (select the vertex)
  */
 function selectVertex(_vertex){
-	unselectVertices(); // 1. unselect all
-	// 2. select current vertex or unpin and unselect
+	// 1. unselect all vertices
+	unselectVertices();
+	// 2. select current vertex
 	var vtx = d3.select(_vertex);
-	var arc = vtx.selectAll(".arc");
-	var edges = d3.selectAll(".edge").filter(function(d){return (d.source.hc == vtx.datum().hc || d.target.hc == vtx.datum().hc);}); // raise the proper external edges
-	var point = vtx.selectAll(".point");
-	vtx.raise();
-	edges.raise();
-	point.raise();
-	if (!vtx.classed("focused")){
+	if (!vtx.classed("focused")) {
+		var arc = vtx.selectAll(".arc");
+		var edges = d3.selectAll(".edge").filter(function(d){return (d.source.hc == vtx.datum().hc || d.target.hc == vtx.datum().hc);}); // raise the proper external edges
+		var point = vtx.selectAll(".point");
+		vtx.raise();
+		edges.raise();
+		//point.raise();
 		vtx.classed("focused", true);
 		arc.classed("notdisplayed", false).classed("draggable", true);
 		point.classed("point-displayed", true);
-	} else {
-		vtx.classed("focused", false);
-		arc.classed("notdisplayed", true);
-		point.classed("point-displayed", false);
-		vtx.fx=null;
-		vtx.fy=null;
-		vtx.classed("pinned", false);
+		arc.call(d3.drag() //add edit arc listener
+					.filter(function(d){return !this.classList.contains("notdisplayed");}) //not fired if arc is not displayed (removing the handler is buggy)
+					.clickDistance(10)
+					.on("start", arcDragStarted)
+					.on("drag", arcDragged)
+					.on("end", arcDragEnded));
+		point.on("click", function(d) {
+			d3.event.stopPropagation();
+			selectPoint(d.point);
+		});
 	}
-	arc.call(d3.drag() //add edit arc listener
-				.filter(function(d){return !this.classList.contains("notdisplayed");}) //not fired if arc is not displayed (removing the handler is buggy)
-				.clickDistance(10)
-				.on("start", arcDragStarted)
-				.on("drag", arcDragged)
-				.on("end", arcDragEnded));
-
-	point.on("click", function(d) {
-		d3.event.stopPropagation();
-		selectPoint(d.point);
-	});
 }
 /**
  * Selects a point and edit it
@@ -1092,6 +1088,20 @@ function unselectVertices(){
 }
 
 /**
+ * unselect a vertex
+ *
+ * @returns nothing (unselect one given vertex)
+ */
+function unselectVertex(_vertex){
+	d3.select("#" + _vertex).selectAll(".focused").classed("focused", false);
+	d3.select("#" + _vertex).selectAll(".arc").classed("notdisplayed", true).classed("draggable", false);
+	d3.select("#" + _vertex).selectAll(".point-displayed").classed("point-displayed", false).on("click", "");
+	d3.select("#" + _vertex).lower();
+	d3.selectAll(".egde").raise(); // raise edges above vortices
+	d3.selectAll(".edgeLbl").raise();
+}
+
+/**
  * unselect & unpin vertices
  *
  * @returns nothing (unselect all vertices and resets fixed position)
@@ -1099,8 +1109,41 @@ function unselectVertices(){
 function unpinVertices(){
 	d3.selectAll(".gvertex").each(function(d){d.fx=null;d.fy=null;});
 	d3.selectAll(".gvertex").select(".vertexCircle").classed("pinned", false);
+	d3.selectAll(".gvertex").selectAll("image").remove();
 	unselectVertices()
 }
+
+/**
+ * pin vertices
+ *
+ * @returns nothing (unselect all vertices and resets fixed position)
+ */
+function pinVertex(_vertex) {
+	d3.select("#" + _vertex).select(".vertexCircle").classed("pinned", true);
+	if (d3.select("#" + _vertex).select("image").empty()) {
+		d3.select("#" + _vertex).append("image")
+		.attr("xlink:href", "/sandbox/pinned3.png")
+		.attr("x",-25).attr("y",-25)
+		.attr("height","50px").attr("width","50px")
+		.on("click", function(d){
+			d3.event.stopPropagation();
+			unpinVertex(this.parentElement.id);});
+	}
+}
+
+/**
+ * unpin a single vertex
+ *
+ * @returns nothing (unselect a vertex)
+ */
+function unpinVertex(_vertex){
+	d3.select("#" + _vertex).each(function(d){d.fx=null;d.fy=null;});
+	d3.select("#" + _vertex).select(".vertexCircle").classed("pinned", false);
+	d3.select("#" + _vertex).select("image").remove();
+	//unselectVertices()
+}
+
+
 
 /*
  * Misc functions & classes
@@ -1111,14 +1154,14 @@ function unpinVertices(){
  * length is 0, returns 0. See website below
  *
  * @see http://erlycoder.com/49/javascript-hash-functions-to-convert-string-into-integer-hash-
- * @param str {string} str - js string value
+ * @param _str {string} str - js string value
  * @returns {integer} hascode - 32bit integer
  */
-function hashCode(str){
+function hashCode(_str){
     var hash = 0;
-    if (str.length == 0) return hash;
-    for (var i=0; i < str.length; i++) {
-        var char = str.charCodeAt(i);
+    if (_str.length == 0) return hash;
+    for (var i=0; i < _str.length; i++) {
+        var char = _str.charCodeAt(i);
         hash = ((hash<<5)-hash)+char;
         hash = hash & hash; // Convert to 32bit integer
     }
@@ -1129,24 +1172,20 @@ function hashCode(str){
  * Prints a Vertex as a string of the points segments or a hash of the value
  * Default is hash
  *
- * @param {object:vertex} -
- *            vertex object as defined in the code : {bp:point, ep:next, pc:1,
- *            hc:"", segments:segments}
- * @param {boolean}
- *            hash - if true returns a hash, otherwise the chain of the points.
- * @returns {chain|integer} chain or hascode - 32bit integer depending of hash
- *          param value
+ * @param {object:vertex} - vertex object as defined in the code : {bp:point, ep:next, pc:1, hc:"", segments:segments}
+ * @param {boolean} - hash - if true returns a hash, otherwise the chain of the points.
+ * @returns {chain|integer} - chain or hascode - 32bit integer depending of hash param value
  */
-function vertexToString(vertex, hash){
-	hash = (typeof hash !== 'undefined') ? hash : true;
+function vertexToString(_vertex, _hash){
+	_hash = (typeof _hash !== 'undefined') ? _hash : true;
 
 	var vertexString=""
-	for (var i=0, n=vertex.segments.length; i<n; i++) {
-		vertexString += "bp:" + vertex.segments[i].point;
-		vertexString += "ep:" + vertex.segments[i].next;
-		vertexString += "pp:" + vertex.segments[i].peer;
+	for (var i=0, n=_vertex.segments.length; i<n; i++) {
+		vertexString += "bp:" + _vertex.segments[i].point;
+		vertexString += "ep:" + _vertex.segments[i].next;
+		vertexString += "pp:" + _vertex.segments[i].peer;
 	}
-	if (hash) {
+	if (_hash) {
 		return hashCode(vertexString);
 	} else {
 		return vertexString;
@@ -1304,7 +1343,7 @@ function qa_vertices_forces(edges, vertices) {
 	//.alpha(def_alpha)
 		.nodes(vertices)
 		.force("center", d3.forceCenter(xc,yc)) // force toward the center
-		.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * -10;}))  // Nodes attracting or reppelling each others (negative = repelling)
+		.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}))  // Nodes attracting or reppelling each others (negative = repelling)
 		.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;})) // collision detection
 		.force("link", qa_linkPoints().links(edges).distance(function(d){return (d.source.radius + d.target.radius) * 2;}).id(function(d) {return d.id;})) // customized force
 		;

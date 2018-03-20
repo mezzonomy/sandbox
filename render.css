@@ -30,8 +30,8 @@ svg#scene {
 }
 
 .pinned {
-  stroke-width: 2px;
-  stroke: black;
+  /*stroke-width: 2px;
+  stroke: black;*/
 }
 
 .point {
