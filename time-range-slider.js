@@ -11,14 +11,14 @@ var formatDate, formatDateP1, formatDateP2, formatDateP3, formatDateP, formatDat
 
 
 function init_timeRangeSlider() {
-  var formatDate = d3.timeFormat("%a %_d %b %Y");
-  var formatDateP1 = d3.timeFormat("%a %_d");
-  var formatDateP2 = d3.timeFormat("%b %Y");
-  var formatDateP3 = d3.timeFormat("%H:%M");
-  var formatDateP = d3.timeFormat("%a %_d %b %y %H:%M:%S")
-  var formatDateMonth = d3.timeFormat("%b %Y");
-  var formatDateBhb = d3.timeFormat(bhb_date_format);
-  var parseDateBhb = d3.timeParse(bhb_date_format);
+  formatDate = d3.timeFormat("%a %_d %b %Y");
+  formatDateP1 = d3.timeFormat("%a %_d");
+  formatDateP2 = d3.timeFormat("%b %Y");
+  formatDateP3 = d3.timeFormat("%H:%M");
+  formatDateP = d3.timeFormat("%a %_d %b %y %H:%M:%S")
+  formatDateMonth = d3.timeFormat("%b %Y");
+  formatDateBhb = d3.timeFormat(bhb_date_format);
+  parseDateBhb = d3.timeParse(bhb_date_format);
   //delete previous slider
   d3.select("#explorer-time-slider").select("svg").remove();
   // Construct time array
