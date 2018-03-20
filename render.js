@@ -253,7 +253,20 @@ function render(data){
 		btnstopAnimation = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-stop-animation").attr("value","stop").text("freeze");
 		btnstopAnimation.on("click", function(){
 			verticesPositionning.stop();
-		})
+		});
+	}
+	var btnToggleCollide = div_perspective.select("#btn-toggle-collide");
+	if (btnToggleCollide.empty()) {
+		btnstopAnimation = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-collide").attr("value","stop").text("collide:off");
+		btnToggleCollide.on("click", function(){
+			if (btnstopAnimation.attr("value") == "stop") {
+				verticesPositionning.force("collide", null);
+				btnstopAnimation.attr("value","start").text("collide:on");
+			} else {
+				verticesPositionning.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;}));
+				btnstopAnimation.attr("value","stop").text("collide:off");
+			}
+		});
 	}
 	/*var btnEdgesColored = div_perspective.select("#btn-edgesColored");
 	if (btnEdgesColored.empty()) {
@@ -631,6 +644,7 @@ function render(data){
 
     ------------------------------------------------------------------*/
 	// Edge forces
+	verticesPositionning = null;
 	verticesPositionning = qa_vertices_forces(edges, vertices);
 	verticesPositionning.on("tick", ticked).on("end", endTick);
 	verticesPositionning.restart(); //reinit forces
@@ -876,8 +890,8 @@ function vertexComputation(QApointsList){
 }
 
 /**
- * Select a vertex, and change the layout.
- * If the vertex is already selected, unpin and unselect the vertex
+ * Unselect all previously selected vertex and Select a vertex (if not already selected),
+ * and change the layout.
  *
  * @param {_vertex} - dom element object - must be a root group of a vertex
  * @returns nothing (select the vertex)
@@ -1142,8 +1156,6 @@ function unpinVertex(_vertex){
 	d3.select("#" + _vertex).select("image").remove();
 	//unselectVertices()
 }
-
-
 
 /*
  * Misc functions & classes
