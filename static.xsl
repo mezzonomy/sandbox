@@ -244,8 +244,13 @@
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
 			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
+				<!--this.parentNode-->
 				<div id="{$toolbox_ID}-pointnavtool">
-					<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value=""/>
+					<!--this.parentNode.children[0]-->
+					<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value="">
+						<!--this.parentNode.children[0].children[0]-->
+						<!--@value set by render.js javascript -->
+					</input>
 					<input id="{$toolbox_ID}-next" name="{$toolbox_ID}-next" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-peer" name="{$toolbox_ID}-peer" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-before" name="{$toolbox_ID}-before" type="hidden" value=""/>
@@ -256,15 +261,15 @@
 					<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
 				</div>
 				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}position')/@key">
-					<xsl:variable name="oracle">[this.parentNode.children[1].children[1].value]</xsl:variable>
+					<xsl:variable name="oracle">[this.parentNode.children[0].children[0].value]</xsl:variable>
 					<input id="{$toolbox_ID}-button" type="button" text="XML" onclick="{bhb:query(., $oracle)}">
+						<!--this-->
 					</input>
 				</xsl:for-each>
 			</form>
 		</div>
 	</div>
 </xsl:template>
-
 
 <!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 	   W A S T E B A S K E T
