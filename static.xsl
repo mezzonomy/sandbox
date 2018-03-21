@@ -33,6 +33,10 @@
 	   S T A T I C
      = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 
+<xsl:template match="xsl:warning" mode="xsl:default">
+		 <xsl:text>Please select a point</xsl:text>
+</xsl:template>
+
 <xsl:template name="tagname">
 	<xsl:param name="name"/>
 	<xsl:param name="dictionary"/>
