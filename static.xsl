@@ -227,7 +227,7 @@
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
 			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
-				<h6>Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;" onclick="openModal(document.getElementById('{$toolbox_ID}-bhb-content').innerHTML,'Content','max-width: 90%; margin-top: 10px;');">
+				<h6>Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="openModal(document.getElementById('{$toolbox_ID}-bhb-content').innerHTML,'Content','max-width: 90%; margin-top: 10px;');">
 				<span>&#8599;</span>
 				</button>
 				</h6>
