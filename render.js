@@ -33,7 +33,7 @@ var scene, //d3 object select scene
 		longclick_timer,
 		autonav_interval=300,
 		navPointStop=false,
-		forcesStatusDef={collide:{status:true}},
+		forcesStatusDef={collide:{status:true},center:{status:true},charge:{status:true}},
 		forcesStatus={};
 
 function dragstarted(d) {
@@ -285,6 +285,54 @@ function render(data){
 				verticesPositionning.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;}));
 				btnToggleCollide.attr("value","stop").text("set collide:off");
 				forcesStatus.collide.status=true;
+			}
+			storeLocalForcesStatus();
+			verticesPositionning.alpha(1);
+			verticesPositionning.restart();
+		});
+	}
+	var btnToggleCenter = div_perspective.select("#btn-toggle-center");
+	if (btnToggleCenter.empty()) {
+		btnToggleCenter = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-center")
+		if (forcesStatus.center.status) {
+			btnToggleCenter.attr("value","stop").text("set center:off");
+		} else {
+			btnToggleCenter.attr("value","start").text("set center:on");
+		}
+		btnToggleCenter.on("click", function(){
+			if (btnToggleCenter.attr("value") == "stop") {
+				verticesPositionning.force("center", null);
+				btnToggleCenter.attr("value","start").text("set center:on");
+				forcesStatus.center.status=false;
+			} else {
+				var xc= scene.property("clientWidth") / 2;
+				var yc= scene.property("clientHeight") / 2;
+				verticesPositionning.force("center", d3.forceCenter(xc,yc));
+				btnToggleCenter.attr("value","stop").text("set center:off");
+				forcesStatus.center.status=true;
+			}
+			storeLocalForcesStatus();
+			verticesPositionning.alpha(1);
+			verticesPositionning.restart();
+		});
+	}
+	var btnToggleCharge = div_perspective.select("#btn-toggle-charge");
+	if (btnToggleCharge.empty()) {
+		btnToggleCharge = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-charge")
+		if (forcesStatus.charge.status) {
+			btnToggleCharge.attr("value","stop").text("set charge:off");
+		} else {
+			btnToggleCharge.attr("value","start").text("set charge:on");
+		}
+		btnToggleCharge.on("click", function(){
+			if (btnToggleCharge.attr("value") == "stop") {
+				verticesPositionning.force("charge", null);
+				btnToggleCharge.attr("value","start").text("set charge:on");
+				forcesStatus.charge.status=false;
+			} else {
+				verticesPositionning.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));
+				btnToggleCharge.attr("value","stop").text("set charge:off");
+				forcesStatus.charge.status=true;
 			}
 			storeLocalForcesStatus();
 			verticesPositionning.alpha(1);
@@ -1347,8 +1395,7 @@ function storeLocalVertexPositionning(_verticesbyHc){
  * @returns {-} - Stores forces settings as a json string in nav's localStorage
  */
 function storeLocalForcesStatus(){
-		//Store forces definition
-		localStorage.setItem("forceStatus_json", JSON.stringify(forcesStatus));
+		localStorage.setItem("forcesStatus_json", JSON.stringify(forcesStatus));
 }
 
 
@@ -1379,20 +1426,25 @@ function addStyles(_tagsColor) {
 	//			4. qa_linkPoints: edge-directed force and rotation
 	// ******************************************************
 
+// forces status examples : verticesPositionning.force("link").links(), verticesPositionning.force("center").x()
+
 function qa_vertices_forces(edges, vertices) {
-	var xc= scene.property("clientWidth") / 2;
-	var yc= scene.property("clientHeight") / 2;
 	var forces = d3.forceSimulation()
 	//.alpha(def_alpha)
 		.nodes(vertices)
-		.force("center", d3.forceCenter(xc,yc)) // force toward the center
-		.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}))  // Nodes attracting or reppelling each others (negative = repelling)
-		.force("link", qa_linkPoints().links(edges).distance(function(d){return (d.source.radius + d.target.radius) * 2;}).id(function(d) {return d.id;})) // customized force
+		.force("link", qa_linkPoints().links(edges).distance(function(d){return (d.source.radius + d.target.radius) * 1.5;}).id(function(d) {return d.id;})) // customized force
 		;
 		if (forcesStatus.collide.status) {
 			forces.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;})); // collision detection
 		}
-
+		if (forcesStatus.center.status) {
+			var xc= scene.property("clientWidth") / 2;
+			var yc= scene.property("clientHeight") / 2;
+			forces.force("center", d3.forceCenter(xc,yc)) // force towards the center
+		}
+		if (forcesStatus.charge.status) {
+			forces.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));  // Nodes attracting or reppelling each others (negative = repelling)
+		}
 	return forces
 }
 
