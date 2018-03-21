@@ -54,7 +54,6 @@
 		<xsl:text>)</xsl:text>
 </xsl:template>
 
-
 <xsl:template name="perspective">
 	<xsl:variable name="toolbox_ID">perspective</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Perspective</xsl:variable>
@@ -224,7 +223,7 @@
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
 			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
-				<h6>Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;" onclick="openModal(document.getElementById('{$toolbox_ID}-bhb-content').innerHTML,'Content','','{$toolbox_ID}-modal-text');">
+				<h6>Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;" onclick="openModal(document.getElementById('{$toolbox_ID}-bhb-content').innerHTML,'Content','max-width: 90%; margin-top: 10px;');">
 				<span>&#8599;</span>
 				</button>
 				</h6>

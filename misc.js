@@ -74,11 +74,18 @@ var simulateOnchange = function (elem) {
 	var canceled = !elem.dispatchEvent(evt);
 };
 
+/**
+ * Opens a modal window with a close button and title and content
+ * @public
+ * @param {string} _text  text content of the window
+ * @param {string} _title  Title on window
+ * @param {string} _style  The style on dialog div, to give dimensions ie : 'max-width: 90%; margin-top: 10px;'
+ */
 function openModal (_text, _title, _style){
 var universe = document.getElementById('universe');
 var modal =
   '<div id="modal-js-generated" class="modal show" tabindex="-1" role="dialog"> \
-    <div class="modal-dialog" tabindex="-1" role="document"> \
+    <div class="modal-dialog" tabindex="-1" role="document" style="'+ _style +'"> \
       <div class="modal-content"> \
         <div class="modal-header"> \
           <h5 class="modal-title"> \
@@ -101,6 +108,10 @@ var modal =
   universe.insertAdjacentHTML('beforeend', modal);
 }
 
+/**
+ * Close an opened modal
+ * @public
+ */
 function removeModal (){
   var modal = document.getElementById("modal-js-generated");
   modal.parentNode.removeChild(modal);
