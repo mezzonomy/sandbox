@@ -1030,7 +1030,7 @@ function selectPoint(_pt) {
 		selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
 	}
 	//send bhb query position
-	//eval(BHB_QUERY_POSITION.replace("$ID", pt.point));
+	eval(BHB_QUERY_POSITION.replace("$ID", pt.point));
 	return Object.assign(pt, {topology:selectedEdge.datum().topology});
 }
 
