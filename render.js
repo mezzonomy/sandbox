@@ -32,8 +32,9 @@ var scene, //d3 object select scene
 		longclick_limit=500,
 		longclick_timer,
 		autonav_interval=300,
-		navPointStop=false;
-
+		navPointStop=false,
+		forcesStatusDef={collide:{status:true}},
+		forcesStatus={};
 
 function dragstarted(d) {
 	d3.event.sourceEvent.stopPropagation();
@@ -220,6 +221,15 @@ function render(data){
 	}
 
 	// ******************************************************
+	// get forces settings from localstore
+	// ******************************************************
+
+	forcesStatus = JSON.parse(localStorage.getItem("forcesStatus_json"));
+	if (!forcesStatus) {
+		forcesStatus = forcesStatusDef;
+	}
+
+	// ******************************************************
 	// perspective buttons
 	// ******************************************************
 	//TODO: dev mode cheat
@@ -260,15 +270,23 @@ function render(data){
 	}
 	var btnToggleCollide = div_perspective.select("#btn-toggle-collide");
 	if (btnToggleCollide.empty()) {
-		btnToggleCollide = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-collide").attr("value","stop").text("collide:off");
+		btnToggleCollide = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-collide")
+		if (forcesStatus.collide.status) {
+			btnToggleCollide.attr("value","stop").text("set collide:off");
+		} else {
+			btnToggleCollide.attr("value","start").text("set collide:on");
+		}
 		btnToggleCollide.on("click", function(){
 			if (btnToggleCollide.attr("value") == "stop") {
 				verticesPositionning.force("collide", null);
-				btnToggleCollide.attr("value","start").text("collide:on");
+				btnToggleCollide.attr("value","start").text("set collide:on");
+				forcesStatus.collide.status=false;
 			} else {
 				verticesPositionning.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;}));
-				btnToggleCollide.attr("value","stop").text("collide:off");
+				btnToggleCollide.attr("value","stop").text("set collide:off");
+				forcesStatus.collide.status=true;
 			}
+			storeLocalForcesStatus();
 			verticesPositionning.alpha(1);
 			verticesPositionning.restart();
 		});
@@ -1318,8 +1336,21 @@ function storeLocalVertexPositionning(_verticesbyHc){
 		}
 		var vertexLastPosition_json = JSON.stringify(vertexLastPosition);
 		localStorage.setItem("vertexLastPosition_json", vertexLastPosition_json);
+
+		storeLocalForcesStatus();
 	})
 }
+
+/**
+ * Store localy the forces settings
+ *
+ * @returns {-} - Stores forces settings as a json string in nav's localStorage
+ */
+function storeLocalForcesStatus(){
+		//Store forces definition
+		localStorage.setItem("forceStatus_json", JSON.stringify(forcesStatus));
+}
+
 
 /**
  * Add css classes in local document for coloring by tag
@@ -1356,9 +1387,12 @@ function qa_vertices_forces(edges, vertices) {
 		.nodes(vertices)
 		.force("center", d3.forceCenter(xc,yc)) // force toward the center
 		.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}))  // Nodes attracting or reppelling each others (negative = repelling)
-		.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;})) // collision detection
 		.force("link", qa_linkPoints().links(edges).distance(function(d){return (d.source.radius + d.target.radius) * 2;}).id(function(d) {return d.id;})) // customized force
 		;
+		if (forcesStatus.collide.status) {
+			forces.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;})); // collision detection
+		}
+
 	return forces
 }
 
