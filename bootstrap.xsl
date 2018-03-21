@@ -38,6 +38,7 @@
   -->
 
 <xsl:import href="../hyper/defaultss.xsl"/>
+<xsl:import href="../hyper/structure-modal.xsl"/>
 
 <!--| situation     : url
     | perspective   : dom
@@ -59,26 +60,6 @@
 		<on:promote method="emit_paraph" filter="not(@bhb:sign)"
 			select="//bhb:display[ @user=bhb:signatures()]"/>
 	</bhb:protocol>
-</xsl:template>
-
-<xsl:template name="sandbox:header">
-	<xsl:param name="role"/>
-	<div class="header">
-		<img id="logo" src="sandbox/mezzonomy-logo-small.png" height="50"/>
-		<div id="environment" class="environment">
-			<p id="env-name">
-				<xsl:value-of select="$perspective/@username"/>
-				<sub>
-					<select id="env-role">
-						<option value="NOSELECT">
-							<xsl:value-of select="$role"/>
-							<?TBD multi-role situation?>
-						</option>
-					</select>
-				</sub>
-			</p>
-		</div>
-	</div>
 </xsl:template>
 
 <xsl:template match="/sandbox:map">
@@ -122,12 +103,13 @@
 <xsl:template name="placeholder">
 	<div id="placeholder" class="render-scene">
 		<xsl:variable name="js">
-			<xsl:apply-templates mode="root"/>
+			<xsl:apply-templates mode="spheric"/>
 		</xsl:variable>
-		<xsl:processing-instruction name="js">
+		<xsl:processing-instruction name="js-draw-matrix">
 			<xsl:text>data=[</xsl:text>
 			<xsl:value-of select="normalize-space($js)"/>
 			<xsl:text>];</xsl:text>
+			<!-- this postlude should be embedded in global prelude -->
 			<xsl:text>
 				function wait4loader() {
 				    if (typeof initLoader != 'undefined') {
@@ -153,258 +135,26 @@
 	</div>
 </xsl:template>
 
-<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	   M O D A L   M A C H I N E R Y
-     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
-
 <xsl:template match="*" mode="info">
 	<xsl:param name="spheric">0</xsl:param>
-	{"xsl_element": "<xsl:value-of select="name()"/>",
-	<xsl:if test="$spheric='1'">"bhb_spheric": "1",</xsl:if>
-	<xsl:apply-templates select="@*" mode="info"/>
-	}
-</xsl:template>
-<xsl:template match="@*" mode="info">
-	"<xsl:value-of select="translate(name(),':','_')"/>": "<xsl:value-of select="."/>",
-</xsl:template>
-
-<xsl:template name="matrix-line">
 	<xsl:param name="point"/>
 	<xsl:param name="path"/>
 	<xsl:param name="order"/>
 	<xsl:param name="next"/>
 	<xsl:param name="peer"/>
-	<xsl:param name="info"/>
 {"point":"<xsl:value-of select="$point"/>",
 "path":"<xsl:value-of select="$path"/>",
 "order":"<xsl:value-of select="$order"/>",
 "next":"<xsl:value-of select="$next"/>",
 "peer":"<xsl:value-of select="$peer"/>",
-"info":<xsl:value-of select="$info"/>,},
+"info":{"xsl_element": "<xsl:value-of select="name()"/>",
+	<xsl:if test="$spheric='1'">"bhb_spheric": "1",</xsl:if>
+	<xsl:apply-templates select="@*" mode="info"/>
+	},},
 </xsl:template>
 
-<xsl:template match="*[not( self::bhb:*)]" mode="root">
-	<!-- noeud racine est en omega, tous ces fils sont sphériques -->
-	<xsl:variable name="bottom">
-		<xsl:apply-templates select="." mode="bottom-alpha"/>
-	</xsl:variable>
-	<xsl:call-template name="matrix-line">
-		<xsl:with-param name="point" select="$bottom"/>
-		<xsl:with-param name="path" select="@on:id"/>
-		<xsl:with-param name="order">push</xsl:with-param>
-		<xsl:with-param name="next">
-			<xsl:choose>
-				<xsl:when test="child::*">
-					<xsl:apply-templates select="child::*[1]" mode="top-alpha"/>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:apply-templates select="." mode="bottom-alpha"/>
-				</xsl:otherwise>
-			</xsl:choose>
-		</xsl:with-param>
-		<xsl:with-param name="peer" select="$bottom"/>
-		<xsl:with-param name="info">
-			<xsl:apply-templates select="." mode="info">
-				<xsl:with-param name="bhb:spheric">1</xsl:with-param>
-			</xsl:apply-templates>
-		</xsl:with-param>
-	</xsl:call-template>
-	<xsl:apply-templates select="descendant::*" mode="alpha-rho"/>
-</xsl:template>
-
-<xsl:template match="*" mode="alpha-rho">
-
-	<xsl:variable name="top">
-		<xsl:apply-templates select="." mode="top-alpha"/>
-	</xsl:variable>
-
-	<xsl:variable name="bottom">
-		<xsl:apply-templates select="." mode="bottom-alpha"/>
-	</xsl:variable>
-
-	<xsl:variable name="after">
-		<xsl:choose>
-			<xsl:when test="following-sibling::*">
-				<xsl:apply-templates select="following-sibling::*[1]" mode="top-alpha"/>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:apply-templates select=".." mode="bottom-alpha"/>
-			</xsl:otherwise>
-		</xsl:choose>
-	</xsl:variable>
-
-	<xsl:variable name="push">
-		<xsl:choose>
-			<xsl:when test="@bhb:symbol">
-				<!-- only first symbol is processed -->
-				<xsl:variable name="symbol" select="@bhb:symbol"/>
-				<xsl:variable name="peer" select="following::*[ @bhb:symbol=$symbol]"/>
-				<xsl:choose>
-					<xsl:when test="$peer/following-sibling::*">
-						<xsl:apply-templates select="$peer/following-sibling::*[1]" mode="top-alpha"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:apply-templates select="$peer/.." mode="bottom-alpha"/>
-					</xsl:otherwise>
-				</xsl:choose>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:choose>
-					<xsl:when test="child::*">
-						<xsl:apply-templates select="child::*[1]" mode="top-alpha"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:apply-templates select="." mode="bottom-alpha"/>
-					</xsl:otherwise>
-				</xsl:choose>
-			</xsl:otherwise>
-		</xsl:choose>
-	</xsl:variable>
-
-	<xsl:variable name="path">
-		<xsl:value-of select="@on:id"/>
-	</xsl:variable>
-
-	<xsl:variable name="peer-path">
-		<xsl:choose>
-			<xsl:when test="@bhb:symbol">
-				<!-- only first symbol is processed -->
-				<xsl:variable name="symbol" select="@bhb:symbol"/>
-				<xsl:variable name="peer" select="following::*[ @bhb:symbol=$symbol]"/>
-				<xsl:value-of select="$peer/@on:id"/>
-			</xsl:when>
-			<xsl:otherwise>
-		<xsl:value-of select="@on:id"/>
-			</xsl:otherwise>
-		</xsl:choose>
-	</xsl:variable>
-
-	<xsl:variable name="order">
-		<xsl:text>push</xsl:text>
-	</xsl:variable>
-
-	<xsl:variable name="peer-order">
-		<xsl:variable name="symbol" select="@bhb:symbol"/>
-		<xsl:choose>
-			<xsl:when test="$symbol and following::*[ @bhb:symbol=$symbol][ @on:id]">
-				<!-- only first symbol is processed -->
-				<xsl:text>push</xsl:text>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:text>after</xsl:text>
-			</xsl:otherwise>
-		</xsl:choose>
-	</xsl:variable>
-
-	<xsl:variable name="name" select="name()"/>
-	<xsl:variable name="planar">
-			<xsl:value-of select="$perspective/@*[ name()=$name]"/>
-	</xsl:variable>
-	<!-- 
-		<?before?>
-		<element > //top
-		  <?push?>
-		  <?children *?>
-		  <?append?>
-		</element> //bottom
-		<?after?>
-	  -->
-	<xsl:choose>
-		<xsl:when test="$planar='1'">
-			<!-- planar -->
-			<xsl:call-template name="matrix-line">
-				<xsl:with-param name="point" select="$top"/>
-				<xsl:with-param name="path" select="$path"/>
-				<xsl:with-param name="order" select="$order"/>
-				<xsl:with-param name="next" select="$after"/>
-				<xsl:with-param name="peer" select="$bottom"/>
-				<xsl:with-param name="info">
-					<xsl:apply-templates select="." mode="info"/>
-				</xsl:with-param>
-			</xsl:call-template>
-			<xsl:call-template name="matrix-line">
-				<xsl:with-param name="point" select="$bottom"/>
-				<xsl:with-param name="path" select="$peer-path"/>
-				<xsl:with-param name="order" select="$peer-order"/>
-				<xsl:with-param name="next" select="$push"/>
-				<xsl:with-param name="peer" select="$top"/>
-				<xsl:with-param name="info">
-					<xsl:apply-templates select="." mode="info"/>
-				</xsl:with-param>
-			</xsl:call-template>
-		</xsl:when>
-		<xsl:otherwise>
-			<!-- hyperbolic -->
-			<xsl:call-template name="matrix-line">
-				<xsl:with-param name="point" select="$top"/>
-				<xsl:with-param name="path" select="$path"/>
-				<xsl:with-param name="order" select="$order"/>
-				<xsl:with-param name="next" select="$push"/>
-				<xsl:with-param name="peer" select="$bottom"/>
-				<xsl:with-param name="info">
-					<xsl:apply-templates select="." mode="info"/>
-				</xsl:with-param>
-			</xsl:call-template>
-			<xsl:call-template name="matrix-line">
-				<xsl:with-param name="point" select="$bottom"/>
-				<xsl:with-param name="path" select="$peer-path"/>
-				<xsl:with-param name="order" select="$peer-order"/>
-				<xsl:with-param name="next" select="$after"/>
-				<xsl:with-param name="peer" select="$top"/>
-				<xsl:with-param name="info">
-					<xsl:apply-templates select="." mode="info"/>
-				</xsl:with-param>
-			</xsl:call-template>
-		</xsl:otherwise>
-	</xsl:choose>
-</xsl:template>
-
-<xsl:template match="*[ preceding::*/@bhb:symbol=current()/@bhb:symbol]" mode="alpha-rho"/>
-<!-- only first symbol is processed -->
-
-<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	   N A M I N G   S T R A T E G Y
-     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
-
-<xsl:template match="*" mode="top-alpha">ERROR</xsl:template>
-<xsl:template match="*" mode="bottom-alpha">ERROR</xsl:template>
-
-<xsl:template match="*[ @bhb:identity][ not(@bhb:symbol)]" mode="top-alpha">
- 	<xsl:text>T_</xsl:text>
-	<xsl:value-of select="@bhb:identity"/>
-</xsl:template>
-
-<xsl:template match="*[ @bhb:identity][ not(@bhb:symbol)]" mode="bottom-alpha">
- 	<xsl:text>B_</xsl:text>
-	<xsl:value-of select="@bhb:identity"/>
-</xsl:template>
-
-<xsl:template match="*[ @bhb:symbol]" mode="top-alpha">
-	<xsl:variable name="symbol" select="@bhb:symbol"/>
-	<xsl:choose>
-		<xsl:when test="preceding::*[ @bhb:symbol=$symbol]">
-		 	<xsl:text>T_</xsl:text>
-			<xsl:value-of select="@bhb:symbol"/>
-		</xsl:when>
-		<xsl:otherwise>
-		 	<xsl:text>B_</xsl:text>
-			<xsl:value-of select="@bhb:symbol"/>
-		</xsl:otherwise>
-	</xsl:choose>
-</xsl:template>
-
-<xsl:template match="*[ @bhb:symbol]" mode="bottom-alpha">
-	<xsl:variable name="symbol" select="@bhb:symbol"/>
-	<xsl:choose>
-		<xsl:when test="preceding::*[ @bhb:symbol=$symbol]">
-		 	<xsl:text>B_</xsl:text>
-			<xsl:value-of select="@bhb:symbol"/>
-		</xsl:when>
-		<xsl:otherwise>
-		 	<xsl:text>T_</xsl:text>
-			<xsl:value-of select="@bhb:symbol"/>
-		</xsl:otherwise>
-	</xsl:choose>
+<xsl:template match="@*" mode="info">
+	"<xsl:value-of select="translate(name(),':','_')"/>": "<xsl:value-of select="."/>",
 </xsl:template>
 
 </xsl:stylesheet>
