@@ -12,6 +12,16 @@
 	left:380px;
 	z-index: 4;
 }
+
+#universe { /* fix : find a way to have 100% of the browser workspace without scroll bars!!! */
+	width: 99%;
+	height: 99%;
+	padding-right: 1px;
+	padding-left: 1px;
+	margin-right: auto;
+	margin-left: auto;
+	z-index:10;
+}
 /* layout */
 html {
   padding: 0;
@@ -30,15 +40,7 @@ body {
   background-color: #8bc34a;
 }
 
-#universe {
-	width: 99%;
-	height: 100%;
-	padding-right: 1px;
-	padding-left: 1px;
-	margin-right: auto;
-	margin-left: auto;
-	z-index:10;
-}
+
 
 .left {
 	float: left;
