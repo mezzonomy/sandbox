@@ -13,8 +13,7 @@ const SCENE_COLOR = "none",
 			ARC_INNER_RADIUS=.1, // Proportional to VERTEX_RADIUS. It is the radius of the inner donut circle of a selected vertex
 			AMEND_TOOLBOX_ID = "amendment",
 			AMEND_EDITZONE_ID = "amendment-editzone",
-			AMEND_TEMPLATE_T_X = "<bhb:link push='$ID'>\nINSERT XML\n</bhb:link>",
-			AMEND_TEMPLATE_B_X = "<bhb:link after='$ID'>\nINSERT XML\n</bhb:link>",
+			AMEND_TEMPLATE = "<bhb:link $ORDER='$ID'>\nINSERT XML\n</bhb:link>",
 			TEXT_TOOLBOX_ID = "text";
 
 const BHB_QUERY_POSITION = 	"_snd({bhb:'query', ['{bhb://the.hypertext.blockchain}position']:'$ID'})";
@@ -98,14 +97,10 @@ function arcDragEnded(d) {
 	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
 		alertInit();
 		var path = d3.event.subject.path;
+		var order = d3.event.subject.order;
 		document.getElementById(AMEND_TOOLBOX_ID + "-point").value = d.point;
 		document.getElementById(AMEND_TOOLBOX_ID + "-next").value = d.next;
-		if (d3.event.subject.point.startsWith("T_")){
-			document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE_T_X.replace("$ID",path);
-		}
-		if (d3.event.subject.point.startsWith("B_")){
-			document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE_B_X.replace("$ID",path);
-		}
+		document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$ID",path).replace("$ORDER",order);
 	}
 	d3.select("#" + AMEND_EDITZONE_ID)
 	.classed("targeted", false).classed("zoom11", false)
@@ -255,7 +250,7 @@ function render(data){
 				//d3.selectAll(".container").remove();
 				unpinVertices();
 				//scene.call(zoom.transform, d3.zoomIdentity);
-				verticesPositionning.alpha(1);
+				verticesPositionning.alpha(def_alpha);
 				verticesPositionning.restart();
 				//mainRender(data);
         return;
@@ -287,7 +282,7 @@ function render(data){
 				forcesStatus.collide.status=true;
 			}
 			storeLocalForcesStatus();
-			verticesPositionning.alpha(1);
+			verticesPositionning.alpha(def_alpha);
 			verticesPositionning.restart();
 		});
 	}
@@ -312,7 +307,7 @@ function render(data){
 				forcesStatus.center.status=true;
 			}
 			storeLocalForcesStatus();
-			verticesPositionning.alpha(1);
+			verticesPositionning.alpha(def_alpha);
 			verticesPositionning.restart();
 		});
 	}
