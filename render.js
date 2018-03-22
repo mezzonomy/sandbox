@@ -22,10 +22,15 @@ const BHB_QUERY_POSITION = 	"_snd({bhb:'query', ['{bhb://the.hypertext.blockchai
 var scene, //d3 object select scene
 		svgScene, //dom object byid scene
 		def_alpha = 1, // [0-1] default 1
-		fast_alpha = .3, // accelerate forces when dragging
+		faster_decay = 1 - Math.pow(0.001, 1 / 100), // accelerate forces when dragging
+		normal_decay = 1 - Math.pow(0.001, 1 / 300),
+		allpinned_decay = 1 - Math.pow(0.001, 1 / 1), // decay when all vertices are pinned (ie. reloading)
+		reheat_alphaTarget = .3, // Non 0 to maintain heated
+		normal_alphaTarget = 0,
 		zoom,
 		vertexLastPosition=[],
 		verticesbyHc=[],
+		vertices=[],
 		verticesPositionning,
 		edgesColored = false,
 		longclick_limit=500,
@@ -35,11 +40,10 @@ var scene, //d3 object select scene
 		forcesStatusDef={collide:{status:true},center:{status:true},charge:{status:true}},
 		forcesStatus={};
 
+
 function dragstarted(d) {
 	d3.event.sourceEvent.stopPropagation();
-	if (!d3.event.active) {
-		verticesPositionning.alphaTarget(fast_alpha).restart();
-	}
+	if (!d3.event.active) { verticesPositionning.alphaTarget(reheat_alphaTarget).alphaDecay(faster_decay).restart();}
 	d.fx = d.x;
 	d.fy = d.y;
 	//console.log("VertexDragEvent started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
@@ -54,7 +58,7 @@ function dragged(d) {
 
 function dragended(d) {
 	if (!d3.event.active) {
-		verticesPositionning.alphaTarget(fast_alpha);
+		verticesPositionning.alphaTarget(normal_alphaTarget).alphaDecay(normal_decay);
 	}
 	//d.fx = null, d.fy = null;
 	// fixed last place
@@ -62,7 +66,7 @@ function dragended(d) {
 	d.fy = d.y;
 	d3.select(this).classed("dragging", false);
 	pinVertex(this.id);
-	//d3.select(this).select(".vertexCircle").classed("pinned", true);
+	storeLocalVertexPositionning(verticesbyHc);
 	//console.log("VertexDragEvent ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 
@@ -434,7 +438,7 @@ function render(data){
 
 	// compute vertices from QA points and create a vertex map
 
-	var vertices = vertexComputation(data);
+	vertices = vertexComputation(data);
 	verticesbyHc = d3.map(vertices, function(d) {return d.hc;});
 
 	/*
@@ -601,7 +605,8 @@ function render(data){
 			if (storedVertex) {
 				d.fx=storedVertex.oX;
 				d.fy=storedVertex.oY;
-				d3.select("#grotate_" + d.hc).attr("data-storedRotation",storedVertex.oRt); // reinitiated by force simulation, hence stored in local dataset replayed in ticks
+				d3.select(this).select(".vertexGroupRotate").attr("transform",storedVertex.oRt);
+				d3.select(this).select(".vertexGroupRotate").attr("data-storedRotation",storedVertex.oRt); // reinitiated by force simulation, hence stored in local dataset replayed in ticks
 				pinVertex("gvertex_"+ d.hc);
 				//d3.select("#gvertex_"+ d.hc).select(".vertexCircle").classed("pinned", true);
 				//d3.select("#gvertex_"+ d.hc).append("image").attr("xlink:href", "/sandbox/pinned3.png").attr("x",-25).attr("y",-25).attr("height","50px").attr("width","50px");
@@ -761,13 +766,21 @@ function render(data){
 																																	"lbl_"+d.id,
 																																	d.topology)});
 
-
-				//console.log("ticks done : ", Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay())));
-				//console.log("Total ticks number : ", Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay())));
-				//TODO : fix : OK at first iteration KO after dragging
-				//if (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50 == 0) { //save positionning every 50 ticks
+				// log forces status TODO : remove
+				var logforces = d3.select("#perspective-footer").select("#logforces");
+				if (logforces.empty) d3.select("#perspective-footer").insert("div").attr("id","logforces");
+				var logforcesHTML = '<p class="small">';
+				logforcesHTML += "alpha:" + this.alpha() + "<br/>";
+				logforcesHTML += "alpha target:" + this.alphaTarget() + "<br/>";
+				logforcesHTML += "alpha decay:" + this.alphaDecay() + "<br/>";
+				logforcesHTML += "ticks done:" + (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))) + "<br/>";
+				logforcesHTML += "total ticks number:" + (Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay()))) + "<br/>";
+				logforcesHTML += "ticks before savepoint (if 0):" + (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50) + "<br/>";
+				logforcesHTML += "</p>";
+				logforces.html(logforcesHTML);
+				if (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50 == 0) { //save positionning every 50 ticks
 					storeLocalVertexPositionning(verticesbyHc); //store last vertex position and rotation
-				//}
+				}
 			}
 			catch(error) {
 			//console.log("shadow tick !");
@@ -1425,7 +1438,6 @@ function addStyles(_tagsColor) {
 
 function qa_vertices_forces(edges, vertices) {
 	var forces = d3.forceSimulation()
-	//.alpha(def_alpha)
 		.nodes(vertices)
 		.force("link", qa_linkPoints().links(edges).distance(function(d){return (d.source.radius + d.target.radius) * 1.5;}).id(function(d) {return d.id;})) // customized force
 		;
@@ -1439,6 +1451,12 @@ function qa_vertices_forces(edges, vertices) {
 		}
 		if (forcesStatus.charge.status) {
 			forces.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));  // Nodes attracting or reppelling each others (negative = repelling)
+		}
+		//when all  vertices are pinned, faster decay
+		if (d3.selectAll(".gvertex").select("circle.pinned").size() == verticesbyHc.size()) {
+			forces.alphaDecay(allpinned_decay);
+		} else {
+			forces.alphaDecay(normal_decay);
 		}
 	return forces
 }
