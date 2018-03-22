@@ -24,7 +24,7 @@ var scene, //d3 object select scene
 		def_alpha = 1, // [0-1] default 1
 		faster_decay = 1 - Math.pow(0.001, 1 / 100), // accelerate forces when dragging
 		normal_decay = 1 - Math.pow(0.001, 1 / 300),
-		allpinned_decay = 1 - Math.pow(0.001, 1 / 1), // decay when all vertices are pinned (ie. reloading)
+		allpinned_decay = 1 - Math.pow(0.001, 1 / 50), // decay when all vertices are pinned (ie. reloading)
 		reheat_alphaTarget = .3, // Non 0 to maintain heated
 		normal_alphaTarget = 0,
 		zoom,
@@ -251,12 +251,8 @@ function render(data){
 			btnResetPosHistory.on("click", function(){
 				verticesPositionning.stop();
 				localStorage.removeItem("vertexLastPosition_json");
-				//d3.selectAll(".container").remove();
 				unpinVertices();
-				//scene.call(zoom.transform, d3.zoomIdentity);
-				verticesPositionning.alpha(def_alpha);
-				verticesPositionning.restart();
-				//mainRender(data);
+				verticesPositionning.alpha(def_alpha).alphaDecay(normal_decay).restart();
         return;
 			})
 	}
@@ -522,7 +518,7 @@ function render(data){
 			curRt=0;
 		}
 		d3.select(this).attr("transform", "rotate(" + (curRt + d3.event.wheelDelta) + ")");
-		d3.select(this).attr("data-storedRotation", "rotate(" + (curRt + d3.event.wheelDelta) + ")"); // store on vertex for simulation forces ticks
+		d3.select(this).attr("data-storedRotation", "rotate(" + (curRt + d3.event.wheelDelta) + ")").attr("data-init", "true"); // store on vertex for simulation forces ticks
 		redrawEdgesforOneVertex(this.id);
 	});
 
@@ -605,8 +601,8 @@ function render(data){
 			if (storedVertex) {
 				d.fx=storedVertex.oX;
 				d.fy=storedVertex.oY;
-				d3.select(this).select(".vertexGroupRotate").attr("transform",storedVertex.oRt);
-				d3.select(this).select(".vertexGroupRotate").attr("data-storedRotation",storedVertex.oRt); // reinitiated by force simulation, hence stored in local dataset replayed in ticks
+				d.spin=Number(storedVertex.oRt.replace("rotate(","").replace(")",""));
+				d3.select(this).select(".vertexGroupRotate").attr("data-storedRotation",storedVertex.oRt).attr("data-init", "true"); // reinitiated by force simulation, hence stored in local dataset replayed in ticks
 				pinVertex("gvertex_"+ d.hc);
 				//d3.select("#gvertex_"+ d.hc).select(".vertexCircle").classed("pinned", true);
 				//d3.select("#gvertex_"+ d.hc).append("image").attr("xlink:href", "/sandbox/pinned3.png").attr("x",-25).attr("y",-25).attr("height","50px").attr("width","50px");
@@ -733,12 +729,17 @@ function render(data){
 
 				vertexGroupRotate
 				.attr("transform", function(d) {
-					if (d.spin) {
-						return "rotate(" + (d.spin) + ")";
-					} else if (this.dataset.storedRotation) {
+					if (this.dataset.init) { // first iteration of forces, reinit spin to stored spin
+						this.removeAttribute("data-init"); // remove indicator
 						return this.dataset.storedRotation;
 					} else {
-						return "rotate(0)";
+						if (d.spin) {
+							return "rotate(" + (d.spin) + ")";
+						} else if (this.dataset.storedRotation) {
+							return this.dataset.storedRotation;
+						} else {
+							return "rotate(0)";
+						}
 					}
 				});
 
