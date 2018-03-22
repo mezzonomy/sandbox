@@ -779,8 +779,14 @@ function render(data){
 				logforcesHTML += "ticks before savepoint (if 0):" + (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50) + "<br/>";
 				logforcesHTML += "</p>";
 				logforces.html(logforcesHTML);
+				if (!div_perspective.select("#btn-stop-animation").empty()) {
+					var cpt = Math.floor(100*((Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))) / (Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay())))))
+					if (cpt%5 ==0) {
+							div_perspective.select("#btn-stop-animation").text("Freeze (running..." + cpt +"%)");
+					}
+				}
 				if (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50 == 0) { //save positionning every 50 ticks
-					storeLocalVertexPositionning(verticesbyHc); //store last vertex position and rotation
+					storeLocalVertexPositionning(verticesbyHc);
 				}
 			}
 			catch(error) {
@@ -793,7 +799,10 @@ function render(data){
 
 	function endTick() {
 		//toggle force btn off
-		//d3.select("#btn-stop-animation").attr("value","start").text("Ended. Restart animation");
+		//d3.select("#btn-stop-animation").attr("value","start").text("Ended. Restart animation")
+		if (!div_perspective.select("#btn-stop-animation").empty()) {
+			div_perspective.select("#btn-stop-animation").text("No animation");
+		}
 		storeLocalVertexPositionning(verticesbyHc); //store last vertex position and rotation
 	}
 }
