@@ -154,7 +154,7 @@
 			</div>
 			<div id="{$toolbox_ID}-time-slider"/>
 			<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from', '{bhb://the.hypertext.blockchain}to')/@key">
-				<input id="{$toolbox_ID}-{translate(bhb:short_ns(.),':','-')}" type="hidden" value="" onchange="{bhb:query(.,'0')}"/>
+				<input id="{$toolbox_ID}-{translate(bhb:short_ns(.),':','-')}" type="hidden" value="" data-bhbquery="{bhb:query(.,'$$DATE')}"/>
 			</xsl:for-each>
 			<ol style="display:none">
 				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from')/@key">
@@ -235,7 +235,7 @@
 					<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
 				</div>
 				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}position')/@key">
-					<xsl:variable name="oracle">$ID</xsl:variable>
+					<xsl:variable name="oracle">$$ID</xsl:variable>
 					<span id="{$toolbox_ID}-bhb-position-querystring" data-bhb-querystring="{bhb:query(., $oracle)}"/>
 				</xsl:for-each>
 				<div id="{$toolbox_ID}-pointnavtool">

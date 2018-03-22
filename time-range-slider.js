@@ -49,8 +49,12 @@ function updateDates(_from, _to){
    var to=new Date(_to);
    document.getElementById("explorer-bhb-from").value=formatDateBhb(from);
    document.getElementById("explorer-bhb-to").value=formatDateBhb(to);
-   simulateOnchange(document.getElementById("explorer-bhb-from"));
-   simulateOnchange(document.getElementById("explorer-bhb-to"));
+   var fromQuery = document.getElementById("explorer-bhb-from").dataset.bhbquery.replace("$$DATE",formatDateBhb(from));
+   var toQuery = document.getElementById("explorer-bhb-to").dataset.bhbquery.replace("$$DATE",formatDateBhb(to));
+   console.log(fromQuery);
+   console.log(toQuery);
+   eval(fromQuery);
+   eval(toQuery);
 }
 
  /**
@@ -161,7 +165,7 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
   .append("title").text(function(d){return formatDateP(d.date);});
 
   // select an history date
-  slider.selectAll(".evts").on("click", function(d){
+  slider.selectAll("circle.evts").on("click", function(d){
     var ptx = +d3.select(this).attr("cx");
     var date = d.date;
     slider.selectAll("g.ghandle").attr("transform", "translate(" + ptx +",0)");

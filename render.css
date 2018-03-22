@@ -89,6 +89,7 @@ path {
 .planar {}
 .spheric{}
 
+
 path.selected {
 	stroke-width: 3px;
 }

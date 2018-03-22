@@ -13,10 +13,10 @@ const SCENE_COLOR = "none",
 			ARC_INNER_RADIUS=.1, // Proportional to VERTEX_RADIUS. It is the radius of the inner donut circle of a selected vertex
 			AMEND_TOOLBOX_ID = "amendment",
 			AMEND_EDITZONE_ID = "amendment-editzone",
-			AMEND_TEMPLATE = "<bhb:link $ORDER='$ID'>\nINSERT XML\n</bhb:link>",
+			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\nINSERT XML\n</bhb:link>",
 			TEXT_TOOLBOX_ID = "text";
 
-const BHB_QUERY_POSITION = 	"_snd({bhb:'query', ['{bhb://the.hypertext.blockchain}position']:'$ID'})";
+const BHB_QUERY_POSITION = 	"_snd({bhb:'query', ['{bhb://the.hypertext.blockchain}position']:'$$ID'})";
 
 
 var scene, //d3 object select scene
@@ -104,7 +104,7 @@ function arcDragEnded(d) {
 		var order = d3.event.subject.order;
 		document.getElementById(AMEND_TOOLBOX_ID + "-point").value = d.point;
 		document.getElementById(AMEND_TOOLBOX_ID + "-next").value = d.next;
-		document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$ID",path).replace("$ORDER",order);
+		document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
 	}
 	d3.select("#" + AMEND_EDITZONE_ID)
 	.classed("targeted", false).classed("zoom11", false)
@@ -566,7 +566,7 @@ function render(data){
 	var pointsById = d3.map(points, function(d) { return d.point; });
 
 	/*------------------------------------------------------------------
-	 * Drawing hyperbolic edges within the vertices
+	 * Drawing internal (hyperbolic) edges within the vertices
 	 */
 	vertexGroupRotate
 	.selectAll(".hyperbolic")
@@ -611,7 +611,7 @@ function render(data){
 	}
 
 	// ******************************************************
-	// Rendering edges
+	// Rendering external edges
 	// ******************************************************
 	/*
 	 * Edges map
@@ -659,7 +659,6 @@ function render(data){
 	 	.attr("id", function(d){return d.id;})
 		.attr("marker-end","url(#marker-end)")
 		.attr("marker-start","url(#marker-start)")
-		.attr("stroke-dasharray", function(d) {if (d.topology=="spheric") {return "0.9";}})
 		.append("title")
 		.text(function(d){return d.source.info.xsl_element;});
 
@@ -1053,7 +1052,7 @@ function selectPoint(_pt) {
 		selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
 	}
 	//send bhb query position
-	eval(BHB_QUERY_POSITION.replace("$ID", pt.point));
+	eval(BHB_QUERY_POSITION.replace("$$ID", pt.point));
 	return Object.assign(pt, {topology:selectedEdge.datum().topology});
 }
 
