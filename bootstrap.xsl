@@ -72,6 +72,7 @@
 				<xsl:value-of select="$perspective/@username" />
 				<xsl:text>]</xsl:text>
 			</title>
+			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8" />
 			<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8" />
 			<link type="text/css" rel="stylesheet" href="sandbox/render.css" charset="utf-8" />

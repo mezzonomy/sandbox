@@ -30,8 +30,13 @@ function init_timeRangeSlider() {
     var minDate = new Date(historyDates[0].date);
     var maxDate = Date.now();
     // 2. sliders
-    var startDate = minDate;
-    var endDate = new Date(historyDates[historyDates.length -1].date);
+    if (!document.getElementById("explorer-bhb-from").dataset.bhbdate) {
+      var startDate = minDate;
+      var endDate = new Date(historyDates[historyDates.length -1].date);
+    } else {
+      var startDate = parseDateBhb(document.getElementById("explorer-bhb-from").dataset.bhbdate);
+      var endDate = parseDateBhb(document.getElementById("explorer-bhb-to").dataset.bhbdate);
+    }
     // 3. render the slider
     var divId = "explorer-time-slider";
     var width = document.getElementById(divId).parentNode.parentNode.clientWidth - 10;

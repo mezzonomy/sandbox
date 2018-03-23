@@ -32,7 +32,6 @@ var scene, //d3 object select scene
 		verticesbyHc=[],
 		vertices=[],
 		verticesPositionning,
-		edgesColored = false,
 		longclick_limit=500,
 		longclick_timer,
 		autonav_interval=300,
@@ -147,8 +146,10 @@ function render(data){
 
 	if (defs.empty()){
 		defs = scene.append("defs")
+		//Normal
 		defs.append("marker")
 			.attr("id", "marker-end")
+			.attr("class", "marker-std")
 			.attr("markerWidth", "10")
 			.attr("markerHeight", "10")
 			.attr("refX", "1")
@@ -156,9 +157,10 @@ function render(data){
 			.attr("orient", "auto")
 			.append("path")
 			.attr("d", "M 0 5 L 10 5")
-			.attr("stroke","black");
+			.attr("class","marker-std");
 		defs.append("marker")
 			.attr("id", "marker-start")
+			.attr("class", "marker-std")
 			.attr("markerWidth", "10")
 			.attr("markerHeight", "10")
 			.attr("refX", "9")
@@ -166,9 +168,10 @@ function render(data){
 			.attr("orient", "auto")
 			.append("path")
 			.attr("d", "M 0 5 L 10 5")
-			.attr("stroke","black");
+			.attr("class","marker-std");
 		defs.append("marker")
 			.attr("id", "marker-start-entry")
+			.attr("class", "marker-std")
 			.attr("markerWidth", "40")
 			.attr("markerHeight", "40")
 			.attr("refX", "10")
@@ -176,9 +179,10 @@ function render(data){
 			.attr("orient", "auto")
 			.append("path")
 			.attr("d", "M35 35 L5 20 L35 5 M5 20 L10 20")
-			.attr("stroke","black");
+			.attr("class","marker-std");
 		defs.append("marker")
 			.attr("id", "marker-end-entry")
+			.attr("class", "marker-std")
 			.attr("markerWidth", "40")
 			.attr("markerHeight", "40")
 			.attr("refX", "30")
@@ -186,8 +190,15 @@ function render(data){
 			.attr("orient", "auto")
 			.append("path")
 			.attr("d", "M5 35 L35 20 L5 5 M35 20 L30 20")
-			.attr("stroke","black");
-	}
+			.attr("class","marker-std");
+
+		//Duplicate for bhbLinks
+		var defsBhbLink = defs.selectAll("marker.marker-std").clone(true)
+			.attr("id", function(d) {return this.id + "-bhbLink";})
+			.attr("class", function(d) {return this.id.replace("-std", "bhbLink");});
+		defsBhbLink.selectAll("path")
+			.attr("class","marker-bhbLink");
+		}
 
 	// ******************************************************
 	// container
@@ -334,21 +345,7 @@ function render(data){
 			verticesPositionning.restart();
 		});
 	}
-	/*var btnEdgesColored = div_perspective.select("#btn-edgesColored");
-	if (btnEdgesColored.empty()) {
-		btnEdgesColored = div_perspective.append("button").attr("type","button").attr("class","btn btn-info").attr("id","btn-edgesColored").attr("value","uncolored").text("Color Edges");
-		btnEdgesColored.on("click", function(){
-			if (btnEdgesColored.attr("value") == "uncolored") {
-				edgesColored=true;
-				mainRender(data);
-				btnEdgesColored.attr("value","colored").text("Uncolored Edges");
-			} else {
-				edgesColored=false;
-				mainRender(data);
-				btnEdgesColored.attr("value","uncolored").text("Color Edges");
-			}
-		})
-	}*/
+
 	// ******************************************************
 	//	Dynamic colors and markers
 	// ******************************************************
@@ -378,56 +375,6 @@ function render(data){
 			d3.selectAll(".edges").classed("selected", false);}
 		);
 
-		if (edgesColored) {
-			tags.each(function(d,i) {
- 	 			tagsColor.push({tag:this.dataset.tagname.replace(":","_"), color:coloring_tags(i)})
- 	 			d3.select(this).select("span.tag-legend").classed(this.dataset.tagname.replace(":","_"), true);
- 	 			}
- 	 		);
- 	 		tagsColor.push({tag:"nocolor", color:"black"})
-
-			//create styles for coloring
-			addStyles(tagsColor);
-
-			//add defs with colors
-			var newStyledMarkerEnd = defs.selectAll("marker.end")
-			.data(tagsColor, function(d) {return d.tag;});
-
-			newStyledMarkerEnd.exit().remove();
-
-			newStyledMarkerEnd
-			.enter()
-			.append("marker")
-			.attr("id", function(d){return "marker-end-" + d.tag;})
-			.attr("class", function(d){return "end " + d.tag;})
-			.attr("markerWidth", "10")
-			.attr("markerHeight", "10")
-			.attr("refX", "1")
-			.attr("refY", "5")
-			.attr("orient", "auto")
-			.append("path")
-			.attr("d", "M 0 5 L 10 5")
-			.attr("class", function(d){return d.tag;});
-
-			var newStyledMarkerStart = defs.selectAll("marker.start")
-			.data(tagsColor, function(d) {return d.tag;});
-
-			newStyledMarkerStart.exit().remove();
-
-			newStyledMarkerStart
-			.enter()
-			.append("marker")
-			.attr("id", function(d){return "marker-start-" + d.tag;})
-			.attr("class", function(d){return "start " + d.tag;})
-			.attr("markerWidth", "10")
-			.attr("markerHeight", "10")
-			.attr("refX", "9")
-			.attr("refY", "5")
-			.attr("orient", "auto")
-			.append("path")
-			.attr("d", "M 0 5 L 10 5")
-			.attr("class", function(d){return d.tag;})
-		}
 	// ******************************************************
 	// Rendering vertices
 	// ******************************************************
@@ -687,16 +634,14 @@ function render(data){
 
 	 	var edgeLbl =  container.selectAll(".edgeLbl");
 
-		if (edgesColored) {
-			d3.selectAll(".edges")
-			.attr("class", function(d) {return this.classList.toString() + " " + d.tagnet;})
-			.attr("marker-end",function(d){return "url(#marker-end-" + d.tagnet + ")";})
-			.attr("marker-start",function(d){return "url(#marker-start-" + d.tagnet + ")";});
-			d3.selectAll(".edgeLbl")
-			.attr("class", function(d) {return this.classList.toString() + " " + d.tagnet;});
-		}
+		// ******************************************************
+		// Misc after drawing
+		// ******************************************************
 
-		/* Reselect the Edited point if any*/
+		/*
+		 * Reselect the Edited point if any
+		 */
+
 		if (document.getElementById(TEXT_TOOLBOX_ID + "-point").value) {
 			var ptId = document.getElementById(TEXT_TOOLBOX_ID + "-point").value;
 			var vtxId = "gvertex_" + d3.select("#" + ptId).datum().hc;
@@ -704,6 +649,13 @@ function render(data){
 			simulateClick(document.getElementById(ptId));
 		}
 
+		/*
+		 * Color all bhb:link edges
+		 */
+		 var bhbLinks = d3.selectAll(".edges").filter(function(d){return d.tagraw=="bhb:link"})
+		 bhbLinks.classed("bhbLink", true);
+		 bhbLinks.attr("marker-start", "url(#marker-start-bhbLink)");
+		 bhbLinks.attr("marker-end", "url(#marker-end-bhbLink)");
 	/* -----------------------------------------------------------------
 
 			FORCES AND TICKS
@@ -1029,13 +981,9 @@ function selectPoint(_pt) {
 	text_nav(pt);
 	// reinit prevously selected point
 	d3.selectAll(".viewed").classed("viewed",false);
-	if (!edgesColored) {
-		d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
-		d3.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
-	} else {
-		d3.selectAll("path.start").attr("marker-start", function(d){return "url(#marker-start-" + pt.tagnet + ")";}).classed("start",false);
-		d3.selectAll("path.end").attr("marker-end", function(d){return "url(#marker-end-" + pt.tagnet + ")";}).classed("end",false);
-	}
+	d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
+	d3.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
+
 	// open text toolbox and poupulates edit zone
 	if (!d3.select("#" + TEXT_TOOLBOX_ID).classed("opened")) {
 		d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
@@ -1159,13 +1107,8 @@ function text_nav(_datum){
 		d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", false).classed("closed", true);
 		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = null;
 		d3.selectAll(".viewed").classed("viewed",false);
-		if (!edgesColored) {
-			d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
-			d3.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
-		} else {
-			d3.selectAll("path.start").attr("marker-start", function(d){return "url(#marker-start-" + d.tagnet + ")";}).classed("start",false);
-			d3.selectAll("path.end").attr("marker-end", function(d){return "url(#marker-end-" + d.tagnet + ")";}).classed("end",false);
-		}
+		d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
+		d3.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
 		unselectVertices()
 	});
 }
@@ -1414,26 +1357,6 @@ function storeLocalVertexPositionning(_verticesbyHc){
 function storeLocalForcesStatus(){
 		localStorage.setItem("forcesStatus_json", JSON.stringify(forcesStatus));
 }
-
-
-/**
- * Add css classes in local document for coloring by tag
- * The html header node "style" must be set before
- *
- * @param _tagsColor {array} - array {tag: color:}
- * @returns {-} - add new classes on top
- */
-function addStyles(_tagsColor) {
-	var styleSheet = document.querySelector('#sandbox-styles').sheet;
-	var rules = d3.entries(styleSheet.cssRules);
-	_tagsColor.forEach(function (elt) {
-				var ruleExists = rules.find(function(e){return e.value.selectorText == "." + elt.tag.replace(/:/,"_")});
-				if (ruleExists) {styleSheet.deleteRule(Number(ruleExists.key));}
-				var colorStyle = '.' + elt.tag.replace(/:/,"_") + ' { stroke: ' + elt.color + '; color: ' +  elt.color + '; }';
-				styleSheet.insertRule(colorStyle, 0); // index 0 to add on the top
-	});
-}
-
 
 	// ******************************************************					_______________________________
 	// Applying Forces to elements

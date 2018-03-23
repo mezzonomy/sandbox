@@ -89,6 +89,12 @@ path {
 .planar {}
 .spheric{}
 
+path.bhbLink {
+	stroke: #777;
+}
+.marker-bhbLink {
+	stroke: #777;
+}
 
 path.selected {
 	stroke-width: 3px;
@@ -113,4 +119,8 @@ path.edited {
 .notdisplayed{
   opacity: 0;
 	pointer-events: none;
+}
+
+.marker-std {
+	stroke: black;
 }

@@ -1,26 +1,5 @@
-#popup {
-	color: #fff;
-	font: 14px "Bree Rg",sans-serif;
-	line-height: 1.45em;
-	text-shadow: 0 1px 2px rgba(34,0,1,0.6);
-	background-image: url('id-default.png');
-	height: 180px;
-	width: 180px;
-	padding: 68px 25px 0;
-	position:fixed;
-	top:35px;
-	left:380px;
-	z-index: 4;
-}
-
-#universe { /* fix : find a way to have 100% of the browser workspace without scroll bars!!! */
-	width: 99%;
-	height: 99%;
-	padding-right: 1px;
-	padding-left: 1px;
-	margin-right: auto;
-	margin-left: auto;
-	z-index:10;
+*, ::after, ::before {
+    box-sizing: border-box;
 }
 
 /* layout */
@@ -329,21 +308,46 @@ div.opened > .toolbox-header {
  div.closed > .toolbox-body{
 	display: none;
 }
+/*controls*/
+input[type=checkbox], input[type=radio] {
+    box-sizing: border-box;
+    padding: 0;
+}
+.form-check-input {
+    position: absolute;
+    margin-top: 1px;
+    margin-left: -1.25rem;
+    width: 1rem;
+    height: 1rem;
+}
+
+button, input, optgroup, select, textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+button, input {
+    overflow: visible;
+}
+
+label {
+    display: inline-block;
+    margin-bottom: .5rem;
+}
+
+
 /*user form*/
 form {
 	font-size: .7rem;
 }
 
-label {
-    display: inline-block;
-    margin-bottom: .1rem;
-}
-
 .form-control {
     display: block;
-    /*width: 100%;*/
+    width: 100%;
 		width: -webkit-fill-available;
-    /*padding: .375rem .75rem;*/
+    padding: .375rem .75rem;
     font-size: 1rem;
     line-height: 1.5;
     color: #495057;
@@ -527,4 +531,32 @@ table {
 	.badge.selected , .badge-clickable:hover {
 			background-color: black;
 	    color: white;
+	}
+
+
+	#popup {
+		width: 160px;
+		position:fixed;
+		top:30%;
+		left:15%;
+	}
+	#popup > form {
+		font-size: initial;
+	}
+
+	#login-logo {
+		position: fixed;
+		top: 10px;
+		left: 15%;
+		width: 160px;
+	}
+
+	#universe { /* fix : find a way to have 100% of the browser workspace without scroll bars!!! */
+		width: 99%;
+		height: 99%;
+		padding-right: 1px;
+		padding-left: 1px;
+		margin-right: auto;
+		margin-left: auto;
+		z-index:10;
 	}

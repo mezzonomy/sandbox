@@ -28,15 +28,20 @@
 		<html>
 			<head>
 				<title>mezzonomy</title>
+				<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 				<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8" />
 				<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8" />
 			</head>
-			<body background="sandbox/mezzonomy-logo-large.png">
+			<body>
+				<img id="app-logo" src="sandbox/sanbox_logo.svg" />
+				<div id="login-logo">
+					<h1>Sandbox</h1>
+				</div>
 				<div id="popup">
 					<label for="login">Login</label>
-					<input id="login" value="example"/>
+					<input id="login" value="example" class="form-control"/>
 					<label for="passwd">Mot de passe</label>
-					<input id="passwd" type="password"/>
+					<input id="passwd" type="password" class="form-control"/>
 					<button class="btn btn-primary"
 							onclick="_snd({bhb:'authentify',
 							login:  _get('login').value,
