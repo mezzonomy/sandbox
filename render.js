@@ -253,10 +253,16 @@ function render(data){
 			//reset zoom
 			btnResetZoom = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-zoom").text("zoom");
 			btnResetZoom.on("click", function(){
-				scene.transition()
-				.duration(750)
-				.call(zoom.transform, d3.zoomIdentity);
-				})
+				if (d3.select("#toolboxes").classed("graphical")) {
+					scene.transition()
+					.duration(750)
+					.call(zoom.transform, d3.zoomIdentity);
+				} else {
+					scene.transition()
+					.duration(750)
+					.call(zoom.transform, d3.zoomIdentity.scale(1/5));
+				}
+			})
 	}
 	var btnResetPosHistory = div_perspective.select("#btnReset-posHistory");
 	if (btnResetPosHistory.empty()) {
