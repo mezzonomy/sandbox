@@ -1186,6 +1186,48 @@ function unpinVertex(_vertex){
 /*
  * Misc functions & classes
  */
+ /**
+  * Switch view from graphical to text view
+  *
+  * @returns {integer} hascode - 32bit integer
+  */
+
+function switchView(){
+	if (d3.select("#toolboxes").classed("graphical")) { //swith to textual view
+		//Move the toolbox to top
+		d3.select("#toolboxes").classed("graphical", false).classed("textual", true);
+		d3.select("#placeholder").classed("graphical", false).classed("textual", true);
+		d3.selectAll(".toolbox").classed("upper-left", false).classed("upper-right", false).classed("lower-left", false).classed("lower-right", false).classed("nav-upper", true);
+		//Move graphic into menu content and vice versa
+		var currentParent = document.getElementById("placeholder");
+		var newParent = document.getElementById("text-bhb-content");
+		var newParentContent = document.getElementById("text-bhb-content").innerHTML;
+		newParent.innerHTML="";
+		newParent.appendChild(currentParent.childNodes[0]);
+		currentParent.innerHTML=newParentContent;
+		// Zoom on graphic
+		scene.transition()
+		.duration(750)
+		.call(zoom.transform, d3.zoomIdentity.scale(1/5));
+
+
+
+
+	} else { //swith to graphical view
+		//Move toolboxes to corners
+		d3.select("#toolboxes").classed("graphical", true).classed("textual", false);
+		d3.select("#placeholder").classed("graphical", true).classed("textual", false);
+		d3.select("#explorer").classed("nav-upper", false).classed("upper-left", true);
+		d3.select("#amendment").classed("nav-upper", false).classed("upper-right", true);
+		d3.select("#perspective").classed("nav-upper", false).classed("lower-left", true);
+		d3.select("#text").classed("nav-upper", false).classed("lower-right", true);
+	}
+}
+
+
+/*
+ * Misc functions & classes
+ */
 
 /**
  * Hash function Returns a integer value from a string with d2jb algo. If string

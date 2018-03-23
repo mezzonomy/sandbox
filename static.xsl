@@ -155,7 +155,7 @@
 			<div id="{$toolbox_ID}-time-slider"/>
 			<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from', '{bhb://the.hypertext.blockchain}to')/@key">
 				<xsl:variable name="key"  select="bhb:short_ns(.)"/>
-				<input id="{$toolbox_ID}-{translate(bhb:short_ns(.),':','-')}" 
+				<input id="{$toolbox_ID}-{translate(bhb:short_ns(.),':','-')}"
 					type="hidden" value=""
 					data-bhbquery="{bhb:query(.,'$$DATE')}"
 					data-bhbdate="{$perspective/@*[ name()=$key]}"/>
@@ -184,7 +184,7 @@
 	<xsl:variable name="toolbox_LBL">Amendment</xsl:variable>
 	<div id="{$toolbox_ID}" class="toolbox upper-right closed">
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
-			<p><xsl:value-of select="$toolbox_LBL"/> as <xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</p>
+			<p><xsl:value-of select="$toolbox_LBL"/><i class="small">&#160;as&#160;<xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</i></p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
 			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
@@ -222,6 +222,9 @@
 				<h6>Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="openModal(document.getElementById('{$toolbox_ID}-bhb-content').innerHTML,'Content','max-width: 90%; margin-top: 10px;');">
 				<span>&#8599;</span>
 				</button>
+				<button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="switchView();">
+			 <span>&#8621;</span>
+		 </button>
 				</h6>
 				<div id="{$toolbox_ID}-bhb-content" class="content-xml">
 					<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>

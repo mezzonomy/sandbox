@@ -85,13 +85,15 @@
 		<body>
 			<div id="loader" style="z-index: 1072; overflow-x: hidden; overflow-y: auto; position: fixed;top: 0; right: 0; bottom: 0; left: 0; display: block; background-color: rgb(0,0,0); background-color: rgba(33,33,33,.6);"/>
 			<div id="universe">
-				<xsl:call-template name="explorer"/>
-				<xsl:call-template name="perspective"/>
-				<xsl:call-template name="amendment">
-					<xsl:with-param name="role" select="'admin'" />
-				</xsl:call-template>
-				<xsl:call-template name="text"/>
-				<xsl:call-template name="placeholder"/>
+				<nav id="toolboxes" class="graphical">
+					<xsl:call-template name="explorer"/>
+					<xsl:call-template name="perspective"/>
+					<xsl:call-template name="amendment">
+						<xsl:with-param name="role" select="'admin'" />
+					</xsl:call-template>
+					<xsl:call-template name="text"/>
+				</nav>
+				<xsl:call-template name="placeholder" class="graphical"/>
 			</div>
 		</body>
 	</html>

@@ -99,6 +99,20 @@ span.braille-sign {
 	    background-color: #8bc34a;
 }
 
+#toolboxes.graphical {}
+#toolboxes.textual {
+	position: relative;
+  top:10px;
+}
+
+#placholder.graphical {}
+#placeholder.textual {
+  float:left;
+  height: auto;
+  padding-top: 1em;
+  padding-left: 10px;
+}
+
 div.upper-left {
 	position: absolute;
 	top:10px;
@@ -111,19 +125,23 @@ div.upper-right {
 	right:10px;
 	width:200px;
 }
-
 div.lower-left {
 	position: absolute;
 	bottom:10px;
 	left:10px;
 	width:200px;
 }
-
 div.lower-right {
 	position: absolute;
 	bottom:10px;
 	right:10px;
 	width:200px;
+}
+div.nav-upper {
+  width: 200px;
+  float:left;
+  margin-left: 10px;
+  margin-bottom: 10px;
 }
 
 .zoom11 {
