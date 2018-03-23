@@ -95,6 +95,9 @@
 				</nav>
 				<xsl:call-template name="placeholder" class="graphical"/>
 			</div>
+			<div id="bhb-situation" class="hidden">
+					<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
+			</div>
 		</body>
 	</html>
 </xsl:template>

@@ -226,8 +226,8 @@
 			 <span>&#8621;</span>
 		 </button>
 				</h6>
-				<div id="{$toolbox_ID}-bhb-content" class="content-xml">
-					<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
+				<div id="mini-placeholder">
+					<div id="{$toolbox_ID}-bhb-content" class="content-xml"/>
 				</div>
 				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}position')/@key">
 					<xsl:variable name="oracle">$$ID</xsl:variable>

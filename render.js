@@ -4,8 +4,7 @@
  * @author mezzònomy
  */
 
-const SCENE_COLOR = "none",
-			POINT_RADIUS = +0,
+const POINT_RADIUS = +0,
 			VERTEX_RADIUS = +30,
 			VERTEX_RADIUS_M = 10, //The vertex radius is multiplied by ((this ratio) * sqrt(point number))
 			VERTEX_COMPUTATION_MAX_ITERATION = 100, // Limits the vertex computation iterations
@@ -132,11 +131,15 @@ function render(data){
 	// ******************************************************
 	// Scene definition
 	// ******************************************************
-	scene = d3.select("#placeholder svg");
+	scene = d3.select("svg#scene");
 
 	// ------- no scene handler
 	if (scene.empty()){
-		scene = d3.select("#placeholder").append("svg").attr("id", "scene");
+		if (d3.select("#toolboxes").classed("graphical")) {
+			scene = d3.select("#placeholder").append("svg").attr("id", "scene");
+		} else {
+			scene = d3.select("#mini-placeholder").append("svg").attr("id", "scene");
+		}
 	}
 	svgScene = document.getElementById("scene");
 	// ******************************************************
@@ -1001,6 +1004,7 @@ function selectPoint(_pt) {
 	}
 	//send bhb query position
 	eval(BHB_QUERY_POSITION.replace("$$ID", pt.point));
+	document.getElementById("text-bhb-content").innerHTML = document.getElementById("bhb-situation").innerHTML;
 	return Object.assign(pt, {topology:selectedEdge.datum().topology});
 }
 
@@ -1200,8 +1204,8 @@ function switchView(){
 		d3.selectAll(".toolbox").classed("upper-left", false).classed("upper-right", false).classed("lower-left", false).classed("lower-right", false).classed("nav-upper", true);
 		//Move graphic into menu content and vice versa
 		var currentParent = document.getElementById("placeholder");
-		var newParent = document.getElementById("text-bhb-content");
-		var newParentContent = document.getElementById("text-bhb-content").innerHTML;
+		var newParent = document.getElementById("mini-placeholder");
+		var newParentContent = document.getElementById("mini-placeholder").innerHTML;
 		newParent.innerHTML="";
 		newParent.appendChild(currentParent.childNodes[0]);
 		currentParent.innerHTML=newParentContent;
@@ -1209,10 +1213,6 @@ function switchView(){
 		scene.transition()
 		.duration(750)
 		.call(zoom.transform, d3.zoomIdentity.scale(1/5));
-
-
-
-
 	} else { //swith to graphical view
 		//Move toolboxes to corners
 		d3.select("#toolboxes").classed("graphical", true).classed("textual", false);
@@ -1222,7 +1222,7 @@ function switchView(){
 		d3.select("#perspective").classed("nav-upper", false).classed("lower-left", true);
 		d3.select("#text").classed("nav-upper", false).classed("lower-right", true);
 		//Move graphic into menu content and vice versa
-		var currentParent = document.getElementById("text-bhb-content");
+		var currentParent = document.getElementById("mini-placeholder");
 		var newParent = document.getElementById("placeholder");
 		var newParentContent = document.getElementById("placeholder").innerHTML;
 		newParent.innerHTML="";
