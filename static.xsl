@@ -154,9 +154,13 @@
 			</div>
 			<div id="{$toolbox_ID}-time-slider"/>
 			<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from', '{bhb://the.hypertext.blockchain}to')/@key">
-				<input id="{$toolbox_ID}-{translate(bhb:short_ns(.),':','-')}" type="hidden" value="" data-bhbquery="{bhb:query(.,'$$DATE')}"/>
+				<xsl:variable name="key"  select="bhb:short_ns(.)"/>
+				<input id="{$toolbox_ID}-{translate(bhb:short_ns(.),':','-')}" 
+					type="hidden" value=""
+					data-bhbquery="{bhb:query(.,'$$DATE')}"
+					data-bhbdate="{$perspective/@*[ name()=$key]}"/>
 			</xsl:for-each>
-			<ol style="display:none">
+			<ol style="font-size:6pt"><!--style="display:none"-->
 				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from')/@key">
 					<xsl:for-each select="$perspective/bhb:solid/bhb:signet">
 						<xsl:apply-templates select="bhb:block(@id)" mode="history-ol">
@@ -169,19 +173,7 @@
 	</div>
 </xsl:template>
 
-<xsl:template match="bhb:document" mode="history">
-	<option value="0">
-		<xsl:text>Genesis</xsl:text>
-	</option>
-</xsl:template>
-
-<xsl:template match="bhb:block" mode="history">
-	<option value="{@on:clock}">
-		<xsl:value-of select="@on:clock"/>
-	</option>
-</xsl:template>
-
-<xsl:template match="bhb:block" mode="history-ol">
+<xsl:template match="bhb:block|bhb:document" mode="history-ol">
 		<xsl:param name="toolbox_ID"/>
 		<li class="{$toolbox_ID}-history-date"><xsl:value-of select="@on:clock"/></li>
 </xsl:template>
