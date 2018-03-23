@@ -1221,6 +1221,18 @@ function switchView(){
 		d3.select("#amendment").classed("nav-upper", false).classed("upper-right", true);
 		d3.select("#perspective").classed("nav-upper", false).classed("lower-left", true);
 		d3.select("#text").classed("nav-upper", false).classed("lower-right", true);
+		//Move graphic into menu content and vice versa
+		var currentParent = document.getElementById("text-bhb-content");
+		var newParent = document.getElementById("placeholder");
+		var newParentContent = document.getElementById("placeholder").innerHTML;
+		newParent.innerHTML="";
+		newParent.appendChild(currentParent.childNodes[0]);
+		currentParent.innerHTML=newParentContent;
+		// Zoom on graphic
+		scene.transition()
+		.duration(750)
+		.call(zoom.transform, d3.zoomIdentity);
+
 	}
 }
 
