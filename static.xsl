@@ -59,9 +59,10 @@
 </xsl:template>
 
 <xsl:template name="perspective">
+	<xsl:param name="navorder"/>
 	<xsl:variable name="toolbox_ID">perspective</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Perspective</xsl:variable>
-	<div id="{$toolbox_ID}" class="toolbox lower-left closed">
+	<div id="{$toolbox_ID}" class="toolbox lower-left closed" order="{$navorder}">
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
@@ -120,9 +121,10 @@
 </xsl:template>
 
 <xsl:template name="explorer">
+	<xsl:param name="navorder"/>
 	<xsl:variable name="toolbox_ID">explorer</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Explorer</xsl:variable>
-	<div id="{$toolbox_ID}" class="toolbox upper-left closed">
+	<div id="{$toolbox_ID}" class="toolbox upper-left closed" order="{$navorder}">
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
@@ -179,10 +181,11 @@
 </xsl:template>
 
 <xsl:template name="amendment">
+	<xsl:param name="navorder"/>
 	<xsl:param name="role"/>
 	<xsl:variable name="toolbox_ID">amendment</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Amendment</xsl:variable>
-	<div id="{$toolbox_ID}" class="toolbox upper-right closed">
+	<div id="{$toolbox_ID}" class="toolbox upper-right closed" order="{$navorder}">
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/><i class="small">&#160;as&#160;<xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</i></p>
 		</div>
@@ -211,9 +214,10 @@
 </xsl:template>
 
 <xsl:template name="text">
+	<xsl:param name="navorder"/>
 	<xsl:variable name="toolbox_ID">text</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Text</xsl:variable>
-	<div id="{$toolbox_ID}" class="toolbox lower-right closed">
+	<div id="{$toolbox_ID}" class="toolbox lower-right closed" order="{$navorder}">
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
