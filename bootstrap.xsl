@@ -92,14 +92,15 @@
 				data-bhbposition="{bhb:default($perspective/@bhb:position, $default-position)}"
 				>
 				<nav id="toolboxes" class="graphical">
-					<xsl:call-template name="explorer"/>
-					<xsl:call-template name="perspective"/>
-					<xsl:call-template name="amendment">
-						<xsl:with-param name="role" select="'admin'" />
-					</xsl:call-template>
-					<xsl:call-template name="text"/>
+					<xsl:call-template name="explorer"><xsl:with-param name="navorder" select="1"/></xsl:call-template>
+					<xsl:call-template name="perspective"><xsl:with-param name="navorder" select="2"/></xsl:call-template>
+					<xsl:call-template name="amendment"><xsl:with-param name="navorder" select="3"/><xsl:with-param name="role" select="'admin'" /></xsl:call-template>
+					<xsl:call-template name="text"><xsl:with-param name="navorder" select="4"/></xsl:call-template>
 				</nav>
 				<xsl:call-template name="placeholder" class="graphical"/>
+			</div>
+			<div id="bhb-situation" class="hidden">
+					<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
 			</div>
 		</body>
 	</html>

@@ -101,15 +101,19 @@ span.braille-sign {
 
 #toolboxes.graphical {}
 #toolboxes.textual {
-	position: relative;
+  position: sticky;
   top:10px;
+  height:100px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items: baseline;
+  align-content: flex-start;
 }
 
 #placholder.graphical {}
 #placeholder.textual {
-  float:left;
-  height: auto;
-  padding-top: 1em;
   padding-left: 10px;
 }
 
@@ -138,10 +142,17 @@ div.lower-right {
 	width:200px;
 }
 div.nav-upper {
+  /*flex-grow: 1;*/
+  flex-shrink:1;
+  flex-basis:200px;
+  /*z-index: 500;*/
+  /*align-self: flex-start;*/
+  /*
   width: 200px;
   float:left;
   margin-left: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 10px;*/
+
 }
 
 .zoom11 {
@@ -149,8 +160,10 @@ div.nav-upper {
 		opacity:.5;
 }
 
-div.content-xml {
-	/*max-height: 25em;*/
+div#placeholder > div.content-xml {
+}
+
+div#mini-placeholder > div.content-xml {
 	overflow-y: scroll;
 	height: 15em;
 	line-height: 1;
