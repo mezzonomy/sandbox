@@ -77,10 +77,17 @@ circle.viewed {
 }
 
 path {
-	fill: none;
+	fill:none;
 	stroke-width: 1px;
 	stroke: black;
 	pointer-events: none;
+}
+
+path.notselectable {
+	fill:none;
+	pointer-events: none;
+	user-select: none;
+	cursor: none;
 }
 .hyperbolic {
 	pointer-events: visible;

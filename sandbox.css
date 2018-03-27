@@ -99,8 +99,9 @@ span.braille-sign {
 	    background-color: #8bc34a;
 }
 
-#toolboxes.graphical {}
-#toolboxes.textual {
+#toolboxes.graph {
+}
+#toolboxes.text {
   position: sticky;
   top:10px;
   height:100px;
@@ -112,8 +113,10 @@ span.braille-sign {
   align-content: flex-start;
 }
 
-#placholder.graphical {}
-#placeholder.textual {
+#workspace.graph {
+  height: 100%
+}
+#workspace.text {
   padding-left: 10px;
 }
 
@@ -142,17 +145,8 @@ div.lower-right {
 	width:200px;
 }
 div.nav-upper {
-  /*flex-grow: 1;*/
   flex-shrink:1;
   flex-basis:200px;
-  /*z-index: 500;*/
-  /*align-self: flex-start;*/
-  /*
-  width: 200px;
-  float:left;
-  margin-left: 10px;
-  margin-bottom: 10px;*/
-
 }
 
 .zoom11 {
@@ -160,10 +154,10 @@ div.nav-upper {
 		opacity:.5;
 }
 
-div#placeholder > div.content-xml {
+div#workspace > div#bhb-text {
 }
 
-div#mini-placeholder > div.content-xml {
+div#mini-workspace > div#bhb-text {
 	overflow-y: scroll;
 	height: 15em;
 	line-height: 1;

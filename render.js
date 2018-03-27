@@ -4,212 +4,101 @@
  * @author mezzònomy
  */
 
+// Global Constants
 const POINT_RADIUS = +0,
 			VERTEX_RADIUS = +30,
 			VERTEX_RADIUS_M = 10, //The vertex radius is multiplied by ((this ratio) * sqrt(point number))
 			VERTEX_COMPUTATION_MAX_ITERATION = 100, // Limits the vertex computation iterations
 			BEYOND=800, // to get infinite line for spheric edges
 			ARC_INNER_RADIUS=.1, // Proportional to VERTEX_RADIUS. It is the radius of the inner donut circle of a selected vertex
+			// Elements & seelctions
 			AMEND_TOOLBOX_ID = "amendment",
 			AMEND_EDITZONE_ID = "amendment-editzone",
 			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\nINSERT XML\n</bhb:link>",
-			TEXT_TOOLBOX_ID = "text";
+			TEXT_TOOLBOX_ID = "text",
+			// Misc
+			LONGCLICK_LIMIT=500,
+			AUTONAV_INTERVAL=300,
+			// Forces constants
+			DEF_ALPHA = 1, // forces default alpha [0-1] default 1
+			FASTER_DECAY = 1 - Math.pow(0.001, 1 / 100), // accelerate forces when dragging, with 100 ticks
+			DEF_DECAY = 1 - Math.pow(0.001, 1 / 300), // Default decay value for 300 ticks
+			ALLPINNED_DECAY = 1 - Math.pow(0.001, 1 / 50), // Decay when all vertices are pinned (ie. reloading)
+			REHEAT_ALPHATARGET = .3, // Non 0 to maintain heated
+			DEF_ALPHATARGET = 0;
 
-const BHB_QUERY_POSITION = 	"_snd({bhb:'query', ['{bhb://the.hypertext.blockchain}position']:'$$ID'})";
-
-
-var scene, //d3 object select scene
-		svgScene, //dom object byid scene
-		def_alpha = 1, // [0-1] default 1
-		faster_decay = 1 - Math.pow(0.001, 1 / 100), // accelerate forces when dragging
-		normal_decay = 1 - Math.pow(0.001, 1 / 300),
-		allpinned_decay = 1 - Math.pow(0.001, 1 / 50), // decay when all vertices are pinned (ie. reloading)
-		reheat_alphaTarget = .3, // Non 0 to maintain heated
-		normal_alphaTarget = 0,
-		zoom,
-		vertexLastPosition=[],
-		verticesbyHc=[],
-		vertices=[],
-		verticesPositionning,
-		longclick_limit=500,
-		longclick_timer,
-		autonav_interval=300,
-		navPointStop=false,
-		forcesStatusDef={collide:{status:true},center:{status:true},charge:{status:true}},
-		forcesStatus={};
-
-
-function dragstarted(d) {
-	d3.event.sourceEvent.stopPropagation();
-	if (!d3.event.active) { verticesPositionning.alphaTarget(reheat_alphaTarget).alphaDecay(faster_decay).restart();}
-	d.fx = d.x;
-	d.fy = d.y;
-	//console.log("VertexDragEvent started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-}
-
-function dragged(d) {
-	d.fx = d3.event.x;
-	d.fy = d3.event.y;
-	d3.select(this).classed("dragging", true);
-	//console.log("VertexDragEvent dragged on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-}
-
-function dragended(d) {
-	if (!d3.event.active) {
-		verticesPositionning.alphaTarget(normal_alphaTarget).alphaDecay(normal_decay);
-	}
-	//d.fx = null, d.fy = null;
-	// fixed last place
-	d.fx = d.x;
-	d.fy = d.y;
-	d3.select(this).classed("dragging", false);
-	pinVertex(this.id);
-	storeLocalVertexPositionning(verticesbyHc);
-	//console.log("VertexDragEvent ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-}
-
-function arcDragStarted(d) {
-	d3.event.sourceEvent.stopPropagation();
-	d3.select("#" + AMEND_EDITZONE_ID).attr("placeholder","drag the selected arc here to amend it !");
-	d3.select(this).classed("dragging",true)
-	d3.select("#" + AMEND_EDITZONE_ID).classed("targeted", true);
-	selectPoint(d.point);
-	// TODO: fix adding dataTransfert API to drag/drop outside the browser
-	//console.log("arcDragStarted started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-}
-
-function arcDragged(d) {
-	d3.select(this).attr("transform", "translate("+  d3.event.x + "," + d3.event.y + ")");
-	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
-		d3.select("#" + AMEND_EDITZONE_ID).classed("zoom11", true);
-	} else {
-		d3.select("#" + AMEND_EDITZONE_ID).classed("zoom11", false);
-	}
-	if (d3.event.sourceEvent.target.id == AMEND_TOOLBOX_ID) {
-		if (!d3.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
-			d3.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
-		}
-	}
-	//d3.select(this).classed("dragging", true);
-	//console.log("arcDragged dragged on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-}
-
-function arcDragEnded(d) {
-	//d3.select(this).classed("dragging", false);
-	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
-		alertInit();
-		var path = d3.event.subject.path;
-		var order = d3.event.subject.order;
-		document.getElementById(AMEND_TOOLBOX_ID + "-point").value = d.point;
-		document.getElementById(AMEND_TOOLBOX_ID + "-next").value = d.next;
-		document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
-	}
-	d3.select("#" + AMEND_EDITZONE_ID)
-	.classed("targeted", false).classed("zoom11", false)
-	.on("focus",function(d){
-		d3.selectAll(".arc.edited").classed("edited",false);
-		d3.select(this).classed("edited",true);
-	});
-	d3.select(this).attr("transform", null); //return arc to initial position
-	//console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-}
+// Global variables
+var D3_UNIVERSE = d3.select("#universe"),
+		D3_SCENE = D3_UNIVERSE.select("svg#scene"), //svg selection
+		DOM_SCENE = document.getElementById("scene"), // Dom object byid scene (maybe null if no scene yet)
+		PERSPECTIVE_TOOLBOX_FOOTER = D3_UNIVERSE.select("#perspective-footer"), // Where to add buttons and log in the perspective toolbox
+		CURRENT_BHB_POSITION,
+		CURRENT_BHB_MODE,
+		ZOOM = d3.zoom(), // d3 zoom
+		VERTEX_LAST_POSITION=[], // array of vertices last positions and rotations
+		VERTICES_BY_HC=[], // d3 map of vertices indexed by Hash code (for naming svg groups)
+		VERTICES=[], //array of vertices computed from DATA matrix points
+		VERTICES_POSITIONNING,
+		LONGCLICK_TIMER,
+		NAVPOINT_STOP=false,
+		FORCES_STATUS_DEF={collide:{status:true},center:{status:true},charge:{status:true}},
+		FORCES_STATUS={};
 
 /***********************************************************************
 ***********************************************************************/
-/*
+/**
  * Main render function. Called each time by the engine via websockets
- * @param data {array} Array of QA points
+ * @param _data {array} Array of QA points
+ * @param _diff {boolean} true if data array of point has changed
  * @returns a svg display of the vertices
  */
 
-function render(data){
+function render(_data, _diff){
+	// if diff is true, data has changed
+	if (!_diff) console.log("@ ----- Reload same matrix ----------------------------------------------");
+	if (_diff) console.log("@ ----- Reload with point matrix change ---------------------------------");
+
 	// ******************************************************
-	// Toolbox init
+	// Inits in diffs and not diffs
 	// ******************************************************
 	init_timeRangeSlider();
+	CURRENT_BHB_POSITION=document.getElementById("universe").dataset.bhbposition;
+	CURRENT_BHB_MODE=document.getElementById("universe").dataset.bhbmode;
+  if (!_diff) selectPoint();
+
+	// ******************************************************
+	// Beyond this point executed only if diffs in matrix
+	// ******************************************************
+	if (!_diff) return false;
 
 	// ******************************************************
 	// Scene definition
 	// ******************************************************
-	scene = d3.select("svg#scene");
-
-	// ------- no scene handler
-	if (scene.empty()){
-		if (d3.select("#toolboxes").classed("graphical")) {
-			scene = d3.select("#placeholder").append("svg").attr("id", "scene");
+	if (D3_SCENE.empty()){
+		if (CURRENT_BHB_MODE=='graph') {
+			D3_SCENE = D3_UNIVERSE.select("#workspace").append("svg").attr("id", "scene");
 		} else {
-			scene = d3.select("#mini-placeholder").append("svg").attr("id", "scene");
+			D3_SCENE = D3_UNIVERSE.select("#mini-workspace").append("svg").attr("id", "scene");
 		}
 	}
-	svgScene = document.getElementById("scene");
+	DOM_SCENE = document.getElementById("scene");
 	// ******************************************************
 	// svg definitions
 	// ******************************************************
-	var defs= scene.select("defs");
+	var defs= D3_SCENE.select("defs");
 
 	if (defs.empty()){
-		defs = scene.append("defs")
-		//Normal
-		defs.append("marker")
-			.attr("id", "marker-end")
-			.attr("class", "marker-std")
-			.attr("markerWidth", "10")
-			.attr("markerHeight", "10")
-			.attr("refX", "1")
-			.attr("refY", "5")
-			.attr("orient", "auto")
-			.append("path")
-			.attr("d", "M 0 5 L 10 5")
-			.attr("class","marker-std");
-		defs.append("marker")
-			.attr("id", "marker-start")
-			.attr("class", "marker-std")
-			.attr("markerWidth", "10")
-			.attr("markerHeight", "10")
-			.attr("refX", "9")
-			.attr("refY", "5")
-			.attr("orient", "auto")
-			.append("path")
-			.attr("d", "M 0 5 L 10 5")
-			.attr("class","marker-std");
-		defs.append("marker")
-			.attr("id", "marker-start-entry")
-			.attr("class", "marker-std")
-			.attr("markerWidth", "40")
-			.attr("markerHeight", "40")
-			.attr("refX", "10")
-			.attr("refY", "20")
-			.attr("orient", "auto")
-			.append("path")
-			.attr("d", "M35 35 L5 20 L35 5 M5 20 L10 20")
-			.attr("class","marker-std");
-		defs.append("marker")
-			.attr("id", "marker-end-entry")
-			.attr("class", "marker-std")
-			.attr("markerWidth", "40")
-			.attr("markerHeight", "40")
-			.attr("refX", "30")
-			.attr("refY", "20")
-			.attr("orient", "auto")
-			.append("path")
-			.attr("d", "M5 35 L35 20 L5 5 M35 20 L30 20")
-			.attr("class","marker-std");
-
-		//Duplicate for bhbLinks
-		var defsBhbLink = defs.selectAll("marker.marker-std").clone(true)
-			.attr("id", function(d) {return this.id + "-bhbLink";})
-			.attr("class", function(d) {return this.id.replace("-std", "bhbLink");});
-		defsBhbLink.selectAll("path")
-			.attr("class","marker-bhbLink");
+		defs = D3_SCENE.append("defs");
+		createMarkers(defs);
 		}
 
 	// ******************************************************
 	// container
 	// ******************************************************
-	var container = scene.select("#container");
+	var container = D3_SCENE.select("#container");
 
 	if (container.empty()){
-		container = scene.append("g")
+		container = D3_SCENE.append("g")
 		.attr("id", "container")
 		.attr("class", "container");
 	}
@@ -217,12 +106,9 @@ function render(data){
 	// ******************************************************
 	// zoom
 	// ******************************************************
+	ZOOM.scaleExtent([1/8, 8]).on("zoom", zoomed);
 
-	zoom = d3.zoom()
-	.scaleExtent([1/8, 8])
-	.on("zoom", zoomed);
-
-	scene.call(zoom)
+	D3_SCENE.call(ZOOM)
 	.on("click", function(d) {
 		unselectVertices() //unselect vertices
 		//console.log("Click on background:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
@@ -236,207 +122,81 @@ function render(data){
 	// ******************************************************
 	// get forces settings from localstore
 	// ******************************************************
-
-	forcesStatus = JSON.parse(localStorage.getItem("forcesStatus_json"));
-	if (!forcesStatus) {
-		forcesStatus = forcesStatusDef;
+	FORCES_STATUS = JSON.parse(localStorage.getItem("forcesStatus_json"));
+	if (!FORCES_STATUS) {
+		FORCES_STATUS = FORCES_STATUS_DEF;
 	}
 
 	// ******************************************************
-	// perspective buttons
+	// perspective ctrl buttons
 	// ******************************************************
-	//TODO: dev mode cheat
-	// Add controls to perspective
-	var div_perspective = d3.select("#perspective-footer");
-	var btnResetZoom = div_perspective.select("#btnReset-zoom");
-	if (btnResetZoom.empty()) {
-			//reset zoom
-			btnResetZoom = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-zoom").text("zoom");
-			btnResetZoom.on("click", function(){
-				if (d3.select("#toolboxes").classed("graphical")) {
-					scene.transition()
-					.duration(750)
-					.call(zoom.transform, d3.zoomIdentity);
-				} else {
-					scene.transition()
-					.duration(750)
-					.call(zoom.transform, d3.zoomIdentity.scale(1/5));
-				}
-			})
-	}
-	var btnResetPosHistory = div_perspective.select("#btnReset-posHistory");
-	if (btnResetPosHistory.empty()) {
-			//reset zoom
-			btnResetPosHistory = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-posHistory").text("reset");
-			btnResetPosHistory.on("click", function(){
-				verticesPositionning.stop();
-				localStorage.removeItem("vertexLastPosition_json");
-				unpinVertices();
-				verticesPositionning.alpha(def_alpha).alphaDecay(normal_decay).restart();
-        return;
-			})
-	}
-	var btnstopAnimation = div_perspective.select("#btn-stop-animation");
-	if (btnstopAnimation.empty()) {
-		btnstopAnimation = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-stop-animation").attr("value","stop").text("freeze");
-		btnstopAnimation.on("click", function(){
-			verticesPositionning.stop();
-		});
-	}
-	var btnToggleCollide = div_perspective.select("#btn-toggle-collide");
-	if (btnToggleCollide.empty()) {
-		btnToggleCollide = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-collide")
-		if (forcesStatus.collide.status) {
-			btnToggleCollide.attr("value","stop").text("set collide:off");
-		} else {
-			btnToggleCollide.attr("value","start").text("set collide:on");
-		}
-		btnToggleCollide.on("click", function(){
-			if (btnToggleCollide.attr("value") == "stop") {
-				verticesPositionning.force("collide", null);
-				btnToggleCollide.attr("value","start").text("set collide:on");
-				forcesStatus.collide.status=false;
-			} else {
-				verticesPositionning.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;}));
-				btnToggleCollide.attr("value","stop").text("set collide:off");
-				forcesStatus.collide.status=true;
-			}
-			storeLocalForcesStatus();
-			verticesPositionning.alpha(def_alpha);
-			verticesPositionning.restart();
-		});
-	}
-	var btnToggleCenter = div_perspective.select("#btn-toggle-center");
-	if (btnToggleCenter.empty()) {
-		btnToggleCenter = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-center")
-		if (forcesStatus.center.status) {
-			btnToggleCenter.attr("value","stop").text("set center:off");
-		} else {
-			btnToggleCenter.attr("value","start").text("set center:on");
-		}
-		btnToggleCenter.on("click", function(){
-			if (btnToggleCenter.attr("value") == "stop") {
-				verticesPositionning.force("center", null);
-				btnToggleCenter.attr("value","start").text("set center:on");
-				forcesStatus.center.status=false;
-			} else {
-				var xc= scene.property("clientWidth") / 2;
-				var yc= scene.property("clientHeight") / 2;
-				verticesPositionning.force("center", d3.forceCenter(xc,yc));
-				btnToggleCenter.attr("value","stop").text("set center:off");
-				forcesStatus.center.status=true;
-			}
-			storeLocalForcesStatus();
-			verticesPositionning.alpha(def_alpha);
-			verticesPositionning.restart();
-		});
-	}
-	var btnToggleCharge = div_perspective.select("#btn-toggle-charge");
-	if (btnToggleCharge.empty()) {
-		btnToggleCharge = div_perspective.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-charge")
-		if (forcesStatus.charge.status) {
-			btnToggleCharge.attr("value","stop").text("set charge:off");
-		} else {
-			btnToggleCharge.attr("value","start").text("set charge:on");
-		}
-		btnToggleCharge.on("click", function(){
-			if (btnToggleCharge.attr("value") == "stop") {
-				verticesPositionning.force("charge", null);
-				btnToggleCharge.attr("value","start").text("set charge:on");
-				forcesStatus.charge.status=false;
-			} else {
-				verticesPositionning.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));
-				btnToggleCharge.attr("value","stop").text("set charge:off");
-				forcesStatus.charge.status=true;
-			}
-			storeLocalForcesStatus();
-			verticesPositionning.alpha(1);
-			verticesPositionning.restart();
-		});
-	}
+	AddButtonsToPerspective();
 
 	// ******************************************************
 	//	Dynamic colors and markers
 	// ******************************************************
-	// add a style id="sandbox-styles" section to the header
-	var style = d3.select("#sandbox-styles");
-
-	if (style.empty()){
-		d3.select("#head").append("style").attr("id", "sandbox-styles");
-	}
-
 	// define coloring scheme
 	var coloring_arcs = d3.scaleOrdinal(d3.schemeBlues[9]);
 	var coloring_tags = d3.scaleOrdinal(d3.schemeCategory20);
 
-	/*------------------------------------------------------------------
-	 * Map of tags color and add selection on hover
-	 */
+	//Map of tags color and add selection on hover
 	 var tagsColor=[];
-	 var tags = d3.select("#perspective").selectAll("span.badge");
+	 var tags = D3_UNIVERSE.select("#perspective").selectAll("span.badge");
 
 		tags.on("mouseover", function(d){
-			d3.selectAll(".edges").classed("selected", false);
+			D3_SCENE.selectAll(".edges").classed("selected", false);
 			var currentTag =  this.dataset.tagname.replace(":","_");
-			d3.selectAll(".edges").filter(function(e){return e.tagnet == currentTag;}).classed("selected", true);}
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet == currentTag;}).classed("selected", true);}
 		);
 		tags.on("mouseout", function(d){
-			d3.selectAll(".edges").classed("selected", false);}
+			D3_SCENE.selectAll(".edges").classed("selected", false);}
 		);
+
+	// ******************************************************
+	// Computing vertices
+	// ******************************************************
+	// compute vertices from QA points and create a vertex map
+	VERTICES = vertexComputation(_data);
+	VERTICES_BY_HC = d3.map(VERTICES, function(d) {return d.hc;});
 
 	// ******************************************************
 	// Rendering vertices
 	// ******************************************************
+	// Entering a svg group for each vertex (for creating a logical group and a group drag behaviour)
+	var newVertexGroup = container.selectAll(".gvertex")
+	.data(VERTICES, function(d){return "gvertex_" + d.hc;});
 
-	// compute vertices from QA points and create a vertex map
+	// Exit removed vertices
+	newVertexGroup.exit().remove();
 
-	vertices = vertexComputation(data);
-	verticesbyHc = d3.map(vertices, function(d) {return d.hc;});
+	// Computing new vertices
+	newVertexGroup
+	.enter()
+	.append("g")
+	.attr("class", "gvertex")
+	.attr("id", function(d) {return "gvertex_" + d.hc;})
+	.attr("vertex", function(d) {return d.hc;})
+	.attr("pointNumber", function(d) {return d.pc;});
 
-	/*
-	 * #D3_PATTERN# synchronizing vertex
-	 */
+	// Selecting all displayed vertex groups
+	var vertexGroup = container.selectAll(".gvertex");
 
-		// Entering a svg group for each vertex (for creating a logical group and a group drag behaviour)
-		// linking data
+	// Add drag drop listener
+	vertexGroup.call(d3.drag()
+	.on("start", dragstarted)
+	.on("drag", dragged)
+	.on("end", dragended));
 
-		var newVertexGroup = container.selectAll(".gvertex")
-		.data(vertices, function(d){return "gvertex_" + d.hc;});
-
-		// Exit removed vertices
-		newVertexGroup.exit().remove();
-
-		// Computing new vertices
-		newVertexGroup
-		.enter()
-		.append("g")
-		.attr("class", "gvertex")
-		.attr("id", function(d) {return "gvertex_" + d.hc;})
-		.attr("vertex", function(d) {return d.hc;})
-		.attr("pointNumber", function(d) {return d.pc;});
-
-		// Selecting all displayed vertex groups
-		var vertexGroup = container.selectAll(".gvertex");
-
-		vertexGroup.call(d3.drag()
-				.on("start", dragstarted)
-				.on("drag", dragged)
-				.on("end", dragended));
-
-	/*
-	 * ----------------------------------------------------------------
-	 */
-
-	/* Not Always preceeded by a drag started/drag ended */
+	// Add Click to select on vertices
 	vertexGroup.on("click", function(){ //Add click for selecting vertices
 		d3.event.stopPropagation(); //otherwise clicks on background which unselect nodes
 		selectVertex(this);
 		//console.log("VertexClikEvent on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 	})
 
-	/*
-	 * ----------------------------------------------------------------
-	 */
+	// ******************************************************
+	// Rendering vertices complements (circles, points)
+	// ******************************************************
 
 	// entering the vertex circles (on the static vertex group, the shadow should not turn)
 	vertexGroup.selectAll(".vertexCircle")
@@ -486,26 +246,12 @@ function render(data){
 	.attr("class", "vertexCircleRotate")
 	.attr("r",function(d){return d.radius;});
 
-	// Entering arcs within vertex's group grotate
-	var arcs = d3.arc()
-	    .outerRadius(function(d){return d.radius;})
-	    .innerRadius(function(d){return d.radius * ARC_INNER_RADIUS;} );
-
-	vertexGroupRotate
-	.selectAll(".arc")
-	.data(function(d){return d.segments;}, function(d) {return "arc_" + d.point;}) //pie calculation already in data (segment reconstruction), standard d3 pie() not used
-	.enter()
-	.append("path")
-	.attr("class", "arc notdisplayed") //arcs are hidden by default
-	.attr("id", function(d) {return "arc_" + d.point;})
-	.attr("d", arcs)
-	.style("fill",function(d) {return coloring_arcs(d.point);});
-
-	// Entering points within vertex's group rotate (last added to be on top)
+	// Entering points within vertex's group rotate and creates a map
 	vertexGroupRotate
 	.selectAll(".point")
 	.data(function(d){return d.segments;}, function(d) {return d.point;})
 	.enter()
+	.filter(function(d) {return (!d.external);})
 	.append("circle")
 	.attr("class", "point")
 	.attr("id", function(d) {return d.point;})
@@ -521,9 +267,28 @@ function render(data){
 	});
 	var pointsById = d3.map(points, function(d) { return d.point; });
 
-	/*------------------------------------------------------------------
-	 * Drawing internal (hyperbolic) edges within the vertices
-	 */
+	// ******************************************************
+	// Rendering vertices arcs for point selection and amendments
+	// ******************************************************
+	// Entering arcs within vertex's group grotate
+	var arcs = d3.arc()
+	    .outerRadius(function(d){return d.radius;})
+	    .innerRadius(function(d){return d.radius * ARC_INNER_RADIUS;} );
+
+	vertexGroupRotate
+	.selectAll(".arc")
+	.data(function(d){return d.segments;}, function(d) {return "arc_" + d.point;}) //pie calculation already in data (segment reconstruction), standard d3 pie() not used
+	.enter()
+	.filter(function(d) {return (!d.external);})
+	.append("path")
+	.attr("class", "arc notdisplayed") //arcs are hidden by default
+	.attr("id", function(d) {return "arc_" + d.point;})
+	.attr("d", arcs)
+	.style("fill",function(d) {return coloring_arcs(d.point);});
+
+	// ******************************************************
+	// Rendering internal (hyperbolic) edges within the vertice
+	// ******************************************************
 	vertexGroupRotate
 	.selectAll(".hyperbolic")
 	.data(function(d){return d.segments;}, function(d){return d.point;})
@@ -536,18 +301,18 @@ function render(data){
 	.attr("id", function(d) {return "hyperbolic_" + d.point;})
 	.attr("d", function(d){return drawHyperbolic(pointsById.get(d.point), pointsById.get(d.peer)).path;})
 	.on("mouseover", function(d){
-			d3.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", true);
-			d3.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", true);
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", true);
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", true);
 		})
 		.on("mouseout", function(d){
-			d3.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", false);
-			d3.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", false);
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", false);
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", false);
 		})
 	;
 
-	/*
-	 * Applying previous stored Positionning
-	 */
+	// ******************************************************
+	// Applying previous stored Positionning on vertices (translation & rotation)
+	// ******************************************************
 	var storedPosition = JSON.parse(localStorage.getItem("vertexLastPosition_json"));
 	if (storedPosition && storedPosition.length > 0) {
 		var storedPositionByOldestPoint = d3.map(storedPosition, function(d){return d.oPt})
@@ -560,37 +325,32 @@ function render(data){
 				d.spin=Number(storedVertex.oRt.replace("rotate(","").replace(")",""));
 				d3.select(this).select(".vertexGroupRotate").attr("data-storedRotation",storedVertex.oRt).attr("data-init", "true"); // reinitiated by force simulation, hence stored in local dataset replayed in ticks
 				pinVertex("gvertex_"+ d.hc);
-				//d3.select("#gvertex_"+ d.hc).select(".vertexCircle").classed("pinned", true);
-				//d3.select("#gvertex_"+ d.hc).append("image").attr("xlink:href", "/sandbox/pinned3.png").attr("x",-25).attr("y",-25).attr("height","50px").attr("width","50px");
+				//D3_SCENE.select("#gvertex_"+ d.hc).select(".vertexCircle").classed("pinned", true);
+				//D3_SCENE.select("#gvertex_"+ d.hc).append("image").attr("xlink:href", "/sandbox/pinned3.png").attr("x",-25).attr("y",-25).attr("height","50px").attr("width","50px");
 			}
 		})
 	}
 
 	// ******************************************************
-	// Rendering external edges
+	// Computing external edges
 	// ******************************************************
-	/*
-	 * Edges map
-	 */
-	 // Creating a list of all planar and spheric edges
-	 // for drawing links & force simulation
-	 // in d3 source/target format
-
+	 // Creating a list of all planar and spheric edges for drawing links & force simulation in d3 source/target format
 	 var edges=[];
 
 	 pointsById.each(function(d){
 		var id="", s, t;
 		if (d.topology == "spheric") { //spheric edge case
+			// by design a spheric is alone or has a B_ conterpart
 			s = Object.assign({}, d);
- 			t = Object.assign({}, d); // new fictionnal point alone in deep universe
- 				t.point = d.peer;
- 				t.peer = d.point;
- 				t.virtual = true;
-				t.tagnet = d.tagnet;
-				t.tagraw = d.tagraw;
- 			id = d.topology + "_" + d.hc + "_" + d.point;
+			t = Object.assign({}, d); // new fictionnal point alone in deep universe
+			t.point = d.peer;
+			t.peer = d.point;
+			t.virtual = true;
+			t.tagnet = d.tagnet;
+			t.tagraw = d.tagraw;
+			id = d.topology + "_" + d.hc + "_" + d.point;
 		}
-		if (d.point.startsWith("T") && (d.topology == "planar")) { // planar edge
+		if (d.point.startsWith("T_") && (d.topology == "planar")) { // planar edge
 			s = Object.assign({}, d);
 			t = Object.assign({}, pointsById.get(d.peer));
 			id = d.topology + "_" + d.hc + "_" + t.hc + "_" + d.point;
@@ -598,83 +358,74 @@ function render(data){
 		if (id) {edges.push({topology:d.topology, id:id, source:s, target:t, point:d.point, peer:d.peer, tagnet:d.tagnet, tagraw:d.tagraw});}
  	});
 
-	/*
-	 * #D3_PATTERN# Adding edges
-	 */
+	// ******************************************************
+	// Rendering external edges
+	// ******************************************************
+	var newEdge = container
+	.selectAll(".edge")
+	.data(edges, function(d){return d.id;});
 
-		 var newEdge = container
-	 	.selectAll(".edge")
-	 	.data(edges, function(d){return d.id;});
+	newEdge.exit().remove();
 
-	 	newEdge.exit().remove();
+	newEdge
+	.enter()
+	.append("path")
+	.attr("class", function(d){return "edges edge " + d.topology;})
+	.attr("id", function(d){return d.id;})
+	.attr("marker-end","url(#marker-end)")
+	.attr("marker-start","url(#marker-start)")
+	.append("title")
+	.text(function(d){return d.source.info.xsl_element;});
 
-	 	newEdge
-	 	.enter()
-	 	.append("path")
-		.attr("class", function(d){return "edges edge " + d.topology;})
-	 	.attr("id", function(d){return d.id;})
-		.attr("marker-end","url(#marker-end)")
-		.attr("marker-start","url(#marker-start)")
-		.append("title")
-		.text(function(d){return d.source.info.xsl_element;});
+	var edge =  container.selectAll(".edge");
 
-		var edge =  container.selectAll(".edge");
+	// ******************************************************
+	// Rendering external edges labels
+	// ******************************************************
+	var newEdgeLbl = container
+	.selectAll(".edgeLbl")
+	.data(edges, function(d){return "lbl_" + d.id;});
 
-	/*
-	 * #D3_PATTERN# Adding edge labels
-	 */
+ 	newEdgeLbl.exit().remove();
 
-	 	var newEdgeLbl = container
-	 	.selectAll(".edgeLbl")
-	 	.data(edges, function(d){return "lbl_" + d.id;});
-
-	 	newEdgeLbl.exit().remove();
-
-	 	newEdgeLbl
-	 	.enter()
-	 	.filter(function(d){return (d.topology == "planar" || d.topology == "spheric") }) //labels for planar & spherics
-	 	.append("text")
-	 	.attr("class", function(d) {return "edgeLbl " + d.topology;})
-	 	.attr("id", function(d){return "lbl_" + d.id;})
-		.attr("text-anchor", "middle")
-	 	.text(function(d) {
+	newEdgeLbl
+	.enter()
+	.filter(function(d){return (d.topology == "planar" || d.topology == "spheric") }) //labels for planar & spherics
+	.append("text")
+	.attr("class", function(d) {return "edgeLbl " + d.topology;})
+	.attr("id", function(d){return "lbl_" + d.id;})
+	.attr("text-anchor", "middle")
+	.text(function(d) {
+		if (d.tagraw=="bhb:link") {
+			return formatDateP(parseDateBhb(d.source.info.on_clock));
+		} else {
 			return d.source.info.xsl_element;
-			});
-
-	 	var edgeLbl =  container.selectAll(".edgeLbl");
-
-		// ******************************************************
-		// Misc after drawing
-		// ******************************************************
-
-		/*
-		 * Reselect the Edited point if any
-		 */
-
-		if (document.getElementById(TEXT_TOOLBOX_ID + "-point").value) {
-			var ptId = document.getElementById(TEXT_TOOLBOX_ID + "-point").value;
-			var vtxId = "gvertex_" + d3.select("#" + ptId).datum().hc;
-			simulateClick(document.getElementById(vtxId));
-			simulateClick(document.getElementById(ptId));
 		}
+		});
 
-		/*
-		 * Color all bhb:link edges
-		 */
-		 var bhbLinks = d3.selectAll(".edges").filter(function(d){return d.tagraw=="bhb:link"})
-		 bhbLinks.classed("bhbLink", true);
-		 bhbLinks.attr("marker-start", "url(#marker-start-bhbLink)");
-		 bhbLinks.attr("marker-end", "url(#marker-end-bhbLink)");
-	/* -----------------------------------------------------------------
+	var edgeLbl =  container.selectAll(".edgeLbl");
 
-			FORCES AND TICKS
+	// ******************************************************
+	// Misc after drawing
+	// ******************************************************
 
-    ------------------------------------------------------------------*/
+	// Reselect the Edited point if any
+	selectPoint();
+
+	// Color all bhb:link edges
+	var bhbLinks = D3_SCENE.selectAll(".edges").filter(function(d){return d.tagraw=="bhb:link"})
+	bhbLinks.classed("bhbLink", true);
+	bhbLinks.attr("marker-start", "url(#marker-start-bhbLink)");
+	bhbLinks.attr("marker-end", "url(#marker-end-bhbLink)");
+
+	// ******************************************************
+	// Forces and Ticks
+	// ******************************************************
 	// Edge forces
-	verticesPositionning = null;
-	verticesPositionning = qa_vertices_forces(edges, vertices);
-	verticesPositionning.on("tick", ticked).on("end", endTick);
-	verticesPositionning.restart(); //reinit forces
+	VERTICES_POSITIONNING = null;
+	VERTICES_POSITIONNING = qa_vertices_forces(edges, VERTICES);
+	VERTICES_POSITIONNING.on("tick", ticked).on("end", endTick);
+	VERTICES_POSITIONNING.restart(); //reinit forces
 
 	// Positionning calculation at each tick
 	var semaphore = true;
@@ -683,7 +434,6 @@ function render(data){
 			try{
 				semaphore = false
 
-				//tick render
 				vertexGroup
 				.attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")";});
 
@@ -722,14 +472,13 @@ function render(data){
 				.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
 				.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
 				.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y,
-																																	(getAbsCoord(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND,
-																																	(getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND,
-																																	"lbl_"+d.id,
-																																	d.topology)});
+					(getAbsCoord(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND,
+					(getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND,
+					"lbl_"+d.id, d.topology)});
 
-				// log forces status TODO : remove
-				var logforces = d3.select("#perspective-footer").select("#logforces");
-				if (logforces.empty) d3.select("#perspective-footer").insert("div").attr("id","logforces");
+				/* log forces status
+				var logforces = D3_UNIVERSE.select("#perspective-footer").select("#logforces");
+				if (logforces.empty) D3_UNIVERSE.select("#perspective-footer").insert("div").attr("id","logforces");
 				var logforcesHTML = '<p class="small">';
 				logforcesHTML += "alpha:" + this.alpha() + "<br/>";
 				logforcesHTML += "alpha target:" + this.alphaTarget() + "<br/>";
@@ -739,97 +488,36 @@ function render(data){
 				logforcesHTML += "ticks before savepoint (if 0):" + (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50) + "<br/>";
 				logforcesHTML += "</p>";
 				logforces.html(logforcesHTML);
-				if (!div_perspective.select("#btn-stop-animation").empty()) {
+				*/
+
+				// Log progess on freeze force button
+				if (!PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").empty()) {
 					var cpt = Math.floor(100*((Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))) / (Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay())))))
-					if (cpt%5 ==0) {
-							div_perspective.select("#btn-stop-animation").text("Freeze (running..." + cpt +"%)");
-					}
+					if (cpt%5 ==0) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text("Freeze (running..." + cpt +"%)");
 				}
-				if (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50 == 0) { //save positionning every 50 ticks
-					storeLocalVertexPositionning(verticesbyHc);
-				}
+				//save positionning every 50 ticks
+				if (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50 == 0) storeLocalVertexPositionning
 			}
 			catch(error) {
-			//console.log("shadow tick !");
-}
+				//console.log("shadow tick !");
+			}
 			semaphore = true;
-} else {
-		console.log('multi-tick!');		}
+		} else {
+		console.log('multi-tick!');}
 	}
 
+	// After the last Tick
 	function endTick() {
-		//toggle force btn off
-		//d3.select("#btn-stop-animation").attr("value","start").text("Ended. Restart animation")
-		if (!div_perspective.select("#btn-stop-animation").empty()) {
-			div_perspective.select("#btn-stop-animation").text("No animation");
-		}
-		storeLocalVertexPositionning(verticesbyHc); //store last vertex position and rotation
+		if (!PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").empty()) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text("No animation");
+		storeLocalVertexPositionning(VERTICES_BY_HC); //store last vertex position and rotation
 	}
 }
-
 /** End of main render function ***************************************
 ***********************************************************************/
 
 
-/**
- * To redraw edges when a single Vertex is rotated
- * @param _vertexhc {string}  hash code (id) of a vertex
- * @returns {nothing} - Redraw the edges
- */
-function redrawEdgesforOneVertex(_vertexhc) {
-	var trueVertexhc=Number(_vertexhc.replace("grotate_",""));
-
-	d3.selectAll("path.planar")
-	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
-	.attr("d", function(d){return drawPlanar(d.source.point, d.target.point).path;});
-
-	d3.selectAll("path.spheric")
-	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
-	.attr("d", function(d){return drawSpheric(d.source.point, "gvertex_" + d.target.hc).path;})
-
-	d3.selectAll("text.edgeLbl")
-	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
-	.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
-	.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
-	.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "lbl_" + d.id, d.topology)});
-
-	//store last vertex position and rotation
-	var currentVertex = [];
-	currentVertex.push(verticesbyHc.get(trueVertexhc));
-	var currentVertexbyId = d3.map(currentVertex, function(d){return d.hc});
-	storeLocalVertexPositionning(currentVertexbyId);
-}
-
-/**
- * Utility to find absolute x,y coordinates of a dom element in zoomed contexts
- * @param elt {string}  elt - element dom id string
- * @returns {object} svg point - point coordinates {x,y}
- */
-function getAbsCoord(elt) {
-	if (svgScene.getElementById(elt)) { // to filter phantom s : TODO: improve by suppressing these fantom Edges
-		var ptn = svgScene.getElementById(elt);
-		var matrixPt = ptn.getCTM(); //get current elt transformation on svg
-		var pt = svgScene.createSVGPoint(); //create new point on the svg
-		pt.x = +ptn.getAttribute("cx");
-		pt.y = +ptn.getAttribute("cy");
-		var ptt = pt.matrixTransform(matrixPt); // apply coord translation on the new point
-		var zm = d3.zoomTransform(svgScene); // get zoom transform of the viewport (x,y,k)
-		ptt.x = (ptt.x - zm.x) / zm.k; // reverse the zoom translation on x
-		ptt.y = (ptt.y - zm.y) / zm.k; // reverse the zoom translation on y
-		return {
-			x: ptt.x,
-			y: ptt.y,
-			pxy: ptt.x + " " + ptt.y
-		};
-	} else {
-			//console.log ("Internal Error: ", "getAbsCoord()", " While trying to found elt position of: ", elt); // not logged
-			return {x:0, y:0}; //No error if elt not found
-	}
-}
-
 /*
  * Vertex Computation
- *
  */
 
 /**
@@ -914,12 +602,10 @@ function vertexComputation(QApointsList){
 			sr[i].segments[k].topology="hyperbolic"; //default topology
 			sr[i].segments[k].tagraw=sr[i].segments[k].info.xsl_element;
 			sr[i].segments[k].tagnet=sr[i].segments[k].info.xsl_element.replace(":","_");
-			if (sr[i].segments[k].point == sr[i].segments[k].peer) {sr[i].segments[k].topology="spheric";}
-			// PGT: attention ! Ceci est la caractérisation des topologies "text".
-			// Cela fonctionne pour le moment car nous n'avons pas de "text".
-			// if (sr[i].segments[k].info.bhb_spheric) {sr[i].segments[k].topology="spheric";} // fallback for spheric TODO:fix
-			if (sr[i].segments[k].info.xsl_element == "spheric") {sr[i].segments[k].topology="spheric";}
 			if (sr[i].segments[k].hc != pointsById.get(sr[i].segments[k].peer).hc) {sr[i].segments[k].topology="planar";}
+			if (sr[i].segments[k].point == sr[i].segments[k].peer) {sr[i].segments[k].topology="spheric";} // spheric by design, to be fixed because same as text node TODO: fix
+			// case of spheric by decision, the point T_ is considered external, and not drawn in a vertex
+			if (sr[i].segments[k].info.bhb_spheric == 1) {sr[i].segments[k].topology="spheric";}
 		}
 	}
 
@@ -938,6 +624,378 @@ function vertexComputation(QApointsList){
 	return sr;
 }
 
+/*
+ * Drag and drop listeners
+ */
+
+function dragstarted(d) {
+	d3.event.sourceEvent.stopPropagation();
+	if (!d3.event.active) {
+		//keep only links and collide forces
+		VERTICES_POSITIONNING.force("center", null).force("charge", null);
+		VERTICES_POSITIONNING.alphaTarget(REHEAT_ALPHATARGET).alphaDecay(FASTER_DECAY).restart();
+	}
+	d.fx = d.x;
+	d.fy = d.y;
+	//console.log("VertexDragEvent started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+function dragged(d) {
+	d.fx = d3.event.x;
+	d.fy = d3.event.y;
+	d3.select(this).classed("dragging", true);
+	//console.log("VertexDragEvent dragged on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+function dragended(d) {
+	if (!d3.event.active) {
+		//restore & relaunch forces
+		var xc= D3_SCENE.property("clientWidth") / 2;
+		var yc= D3_SCENE.property("clientHeight") / 2;
+		VERTICES_POSITIONNING.force("center", d3.forceCenter(xc,yc))
+		VERTICES_POSITIONNING.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));
+		VERTICES_POSITIONNING.alphaTarget(DEF_ALPHATARGET).alphaDecay(DEF_DECAY);
+	}
+	//d.fx = null, d.fy = null;
+	// fixed last place
+	d.fx = d.x;
+	d.fy = d.y;
+	d3.select(this).classed("dragging", false);
+	pinVertex(this.id);
+	storeLocalVertexPositionning(VERTICES_BY_HC);
+	//console.log("VertexDragEvent ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+function arcDragStarted(d) {
+	d3.event.sourceEvent.stopPropagation();
+	D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).attr("placeholder","drag the selected arc here to amend it !");
+	d3.select(this).classed("dragging",true)
+	D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("targeted", true);
+	setBhbPosition(d.point);
+	// TODO: fix adding dataTransfert API to drag/drop outside the browser
+	//console.log("arcDragStarted started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+function arcDragged(d) {
+	d3.select(this).attr("transform", "translate("+  d3.event.x + "," + d3.event.y + ")");
+	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
+		D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("zoom11", true);
+	} else {
+		D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("zoom11", false);
+	}
+	if (d3.event.sourceEvent.target.id == AMEND_TOOLBOX_ID) {
+		if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
+			D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
+		}
+	}
+	//d3.select(this).classed("dragging", true);
+	//console.log("arcDragged dragged on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+function arcDragEnded(d) {
+	//d3.select(this).classed("dragging", false);
+	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
+		alertInit();
+		var path = d3.event.subject.path;
+		var order = d3.event.subject.order;
+		document.getElementById(AMEND_TOOLBOX_ID + "-point").value = d.point;
+		document.getElementById(AMEND_TOOLBOX_ID + "-next").value = d.next;
+		document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
+	}
+	D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID)
+	.classed("targeted", false).classed("zoom11", false)
+	.on("focus",function(d){
+		D3_SCENE.selectAll(".arc.edited").classed("edited",false);
+		d3.select(this).classed("edited",true);
+	});
+	d3.select(this).attr("transform", null); //return arc to initial position
+	//console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+/*
+ * SVG positionning tool
+ */
+
+ /**
+  * Utility to find absolute x,y coordinates of a dom element in zoomed contexts
+  * @param elt {string}  elt - element dom id string
+  * @returns {object} svg point - point coordinates {x,y}
+  */
+ function getAbsCoord(elt) {
+ 	if (DOM_SCENE.getElementById(elt)) { // to filter phantom s : TODO: improve by suppressing these fantom Edges
+ 		var ptn = DOM_SCENE.getElementById(elt);
+ 		var matrixPt = ptn.getCTM(); //get current elt transformation on svg
+ 		var pt = DOM_SCENE.createSVGPoint(); //create new point on the svg
+ 		pt.x = +ptn.getAttribute("cx");
+ 		pt.y = +ptn.getAttribute("cy");
+ 		var ptt = pt.matrixTransform(matrixPt); // apply coord translation on the new point
+ 		var zm = d3.zoomTransform(DOM_SCENE); // get zoom transform of the viewport (x,y,k)
+ 		ptt.x = (ptt.x - zm.x) / zm.k; // reverse the zoom translation on x
+ 		ptt.y = (ptt.y - zm.y) / zm.k; // reverse the zoom translation on y
+ 		return {
+ 			x: ptt.x,
+ 			y: ptt.y,
+ 			pxy: ptt.x + " " + ptt.y
+ 		};
+ 	} else {
+ 			//console.log ("Internal Error: ", "getAbsCoord()", " While trying to found elt position of: ", elt); // not logged
+ 			return {x:0, y:0}; //No error if elt not found
+ 	}
+ }
+
+ /*
+  * Functions to compute path for edges
+  */
+
+ /**
+  * function for computing the planar Edges
+  *
+  * @param s {string:point id} - point object from
+  * @param t {string:point id} - point object to
+  * @returns {string} - svg path for the edge
+  */
+ function drawPlanar(s, t){
+ 	var path="M" + getAbsCoord(s).pxy + "L" + getAbsCoord(t).pxy;
+ 	return {path:path};
+ }
+
+ /**
+  * function for computing the spheric Edges
+  *
+  * @param s {string:point id} - point object from
+  * @param v {string:vertex id} - point object to
+  * @returns {string} - svg path for the edge
+  */
+ function drawSpheric(s, v){
+ 	var path="M" + getAbsCoord(s).pxy + "L" + ((getAbsCoord(s).x - getAbsCoord(v).x) * BEYOND) + " " + ((getAbsCoord(s).y - getAbsCoord(v).y) * BEYOND);
+ 	return {path:path};
+ }
+
+ /**
+  * function for computing the hyperbolics edges
+  *
+  * @param s {object:point} - point object from
+  * @param t {object:point} - point object to
+  * @returns {string} - svg path for the bezier curve
+  */
+ function drawHyperbolic(s, t) {
+ 		var radius = Math.sqrt(s.ptX*s.ptX + s.ptY*s.ptY)
+ 		// With the help of Mr. Poincare
+ 		var xm = (s.ptX + t.ptX)/2.
+ 		var ym = (s.ptY + t.ptY)/2.
+ 		var rm = Math.sqrt(xm*xm + ym*ym)
+ 		path =  "M" + s.ptX + "," + s.ptY
+ 		if (rm < 0.001) {
+ 			path += "L" + t.ptX + "," + t.ptY;
+ 			return {path:path};}
+ 		var tm = Math.atan2(ym, xm)
+ 	 	    rm = radius * radius / rm
+ 		var xr = s.ptX - Math.cos(tm) * rm
+ 		var yr = s.ptY - Math.sin(tm) * rm
+ 		var rf = Math.sqrt(xr*xr + yr*yr)
+ 		kind   = (Math.sin(t.startAngle - s.startAngle) < 0) ?
+ 			" 0 0 1" : " 0 0 0"
+ 		path   += "A " + rf + " " + rf + kind;
+ 		path   += " " + t.ptX + "," + t.ptY;
+ 	return {path:path};
+ }
+
+ /**
+  * function for computing label orientation of a line
+  *
+  * @param x1..y2 {num} - num - coordinates of the begin/end of the edge
+  * @param lblId optional {string} - id - uid of the label to get correct positionning
+  * @param topology {string} - Topology
+  * @returns {string} - A SVG rotate transformation string
+  */
+ function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
+ 	lblId = lblId || "";
+ 	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
+ 	var labelBox;
+ 	if (topology == "planar") {
+ 		if (Math.abs(rt) < 90) {
+ 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 + Math.abs((y2-y1)/2)) + "," + (-3) + ")";
+ 		} else {
+ 			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 - Math.abs((y2-y1)/2)) + "," + (-3) + ")";
+ 		}
+ 	}
+ 	if (topology == "spheric") {
+ 		labelBoxW = document.getElementById(lblId).getBBox().width;
+ 		if (Math.abs(rt) < 90) {
+ 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (labelBoxW) + "," + (-3) + ")";
+ 		} else {
+ 			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + (-labelBoxW) + "," + (-3) + ")";
+ 		}
+ 	}
+ }
+
+ /**
+  * creating markers definitions for the svg
+  *
+  * @param _defs {d3 selection} - d3 selection of the svg def tag where to create markers
+  * @returns {-} - Adds def definition of markers and duplicates them for coloring
+  */
+function createMarkers(_defs) {
+	//Normal design
+	_defs.append("marker")
+		.attr("id", "marker-end")
+		.attr("class", "marker-std")
+		.attr("markerWidth", "10")
+		.attr("markerHeight", "10")
+		.attr("refX", "1")
+		.attr("refY", "5")
+		.attr("orient", "auto")
+		.append("path")
+		.attr("d", "M 0 5 L 10 5")
+		.attr("class","marker-std");
+	_defs.append("marker")
+		.attr("id", "marker-start")
+		.attr("class", "marker-std")
+		.attr("markerWidth", "10")
+		.attr("markerHeight", "10")
+		.attr("refX", "9")
+		.attr("refY", "5")
+		.attr("orient", "auto")
+		.append("path")
+		.attr("d", "M 0 5 L 10 5")
+		.attr("class","marker-std");
+	_defs.append("marker")
+		.attr("id", "marker-start-position")
+		.attr("class", "marker-std")
+		.attr("markerWidth", "40")
+		.attr("markerHeight", "40")
+		.attr("refX", "10")
+		.attr("refY", "20")
+		.attr("orient", "auto")
+		.append("path")
+		.attr("d", "M35 35 L5 20 L35 5 M5 20 L10 20")
+		.attr("class","marker-std");
+	_defs.append("marker")
+		.attr("id", "marker-end-position")
+		.attr("class", "marker-std")
+		.attr("markerWidth", "40")
+		.attr("markerHeight", "40")
+		.attr("refX", "30")
+		.attr("refY", "20")
+		.attr("orient", "auto")
+		.append("path")
+		.attr("d", "M5 35 L35 20 L5 5 M35 20 L30 20")
+		.attr("class","marker-std");
+
+	//Duplicate for bhbLinks
+	var defsBhbLink = _defs.selectAll("marker.marker-std").clone(true)
+		.attr("id", function(d) {return this.id + "-bhbLink";})
+		.attr("class", function(d) {return this.id.replace("-std", "bhbLink");});
+	defsBhbLink.selectAll("path")
+		.attr("class","marker-bhbLink");
+}
+
+/*
+ * Misc Functions
+ */
+
+ /**
+  * Adding control buttons in the perspective footer
+	* Buttons are not redrawn if exists (re enters)
+  *
+  * @param -
+  * @returns {-} - Adds buttons
+  */
+function AddButtonsToPerspective(){
+	// reset zoom
+	var btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnReset-zoom");
+	if (btnResetZoom.empty()) {
+			btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-zoom").text("zoom");
+			btnResetZoom.on("click", function(){
+				if (D3_UNIVERSE.select("#toolboxes").classed("graph")) {
+					D3_SCENE.transition()
+					.duration(750)
+					.call(ZOOM.transform, d3.zoomIdentity);
+				} else {
+					D3_SCENE.transition()
+					.duration(750)
+					.call(ZOOM.transform, d3.zoomIdentity.scale(1/5));
+				}
+			})
+	}
+
+	// reset position
+	var btnResetPosHistory = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnReset-posHistory");
+	if (btnResetPosHistory.empty()) {
+			btnResetPosHistory = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-posHistory").text("reset");
+			btnResetPosHistory.on("click", function(){
+				VERTICES_POSITIONNING.stop();
+				localStorage.removeItem("vertexLastPosition_json");
+				unpinVertices();
+				VERTICES_POSITIONNING.alpha(DEF_ALPHA).alphaDecay(DEF_DECAY).restart();
+				return;
+			})
+	}
+
+	// Stop animation (and log animation status)
+	var btnstopAnimation = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation");
+	if (btnstopAnimation.empty()) {
+		btnstopAnimation = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-stop-animation").attr("value","stop").text("freeze");
+		btnstopAnimation.on("click", function(){
+			VERTICES_POSITIONNING.stop();
+		});
+	}
+
+	// Start/Stop Collide force manually
+	var btnToggleCollide = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-toggle-collide");
+	if (btnToggleCollide.empty()) {
+		btnToggleCollide = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-collide")
+		if (FORCES_STATUS.collide.status) {
+			btnToggleCollide.attr("value","stop").text("set collide:off");
+		} else {
+			btnToggleCollide.attr("value","start").text("set collide:on");
+		}
+		btnToggleCollide.on("click", function(){
+			if (btnToggleCollide.attr("value") == "stop") {
+				VERTICES_POSITIONNING.force("collide", null);
+				btnToggleCollide.attr("value","start").text("set collide:on");
+				FORCES_STATUS.collide.status=false;
+			} else {
+				VERTICES_POSITIONNING.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;}));
+				btnToggleCollide.attr("value","stop").text("set collide:off");
+				FORCES_STATUS.collide.status=true;
+			}
+			storeLocalForcesStatus();
+			VERTICES_POSITIONNING.alpha(DEF_ALPHA);
+			VERTICES_POSITIONNING.restart();
+		});
+	}
+}
+
+/**
+ * To redraw edges when a single Vertex is rotated
+ * @param _vertexhc {string}  hash code (id) of a vertex
+ * @returns {nothing} - Redraw the edges
+ */
+function redrawEdgesforOneVertex(_vertexhc) {
+	var trueVertexhc=Number(_vertexhc.replace("grotate_",""));
+
+	D3_SCENE.selectAll("path.planar")
+	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
+	.attr("d", function(d){return drawPlanar(d.source.point, d.target.point).path;});
+
+	D3_SCENE.selectAll("path.spheric")
+	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
+	.attr("d", function(d){return drawSpheric(d.source.point, "gvertex_" + d.target.hc).path;})
+
+	D3_SCENE.selectAll("text.edgeLbl")
+	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
+	.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
+	.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
+	.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "lbl_" + d.id, d.topology)});
+
+	//store last vertex position and rotation
+	var currentVertex = [];
+	currentVertex.push(VERTICES_BY_HC.get(trueVertexhc));
+	var currentVertexbyId = d3.map(currentVertex, function(d){return d.hc});
+	storeLocalVertexPositionning(currentVertexbyId);
+}
+
 /**
  * Unselect all previously selected vertex and Select a vertex (if not already selected),
  * and change the layout.
@@ -952,14 +1010,16 @@ function selectVertex(_vertex){
 	var vtx = d3.select(_vertex);
 	if (!vtx.classed("focused")) {
 		var arc = vtx.selectAll(".arc");
-		var edges = d3.selectAll(".edge").filter(function(d){return (d.source.hc == vtx.datum().hc || d.target.hc == vtx.datum().hc);}); // raise the proper external edges
+		var externalEdges = D3_SCENE.selectAll(".edge").filter(function(d){return (d.source.hc == vtx.datum().hc || d.target.hc == vtx.datum().hc);}); // raise the proper external edges
+		var internalEdges = vtx.selectAll(".edges");
 		var point = vtx.selectAll(".point");
 		vtx.raise();
-		edges.raise();
+		externalEdges.raise();
 		//point.raise();
 		vtx.classed("focused", true);
 		arc.classed("notdisplayed", false).classed("draggable", true);
 		point.classed("point-displayed", true);
+		internalEdges.classed("notselectable", true);
 		arc.call(d3.drag() //add edit arc listener
 					.filter(function(d){return !this.classList.contains("notdisplayed");}) //not fired if arc is not displayed (removing the handler is buggy)
 					.clickDistance(10)
@@ -968,55 +1028,142 @@ function selectVertex(_vertex){
 					.on("end", arcDragEnded));
 		point.on("click", function(d) {
 			d3.event.stopPropagation();
-			selectPoint(d.point);
+			console.log("click on point: ", d.point);
+			setBhbPosition(d.point);
+			return false;
 		});
 	}
 }
+
 /**
- * Selects a point and edit it
+ * unselect vertices
  *
- * @param {_pt} - dom element object - must be a root group of a vertex
+ * @returns nothing (unselect all vertices)
+ */
+function unselectVertices(){
+	D3_SCENE.selectAll(".focused").classed("focused", false);
+	D3_SCENE.selectAll(".notselectable").classed("notselectable", false);
+	D3_SCENE.selectAll(".arc").classed("notdisplayed", true).classed("draggable", false);
+	D3_SCENE.selectAll(".point-displayed").classed("point-displayed", false).on("click", "");
+	D3_SCENE.selectAll(".gvertex").lower();
+	D3_SCENE.selectAll(".egde").raise(); // raise edges above vortices
+	D3_SCENE.selectAll(".edgeLbl").raise();
+}
+
+/**
+ * unselect a vertex
+ *
+ * @returns nothing (unselect one given vertex)
+ */
+function unselectVertex(_vertex){
+	D3_SCENE.select("#" + _vertex).selectAll(".focused").classed("focused", false);
+	D3_SCENE.select("#" + _vertex).selectAll(".notselectable").classed("notselectable", false);
+	D3_SCENE.select("#" + _vertex).selectAll(".arc").classed("notdisplayed", true).classed("draggable", false);
+	D3_SCENE.select("#" + _vertex).selectAll(".point-displayed").classed("point-displayed", false).on("click", "");
+	D3_SCENE.select("#" + _vertex).lower();
+	D3_SCENE.selectAll(".egde").raise(); // raise edges above vortices
+	D3_SCENE.selectAll(".edgeLbl").raise();
+}
+
+/**
+ * unselect & unpin vertices
+ *
+ * @returns nothing (unselect all vertices and resets fixed position)
+ */
+function unpinVertices(){
+	D3_SCENE.selectAll(".gvertex").each(function(d){d.fx=null;d.fy=null;});
+	D3_SCENE.selectAll(".gvertex").select(".vertexCircle").classed("pinned", false);
+	D3_SCENE.selectAll(".gvertex").selectAll("image").remove();
+	unselectVertices()
+}
+
+/**
+ * pin vertices
+ *
+ * @returns nothing (unselect all vertices and resets fixed position)
+ */
+function pinVertex(_vertex) {
+	D3_SCENE.select("#" + _vertex).select(".vertexCircle").classed("pinned", true);
+	if (D3_SCENE.select("#" + _vertex).select("image").empty()) {
+		D3_SCENE.select("#" + _vertex).append("image")
+		.attr("xlink:href", "/sandbox/pinned3.png")
+		.attr("x",-25).attr("y",-25)
+		.attr("height","50px").attr("width","50px")
+		.on("click", function(d){
+			d3.event.stopPropagation();
+			unpinVertex(this.parentElement.id);});
+	}
+}
+
+/**
+ * unpin a single vertex
+ *
+ * @returns nothing (unselect a vertex)
+ */
+function unpinVertex(_vertex){
+	D3_SCENE.select("#" + _vertex).each(function(d){d.fx=null;d.fy=null;});
+	D3_SCENE.select("#" + _vertex).select(".vertexCircle").classed("pinned", false);
+	D3_SCENE.select("#" + _vertex).select("image").remove();
+	//unselectVertices()
+}
+
+/**
+ * Sets display according to point position selected in the bhb
+ *
+ * @param {_ptId} - String point ID, the point must be setted before by setBhbPosition()
+ *                  Optional. if null, the point defined on universe (data-data-bhbposition)
  * @returns {pt.datum()} (select the point and populates & open text nav)
  */
-function selectPoint(_pt) {
-	pt = d3.select("#" + _pt).datum();
+function selectPoint(_ptId, _openToolbox) {
+	_ptId = _ptId || CURRENT_BHB_POSITION;
+	_openToolbox = _openToolbox || false;
+	try {
+		pt = D3_SCENE.select("#" + _ptId).datum();
+	} catch (err) {
+		console.log ("point: ", _ptId, " not found!");
+		return false;
+	}
 	// populates hidden inputs for dummy navbar
 	document.getElementById(TEXT_TOOLBOX_ID + "-point").value = pt.point;
 	document.getElementById(TEXT_TOOLBOX_ID + "-next").value = pt.next;
 	document.getElementById(TEXT_TOOLBOX_ID + "-peer").value = pt.peer;
-	var ptbefore = d3.selectAll(".point").filter(function(s){return s.next == pt.point;}).datum();
+	var ptbefore = D3_SCENE.selectAll(".point").filter(function(s){return s.next == pt.point;}).datum();
 	document.getElementById(TEXT_TOOLBOX_ID + "-before").value = ptbefore.point;
-	console.log("click on point ",pt.point,text_readInfo(pt), ": ", pt);
 	text_nav(pt);
 	// reinit prevously selected point
-	d3.selectAll(".viewed").classed("viewed",false);
-	d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
-	d3.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
+	var pointsViewed = D3_SCENE.selectAll(".viewed").classed("viewed",false);
+	pointsViewed.each(function(d) {
+		if (d.tagraw == "bhb:link") {
+			d3.select(this).attr("marker-start", "url(#marker-start-bhbLink)").classed("start",false);
+			d3.select(this).attr("marker-end", "url(#marker-end-bhbLink)").classed("end",false);
+
+		} else {
+			d3.select(this).attr("marker-start", "url(#marker-start)").classed("start",false);
+			d3.select(this).attr("marker-end", "url(#marker-end)").classed("end",false);
+		}
+	});
 
 	// open text toolbox and poupulates edit zone
-	if (!d3.select("#" + TEXT_TOOLBOX_ID).classed("opened")) {
-		d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
+	if (_openToolbox && (!D3_UNIVERSE.select("#" + TEXT_TOOLBOX_ID).classed("opened"))) {
+		D3_UNIVERSE.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
 	}
-	var selectedEdge = d3.selectAll("path.edges").filter(function(l){return (l.point == pt.point || l.peer == pt.point);});
+	var selectedEdge = D3_SCENE.selectAll("path.edges").filter(function(l){return (l.point == pt.point || l.peer == pt.point);});
 	// select Point, Edge and style them it with the wiev marker
-	d3.select("#" + pt.point).classed("viewed",true);
+	D3_SCENE.select("#" + pt.point).classed("viewed",true);
 	selectedEdge.classed("viewed",true);
 	if (selectedEdge.datum().point == pt.point) {
 		selectedEdge.classed("start", true);
-		selectedEdge.attr("marker-start",function(d){return "url(#marker-start-entry)";})
+		selectedEdge.attr("marker-start",function(d){return "url(#marker-start-position)";})
 	} else {
 		selectedEdge.classed("end", true);
-		selectedEdge.attr("marker-end",function(d){return "url(#marker-end-entry)";})
+		selectedEdge.attr("marker-end",function(d){return "url(#marker-end-position)";})
 	}
-	//send bhb query position
-	eval(BHB_QUERY_POSITION.replace("$$ID", pt.point));
-	document.getElementById("text-bhb-content").innerHTML = document.getElementById("bhb-situation").innerHTML;
-	return Object.assign(pt, {topology:selectedEdge.datum().topology});
+
+	return Object.assign(pt, {topology:selectedEdge.datum().topology, displayed:true});
 }
 
-
 /**
- * print out info on point
+ * print out info on point (deprecated, not really used except for information)
  * @param {_datum} - d3 datum object - point
  * @returns a xml node string with the info
  */
@@ -1036,18 +1183,17 @@ function text_readInfo(_datum){
 }
 
 /**
- * print out info on point
+ * Creates the toolbox text navbar
  * @param {_datum} - d3 datum object - point
  * @returns a navbar (does it once for all, if the navbar is drawn, it won't be again)
  */
 function text_nav(_datum){
 	//nav buttons
-	var navTool = d3.select("#" + TEXT_TOOLBOX_ID + "-pointnavtool");
+	var navTool = D3_UNIVERSE.select("#" + TEXT_TOOLBOX_ID + "-pointnavtool");
 	var btnNextPt = navTool.select("#" + TEXT_TOOLBOX_ID + "-btnNextPt");
 	if (!btnNextPt.empty()) {return;} // Exits if already drawned
 
 	// creates dynamic nav buttons
-
 	navTool.append("button")
 	.attr("type","button")
 	.attr("class","btn btn-primary")
@@ -1056,27 +1202,26 @@ function text_nav(_datum){
 	.attr("title", "Next")
 	.attr("accessKey", "n")
 	.on("click", function(d) {
+		d3.event.stopPropagation();
 		var nextPtId = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
-		var nextVtxId = "gvertex_" + d3.select("#" + nextPtId).datum().hc;
-		simulateClick(document.getElementById(nextVtxId));
-		simulateClick(document.getElementById(nextPtId));
+		setBhbPosition(nextPtId);
 	})
-	.on("mouseup", function(){
-		clearTimeout(longclick_timer);
-		navPointStop=true;
+	/*.on("mouseup", function(){
+		clearTimeout(LONGCLICK_TIMER);
+		NAVPOINT_STOP=true;
 	})
 	.on("mousedown", function(){
-  	longclick_timer = window.setTimeout(function(){
+  	LONGCLICK_TIMER = window.setTimeout(function(){
 			console.log("longclick detected");
-			navPointStop=false;
-			var pt = document.getElementById(TEXT_TOOLBOX_ID + "-point").value;
+			NAVPOINT_STOP=false;
+			var ptn = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
 				var autonav = setInterval(function(){
-					if (navPointStop) {clearInterval(autonav);}
-					pt = selectPoint(pt).next;
-					if (pt.topology=="planar") {clearInterval(autonav);}
-				},autonav_interval);
-		},longclick_limit);
-	})
+					if (NAVPOINT_STOP) {clearInterval(autonav);}
+					setBhbPosition(ptn)
+					if (ptn.topology=="planar") {clearInterval(autonav);}
+				},AUTONAV_INTERVAL);
+		},LONGCLICK_LIMIT);
+	})*/
 	;
 
 	navTool.append("button")
@@ -1088,7 +1233,7 @@ function text_nav(_datum){
 	.attr("accessKey", "p")
 	.on("click", function(d) {
 		var peerPtId = document.getElementById(TEXT_TOOLBOX_ID + "-peer").value;
-		var peerVtxId = "gvertex_" + d3.select("#" + peerPtId).datum().hc;
+		var peerVtxId = "gvertex_" + D3_SCENE.select("#" + peerPtId).datum().hc;
 		simulateClick(document.getElementById(peerVtxId));
 		simulateClick(document.getElementById(peerPtId));
 	});
@@ -1102,7 +1247,7 @@ function text_nav(_datum){
 	.attr("accessKey", "b")
 	.on("click", function(d) {
 		var beforePtId = document.getElementById(TEXT_TOOLBOX_ID + "-before").value;
-		var beforeVtxId = "gvertex_" + d3.select("#" + beforePtId).datum().hc;
+		var beforeVtxId = "gvertex_" + D3_SCENE.select("#" + beforePtId).datum().hc;
 		simulateClick(document.getElementById(beforeVtxId));
 		simulateClick(document.getElementById(beforePtId));
 	});
@@ -1114,100 +1259,32 @@ function text_nav(_datum){
 	.text(String.fromCharCode(215))
 	.attr("title", "unselect")
 	.on("click", function(d) {
-		d3.select("#" + TEXT_TOOLBOX_ID).classed("opened", false).classed("closed", true);
+		D3_UNIVERSE.select("#" + TEXT_TOOLBOX_ID).classed("opened", false).classed("closed", true);
 		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = null;
-		d3.selectAll(".viewed").classed("viewed",false);
-		d3.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
-		d3.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
+		D3_SCENE.selectAll(".viewed").classed("viewed",false);
+		D3_SCENE.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
+		D3_SCENE.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
 		unselectVertices()
 	});
 }
 
-/**
- * unselect vertices
- *
- * @returns nothing (unselect all vertices)
- */
-function unselectVertices(){
-	d3.selectAll(".focused").classed("focused", false);
-	d3.selectAll(".arc").classed("notdisplayed", true).classed("draggable", false);
-	d3.selectAll(".point-displayed").classed("point-displayed", false).on("click", "");
-	d3.selectAll(".gvertex").lower();
-	d3.selectAll(".egde").raise(); // raise edges above vortices
-	d3.selectAll(".edgeLbl").raise();
-}
 
-/**
- * unselect a vertex
- *
- * @returns nothing (unselect one given vertex)
- */
-function unselectVertex(_vertex){
-	d3.select("#" + _vertex).selectAll(".focused").classed("focused", false);
-	d3.select("#" + _vertex).selectAll(".arc").classed("notdisplayed", true).classed("draggable", false);
-	d3.select("#" + _vertex).selectAll(".point-displayed").classed("point-displayed", false).on("click", "");
-	d3.select("#" + _vertex).lower();
-	d3.selectAll(".egde").raise(); // raise edges above vortices
-	d3.selectAll(".edgeLbl").raise();
-}
-
-/**
- * unselect & unpin vertices
- *
- * @returns nothing (unselect all vertices and resets fixed position)
- */
-function unpinVertices(){
-	d3.selectAll(".gvertex").each(function(d){d.fx=null;d.fy=null;});
-	d3.selectAll(".gvertex").select(".vertexCircle").classed("pinned", false);
-	d3.selectAll(".gvertex").selectAll("image").remove();
-	unselectVertices()
-}
-
-/**
- * pin vertices
- *
- * @returns nothing (unselect all vertices and resets fixed position)
- */
-function pinVertex(_vertex) {
-	d3.select("#" + _vertex).select(".vertexCircle").classed("pinned", true);
-	if (d3.select("#" + _vertex).select("image").empty()) {
-		d3.select("#" + _vertex).append("image")
-		.attr("xlink:href", "/sandbox/pinned3.png")
-		.attr("x",-25).attr("y",-25)
-		.attr("height","50px").attr("width","50px")
-		.on("click", function(d){
-			d3.event.stopPropagation();
-			unpinVertex(this.parentElement.id);});
-	}
-}
-
-/**
- * unpin a single vertex
- *
- * @returns nothing (unselect a vertex)
- */
-function unpinVertex(_vertex){
-	d3.select("#" + _vertex).each(function(d){d.fx=null;d.fy=null;});
-	d3.select("#" + _vertex).select(".vertexCircle").classed("pinned", false);
-	d3.select("#" + _vertex).select("image").remove();
-	//unselectVertices()
-}
-
-/*
- * Misc functions & classes
- */
  /**
-  * Switch view from graphical to text view
+  * Switch view from graph to text mode
   *
-  * @returns {integer} hascode - 32bit integer
+  * @returns {-} switch mode
   */
-
 function switchView(){
-	if (d3.select("#toolboxes").classed("graphical")) { //swith to textual view
+	if (CURRENT_BHB_MODE == "graph") setBhbMode("text");
+	if (CURRENT_BHB_MODE == "text") setBhbMode("graph");
+}
+
+/*function switchView(){
+	if (D3_UNIVERSE.select("#toolboxes").classed("graph")) { //swith to text mode
 		//Move the toolbox to top
-		d3.select("#toolboxes").classed("graphical", false).classed("textual", true);
-		d3.select("#placeholder").classed("graphical", false).classed("textual", true);
-		d3.selectAll(".toolbox").classed("upper-left", false).classed("upper-right", false).classed("lower-left", false).classed("lower-right", false).classed("nav-upper", true);
+		D3_UNIVERSE.select("#toolboxes").classed("graph", false).classed("text", true);
+		D3_UNIVERSE.select("#placeholder").classed("graph", false).classed("text", true);
+		D3_UNIVERSE.selectAll(".toolbox").classed("upper-left", false).classed("upper-right", false).classed("lower-left", false).classed("lower-right", false).classed("nav-upper", true);
 		//Move graphic into menu content and vice versa
 		var currentParent = document.getElementById("placeholder");
 		var newParent = document.getElementById("mini-placeholder");
@@ -1216,17 +1293,17 @@ function switchView(){
 		newParent.appendChild(currentParent.childNodes[0]);
 		currentParent.innerHTML=newParentContent;
 		// Zoom on graphic
-		scene.transition()
+		D3_SCENE.transition()
 		.duration(750)
-		.call(zoom.transform, d3.zoomIdentity.scale(1/5));
-	} else { //swith to graphical view
+		.call(ZOOM.transform, d3.zoomIdentity.scale(1/5));
+	} else { //swith to graph mode
 		//Move toolboxes to corners
-		d3.select("#toolboxes").classed("graphical", true).classed("textual", false);
-		d3.select("#placeholder").classed("graphical", true).classed("textual", false);
-		d3.select("#explorer").classed("nav-upper", false).classed("upper-left", true);
-		d3.select("#amendment").classed("nav-upper", false).classed("upper-right", true);
-		d3.select("#perspective").classed("nav-upper", false).classed("lower-left", true);
-		d3.select("#text").classed("nav-upper", false).classed("lower-right", true);
+		D3_UNIVERSE.select("#toolboxes").classed("graph", true).classed("text", false);
+		D3_UNIVERSE.select("#placeholder").classed("graph", true).classed("text", false);
+		D3_UNIVERSE.select("#explorer").classed("nav-upper", false).classed("upper-left", true);
+		D3_UNIVERSE.select("#amendment").classed("nav-upper", false).classed("upper-right", true);
+		D3_UNIVERSE.select("#perspective").classed("nav-upper", false).classed("lower-left", true);
+		D3_UNIVERSE.select("#text").classed("nav-upper", false).classed("lower-right", true);
 		//Move graphic into menu content and vice versa
 		var currentParent = document.getElementById("mini-placeholder");
 		var newParent = document.getElementById("placeholder");
@@ -1235,16 +1312,88 @@ function switchView(){
 		newParent.appendChild(currentParent.childNodes[0]);
 		currentParent.innerHTML=newParentContent;
 		// Zoom on graphic
-		scene.transition()
+		D3_SCENE.transition()
 		.duration(750)
-		.call(zoom.transform, d3.zoomIdentity);
-
+		.call(ZOOM.transform, d3.zoomIdentity);
 	}
-}
-
+}*/
 
 /*
- * Misc functions & classes
+ * Bhb Queries
+ */
+
+ /**
+  * bhbquery to set a new point
+  * @param {_pt} - a point id
+  * @returns sends a query to the server, returns the point
+  */
+ function setBhbPosition(_pt){
+ 		_snd({bhb:"query", ["{bhb://the.hypertext.blockchain}position"]: _pt});
+ 		return _pt;
+ }
+
+ /**
+  * bhbquery to change view mode
+  * @param {_mode} - mode : graph, test...
+  * @returns sends a query to the server, returns the mode
+  */
+ function setBhbMode(_mode){
+ 		_snd({bhb:"query", ["{bhb://the.hypertext.blockchain}mode"]: _mode});
+ 		return _mode;
+ }
+
+ /*
+  * Functions to store local information
+  */
+
+ /**
+  * Store localy the position of the vertices (both tanslation & rotation) in the global variable vertexLastPosition
+  *
+  * @param _verticesbyHc {d3map} - map of drawn vertices to register their transformations
+  * @returns {-} - Stores positionning as a json string in nav's localStorage
+  */
+ function storeLocalVertexPositionning(_verticesbyHc){
+ 	//console.log("store positionning");
+ 	var tf_vtx, tf_vtxRt;
+ 	var vtxLastPosbyPt = d3.map(VERTEX_LAST_POSITION, function(d) {return d.oPt});
+ 	_verticesbyHc.each(function (d) {
+ 		if (document.getElementById("gvertex_" + d.hc).attributes.transform){
+ 			tf_vtx = document.getElementById("gvertex_" + d.hc).attributes.transform.value;
+ 		} else {
+ 			tf_vtx = "";
+ 		}
+ 		if (document.getElementById("grotate_" + d.hc).attributes.transform){
+ 			tf_vtxRt = document.getElementById("grotate_" + d.hc).attributes.transform.value;
+ 		} else {
+ 			tf_vtxRt = "rotate(0)";
+ 		}
+ 		if (!vtxLastPosbyPt.get(d.oldestPoint)) {
+ 				VERTEX_LAST_POSITION.push({hc:d.hc, oPt:d.oldestPoint, oX: d.x, oY: d.y, oTf:tf_vtx, oRt:tf_vtxRt});
+ 		} else {
+ 			vtxLastPosbyPt.get(d.oldestPoint).oX=d.x;
+ 			vtxLastPosbyPt.get(d.oldestPoint).oY=d.y;
+ 			vtxLastPosbyPt.get(d.oldestPoint).oTf=tf_vtx;
+ 			vtxLastPosbyPt.get(d.oldestPoint).oRt=tf_vtxRt;
+
+ 		}
+ 		var vertexLastPosition_json = JSON.stringify(VERTEX_LAST_POSITION);
+ 		localStorage.setItem("vertexLastPosition_json", vertexLastPosition_json);
+
+ 		storeLocalForcesStatus();
+ 	})
+ }
+
+ /**
+  * Store localy the forces settings
+  *
+  * @returns {-} - Stores forces settings as a json string in nav's localStorage
+  */
+ function storeLocalForcesStatus(){
+ 		localStorage.setItem("forcesStatus_json", JSON.stringify(FORCES_STATUS));
+ }
+
+/*
+ * Misc functions
  */
 
 /**
@@ -1290,133 +1439,7 @@ function vertexToString(_vertex, _hash){
 	}
 }
 
-/**
- * function for computing the planar Edges
- *
- * @param s {string:point id} - point object from
- * @param t {string:point id} - point object to
- * @returns {string} - svg path for the edge
- */
-function drawPlanar(s, t){
-	var path="M" + getAbsCoord(s).pxy + "L" + getAbsCoord(t).pxy;
-	return {path:path};
-}
 
-/**
- * function for computing the spheric Edges
- *
- * @param s {string:point id} - point object from
- * @param v {string:vertex id} - point object to
- * @returns {string} - svg path for the edge
- */
-function drawSpheric(s, v){
-	var path="M" + getAbsCoord(s).pxy + "L" + ((getAbsCoord(s).x - getAbsCoord(v).x) * BEYOND) + " " + ((getAbsCoord(s).y - getAbsCoord(v).y) * BEYOND);
-	return {path:path};
-}
-
-/**
- * function for computing the hyperbolics arcs
- *
- * @param s {object:point} - point object from
- * @param t {object:point} - point object to
- * @returns {string} - svg path for the bezier curve
- */
-function drawHyperbolic(s, t) {
-		var radius = Math.sqrt(s.ptX*s.ptX + s.ptY*s.ptY)
-		// With the help of Mr. Poincare
-		var xm = (s.ptX + t.ptX)/2.
-		var ym = (s.ptY + t.ptY)/2.
-		var rm = Math.sqrt(xm*xm + ym*ym)
-		path =  "M" + s.ptX + "," + s.ptY
-		if (rm < 0.001) {
-			path += "L" + t.ptX + "," + t.ptY;
-			return {path:path};}
-		var tm = Math.atan2(ym, xm)
-	 	    rm = radius * radius / rm
-		var xr = s.ptX - Math.cos(tm) * rm
-		var yr = s.ptY - Math.sin(tm) * rm
-		var rf = Math.sqrt(xr*xr + yr*yr)
-		kind   = (Math.sin(t.startAngle - s.startAngle) < 0) ?
-			" 0 0 1" : " 0 0 0"
-		path   += "A " + rf + " " + rf + kind;
-		path   += " " + t.ptX + "," + t.ptY;
-	return {path:path};
-}
-
-/**
- * function for computing label orientation of a line
- *
- * @param x1..y2 {num} - num - coordinates of the begin/end of the edge
- * @param lblId optional {string} - id - uid of the label to get correct positionning
- * @param topology {string} - Topology
- * @returns {string} - A SVG rotate transformation string
- */
-function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
-	lblId = lblId || "";
-	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
-	var labelBox;
-	if (topology == "planar") {
-		if (Math.abs(rt) < 90) {
-			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 + Math.abs((y2-y1)/2)) + "," + (-3) + ")";
-		} else {
-			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 - Math.abs((y2-y1)/2)) + "," + (-3) + ")";
-		}
-	}
-	if (topology == "spheric") {
-		labelBoxW = document.getElementById(lblId).getBBox().width;
-		if (Math.abs(rt) < 90) {
-			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (labelBoxW) + "," + (-3) + ")";
-		} else {
-			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + (-labelBoxW) + "," + (-3) + ")";
-		}
-	}
-}
-
-/**
- * Store localy the position of the vertices (both tanslation & rotation) in the global variable vertexLastPosition
- *
- * @param _verticesbyHc {d3map} - map of drawn vertices to register their transformations
- * @returns {-} - Stores positionning as a json string in nav's localStorage
- */
-function storeLocalVertexPositionning(_verticesbyHc){
-	//console.log("store positionning");
-	var tf_vtx, tf_vtxRt;
-	var vtxLastPosbyPt = d3.map(vertexLastPosition, function(d) {return d.oPt});
-	_verticesbyHc.each(function (d) {
-		if (document.getElementById("gvertex_" + d.hc).attributes.transform){
-			tf_vtx = document.getElementById("gvertex_" + d.hc).attributes.transform.value;
-		} else {
-			tf_vtx = "";
-		}
-		if (document.getElementById("grotate_" + d.hc).attributes.transform){
-			tf_vtxRt = document.getElementById("grotate_" + d.hc).attributes.transform.value;
-		} else {
-			tf_vtxRt = "rotate(0)";
-		}
-		if (!vtxLastPosbyPt.get(d.oldestPoint)) {
-				vertexLastPosition.push({hc:d.hc, oPt:d.oldestPoint, oX: d.x, oY: d.y, oTf:tf_vtx, oRt:tf_vtxRt});
-		} else {
-			vtxLastPosbyPt.get(d.oldestPoint).oX=d.x;
-			vtxLastPosbyPt.get(d.oldestPoint).oY=d.y;
-			vtxLastPosbyPt.get(d.oldestPoint).oTf=tf_vtx;
-			vtxLastPosbyPt.get(d.oldestPoint).oRt=tf_vtxRt;
-
-		}
-		var vertexLastPosition_json = JSON.stringify(vertexLastPosition);
-		localStorage.setItem("vertexLastPosition_json", vertexLastPosition_json);
-
-		storeLocalForcesStatus();
-	})
-}
-
-/**
- * Store localy the forces settings
- *
- * @returns {-} - Stores forces settings as a json string in nav's localStorage
- */
-function storeLocalForcesStatus(){
-		localStorage.setItem("forcesStatus_json", JSON.stringify(forcesStatus));
-}
 
 	// ******************************************************					_______________________________
 	// Applying Forces to elements
@@ -1426,29 +1449,29 @@ function storeLocalForcesStatus(){
 	//			4. qa_linkPoints: edge-directed force and rotation
 	// ******************************************************
 
-// forces status examples : verticesPositionning.force("link").links(), verticesPositionning.force("center").x()
+// forces status examples : VERTICES_POSITIONNING.force("link").links(), VERTICES_POSITIONNING.force("center").x()
 
 function qa_vertices_forces(edges, vertices) {
 	var forces = d3.forceSimulation()
-		.nodes(vertices)
+		.nodes(VERTICES)
 		.force("link", qa_linkPoints().links(edges).distance(function(d){return (d.source.radius + d.target.radius) * 1.5;}).id(function(d) {return d.id;})) // customized force
 		;
-		if (forcesStatus.collide.status) {
+		if (FORCES_STATUS.collide.status) {
 			forces.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;})); // collision detection
 		}
-		if (forcesStatus.center.status) {
-			var xc= scene.property("clientWidth") / 2;
-			var yc= scene.property("clientHeight") / 2;
+		if (FORCES_STATUS.center.status) {
+			var xc= D3_SCENE.property("clientWidth") / 2;
+			var yc= D3_SCENE.property("clientHeight") / 2;
 			forces.force("center", d3.forceCenter(xc,yc)) // force towards the center
 		}
-		if (forcesStatus.charge.status) {
+		if (FORCES_STATUS.charge.status) {
 			forces.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));  // Nodes attracting or reppelling each others (negative = repelling)
 		}
 		//when all  vertices are pinned, faster decay
-		if (d3.selectAll(".gvertex").select("circle.pinned").size() == verticesbyHc.size()) {
-			forces.alphaDecay(allpinned_decay);
+		if (D3_SCENE.selectAll(".gvertex").select("circle.pinned").size() == VERTICES_BY_HC.size()) {
+			forces.alphaDecay(ALLPINNED_DECAY);
 		} else {
-			forces.alphaDecay(normal_decay);
+			forces.alphaDecay(DEF_DECAY);
 		}
 	return forces
 }
@@ -1505,8 +1528,8 @@ function qa_linkPoints(links) {
       var b    = bias[i];	// force bias
       var link = links[i], source = link.source, target = link.target;	// link data
 			var d_tgt, d_src; try {
-			d_tgt = d3.select("#gvertex_"+target.hc).datum();
-			d_src = d3.select("#gvertex_"+source.hc).datum();
+			d_tgt = D3_SCENE.select("#gvertex_"+target.hc).datum();
+			d_src = D3_SCENE.select("#gvertex_"+source.hc).datum();
 		} catch (e) {
 			//console.log("(error - data) i:", i, "id: ", links[i].id);
 			continue;

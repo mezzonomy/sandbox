@@ -141,6 +141,67 @@ function validateAmendment(txt) {
 /***********************************************************************
 ***********************************************************************/
 /**
+ * Code for exporting data to csv (inspired from https://halistechnology.com/2015/05/28/use-javascript-to-export-your-data-as-csv/)
+ */
+
+function convertArrayOfObjectsToCSV(_data) {
+  var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+
+  data = _data || null;
+  if (data == null || !data.length) {return null;}
+
+  columnDelimiter = ';';
+  lineDelimiter = '\n';
+
+  keys = Object.keys(data[0]);
+
+  result = '';
+  result += keys.join(columnDelimiter);
+  result += lineDelimiter;
+
+  data.forEach(function(item) {
+      ctr = 0;
+      keys.forEach(function(key) {
+          if (ctr > 0) result += columnDelimiter;
+          result += item[key];
+          ctr++;
+      });
+      result += lineDelimiter;
+  });
+
+  return result;
+}
+
+function downloadCSV(_data) {
+  var data, filename, link;
+  var csv = convertArrayOfObjectsToCSV(_data);
+  if (csv == null) return;
+
+  filename = 'export.csv';
+
+  var blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+
+  if (navigator.msSaveBlob) { // IE 10+
+    navigator.msSaveBlob(blob, filename)
+  } else {
+    var link = document.createElement("a");
+    if (link.download !== undefined) {
+      // feature detection, Browsers that support HTML5 download attribute
+      var url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style = "visibility:hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+}
+
+
+/***********************************************************************
+***********************************************************************/
+/**
  * Code for validating XML (inspired from https://www.w3schools.com/xml/xml_validator.asp)
  */
  var xt="", h3OK=1;

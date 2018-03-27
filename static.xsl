@@ -33,8 +33,38 @@
 	   S T A T I C
      = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 
+<xsl:template name="workspace">
+	<xsl:param name="mode"/>
+	<xsl:choose>
+		 <xsl:when test="$mode = 'graph'">
+			 <xsl:call-template name="bhbgraph"/>
+		 </xsl:when>
+		 <xsl:when test="$mode = 'text'">
+			 <xsl:call-template name="bhbtext"/>
+		 </xsl:when>
+	</xsl:choose>
+</xsl:template>
+
+<xsl:template name="mini_workspace">
+	<xsl:param name="mode"/>
+	<xsl:choose>
+		 <xsl:when test="$mode = 'text'">
+			 <xsl:call-template name="bhbgraph"/>
+		 </xsl:when>
+		 <xsl:when test="$mode = 'graph'">
+			 <xsl:call-template name="bhbtext"/>
+		 </xsl:when>
+</xsl:choose>
+</xsl:template>
+
+<xsl:template name="bhbtext">
+	<div id="bhb-text">
+			 <xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
+	</div>
+</xsl:template>
+
 <xsl:template match="xsl:warning" mode="xsl:default">
-		 <xsl:text>Please select a point</xsl:text>
+		<xsl:text>Please select a point</xsl:text>
 </xsl:template>
 
 <xsl:template name="tagname">
@@ -60,9 +90,20 @@
 
 <xsl:template name="perspective">
 	<xsl:param name="navorder"/>
+	<xsl:param name="mode"/>
 	<xsl:variable name="toolbox_ID">perspective</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Perspective</xsl:variable>
-	<div id="{$toolbox_ID}" class="toolbox lower-left closed" order="{$navorder}">
+	<div id="{$toolbox_ID}" order="{$navorder}">
+		<xsl:attribute name="class">
+			<xsl:choose>
+				<xsl:when test="$mode = 'graph'">
+					<xsl:text>toolbox lower-left closed</xsl:text>
+				</xsl:when>
+				<xsl:when test="$mode = 'text'">
+					<xsl:text>toolbox nav-upper closed</xsl:text>
+				</xsl:when>
+			</xsl:choose>
+		</xsl:attribute>
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
@@ -122,9 +163,20 @@
 
 <xsl:template name="explorer">
 	<xsl:param name="navorder"/>
+	<xsl:param name="mode"/>
 	<xsl:variable name="toolbox_ID">explorer</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Explorer</xsl:variable>
-	<div id="{$toolbox_ID}" class="toolbox upper-left closed" order="{$navorder}">
+	<div id="{$toolbox_ID}" order="{$navorder}">
+		<xsl:attribute name="class">
+			<xsl:choose>
+				<xsl:when test="$mode = 'graph'">
+					<xsl:text>toolbox upper-left closed</xsl:text>
+				</xsl:when>
+				<xsl:when test="$mode = 'text'">
+					<xsl:text>toolbox nav-upper closed</xsl:text>
+				</xsl:when>
+			</xsl:choose>
+		</xsl:attribute>
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
@@ -182,10 +234,21 @@
 
 <xsl:template name="amendment">
 	<xsl:param name="navorder"/>
+	<xsl:param name="mode"/>
 	<xsl:param name="role"/>
 	<xsl:variable name="toolbox_ID">amendment</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Amendment</xsl:variable>
-	<div id="{$toolbox_ID}" class="toolbox upper-right closed" order="{$navorder}">
+	<div id="{$toolbox_ID}" order="{$navorder}">
+		<xsl:attribute name="class">
+			<xsl:choose>
+				<xsl:when test="$mode = 'graph'">
+					<xsl:text>toolbox upper-right closed</xsl:text>
+				</xsl:when>
+				<xsl:when test="$mode = 'text'">
+					<xsl:text>toolbox nav-upper closed</xsl:text>
+				</xsl:when>
+			</xsl:choose>
+		</xsl:attribute>
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/><i class="small">&#160;as&#160;<xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</i></p>
 		</div>
@@ -215,28 +278,37 @@
 
 <xsl:template name="text">
 	<xsl:param name="navorder"/>
+	<xsl:param name="mode"/>
 	<xsl:variable name="toolbox_ID">text</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Text</xsl:variable>
-	<div id="{$toolbox_ID}" class="toolbox lower-right closed" order="{$navorder}">
+	<div id="{$toolbox_ID}" order="{$navorder}">
+		<xsl:attribute name="class">
+			<xsl:choose>
+				<xsl:when test="$mode = 'graph'">
+					<xsl:text>toolbox lower-right closed</xsl:text>
+				</xsl:when>
+				<xsl:when test="$mode = 'text'">
+					<xsl:text>toolbox nav-upper closed</xsl:text>
+				</xsl:when>
+			</xsl:choose>
+		</xsl:attribute>
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
 			<p><xsl:value-of select="$toolbox_LBL"/></p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
 			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
-				<h6>Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="openModal(document.getElementById('{$toolbox_ID}-bhb-content').innerHTML,'Content','max-width: 90%; margin-top: 10px;');">
+				<h6>Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="openModal(document.getElementById('bhb-text').innerHTML,'Content','max-width: 90%; margin-top: 10px;');">
 				<span>&#8599;</span>
 				</button>
 				<button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="switchView();">
 			 <span>&#8621;</span>
 		 </button>
 				</h6>
-				<div id="mini-placeholder">
-					<div id="{$toolbox_ID}-bhb-content" class="content-xml"/>
+				<div id="mini-workspace">
+					<xsl:call-template name="mini_workspace">
+						<xsl:with-param name="mode" select="$mode"/>
+					</xsl:call-template>
 				</div>
-				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}position')/@key">
-					<xsl:variable name="oracle">$$ID</xsl:variable>
-					<span id="{$toolbox_ID}-bhb-position-querystring" data-bhb-querystring="{bhb:query(., $oracle)}"/>
-				</xsl:for-each>
 				<div id="{$toolbox_ID}-pointnavtool">
 					<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-next" name="{$toolbox_ID}-next" type="hidden" value=""/>
