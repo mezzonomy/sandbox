@@ -6,24 +6,24 @@
 
 // Time formaters & parsers
 
-const bhb_date_format = "%Y-%m-%dT%H:%M:%SZ"
-var formatDate, formatDateP1, formatDateP2, formatDateP3, formatDateP, formatDateMonth,formatDateBhb, parseDateBhb;
+const BHB_DATE_ENCODING = "%Y-%m-%dT%H:%M:%SZ"
+var FORMAT_DATE, FORMAT_DATE_P1, FORMAT_DATE_P2, FORMAT_DATE_P3, FORMAT_DATE_TIME,FORMAT_DATE_BHB, PARSE_DATE_BHB;
 
 
 function init_timeRangeSlider() {
-  formatDate = d3.timeFormat("%a %_d %b %Y");
-  formatDateP1 = d3.timeFormat("%a %_d");
-  formatDateP2 = d3.timeFormat("%b %Y");
-  formatDateP3 = d3.timeFormat("%H:%M");
-  formatDateP = d3.timeFormat("%a %_d %b %y %H:%M:%S")
-  formatDateMonth = d3.timeFormat("%b %Y");
-  formatDateBhb = d3.timeFormat(bhb_date_format);
-  parseDateBhb = d3.timeParse(bhb_date_format);
+  FORMAT_DATE = d3.timeFormat("%a %_d %b %Y");
+  FORMAT_DATE_P1 = d3.timeFormat("%a %_d");
+  FORMAT_DATE_P2 = d3.timeFormat("%b %Y");
+  FORMAT_DATE_P3 = d3.timeFormat("%H:%M");
+  FORMAT_DATE_TIME = d3.timeFormat("%a %_d %b %y %H:%M:%S");
+  FORMAT_DATE_TIME_SHORT = d3.timeFormat("%Y%m%d-%H%M%S");
+  FORMAT_DATE_BHB = d3.timeFormat(BHB_DATE_ENCODING);
+  PARSE_DATE_BHB = d3.timeParse(BHB_DATE_ENCODING);
   //delete previous slider
   d3.select("#explorer-time-slider").select("svg").remove();
   // Construct time array
   var historyDates=[];
-  d3.selectAll(".explorer-history-date").each(function() {historyDates.push({date:parseDateBhb(this.innerText)});});
+  d3.selectAll(".explorer-history-date").each(function() {historyDates.push({date:PARSE_DATE_BHB(this.innerText)});});
   if (historyDates.length > 0) { // Case no evts
     // Render the slider
     // 1. domain
@@ -34,8 +34,8 @@ function init_timeRangeSlider() {
       var startDate = minDate;
       var endDate = new Date(historyDates[historyDates.length -1].date);
     } else {
-      var startDate = parseDateBhb(document.getElementById("explorer-bhb-from").dataset.bhbdate);
-      var endDate = parseDateBhb(document.getElementById("explorer-bhb-to").dataset.bhbdate);
+      var startDate = PARSE_DATE_BHB(document.getElementById("explorer-bhb-from").dataset.bhbdate);
+      var endDate = PARSE_DATE_BHB(document.getElementById("explorer-bhb-to").dataset.bhbdate);
     }
     // 3. render the slider
     var divId = "explorer-time-slider";
@@ -52,10 +52,10 @@ function init_timeRangeSlider() {
 function updateDates(_from, _to){
    var from= new Date(_from);
    var to=new Date(_to);
-   document.getElementById("explorer-bhb-from").value=formatDateBhb(from);
-   document.getElementById("explorer-bhb-to").value=formatDateBhb(to);
-   var fromQuery = document.getElementById("explorer-bhb-from").dataset.bhbquery.replace("$$DATE",formatDateBhb(from));
-   var toQuery = document.getElementById("explorer-bhb-to").dataset.bhbquery.replace("$$DATE",formatDateBhb(to));
+   document.getElementById("explorer-bhb-from").value=FORMAT_DATE_BHB(from);
+   document.getElementById("explorer-bhb-to").value=FORMAT_DATE_BHB(to);
+   var fromQuery = document.getElementById("explorer-bhb-from").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(from));
+   var toQuery = document.getElementById("explorer-bhb-to").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(to));
    console.log(fromQuery);
    console.log(toQuery);
    eval(fromQuery);
@@ -123,21 +123,21 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
   .attr("class", "handle-label part1")
   .attr("y", -42)
   .attr("x", 0)
-  .text(function(d) {return formatDateP1(sliderVals[d]);});
+  .text(function(d) {return FORMAT_DATE_P1(sliderVals[d]);});
 
   ghandle.append("text")
   .attr("text-anchor", "middle")
   .attr("class", "handle-label part2")
   .attr("y", -30)
   .attr("x", 0)
-  .text(function(d) {return formatDateP2(sliderVals[d]);});
+  .text(function(d) {return FORMAT_DATE_P2(sliderVals[d]);});
 
   ghandle.append("text")
   .attr("text-anchor", "middle")
   .attr("class", "handle-label part3")
   .attr("y", -18)
   .attr("x", 0)
-  .text(function(d) {return formatDateP3(sliderVals[d]);});
+  .text(function(d) {return FORMAT_DATE_P3(sliderVals[d]);});
 
   ghandle.append("polygon")
   .attr("class", "handle-label")
@@ -167,7 +167,7 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
   .attr("class", "evts")
   .attr("r", 2)
   .attr("cx", function(d){return x(d.date);})
-  .append("title").text(function(d){return formatDateP(d.date);});
+  .append("title").text(function(d){return FORMAT_DATE_TIME(d.date);});
 
   // select an history date
   slider.selectAll("circle.evts").on("click", function(d){
@@ -189,9 +189,9 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
     sliderVals[d] = ptx;
     var selHandle = d3.select(this);
     selHandle.attr("transform", function(d) {return "translate("+ ptx +",0)"; });
-    selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part1")}).text(function(d) {return formatDateP1(x.invert(ptx));});
-    selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part2")}).text(function(d) {return formatDateP2(x.invert(ptx));});
-    selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part3")}).text(function(d) {return formatDateP3(x.invert(ptx));});
+    selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part1")}).text(function(d) {return FORMAT_DATE_P1(x.invert(ptx));});
+    selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part2")}).text(function(d) {return FORMAT_DATE_P2(x.invert(ptx));});
+    selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part3")}).text(function(d) {return FORMAT_DATE_P3(x.invert(ptx));});
     var ptx2=x(sliderVals[d==0?1:0]);
     selRange.attr("x1", ptx).attr("x2", ptx2)
   }

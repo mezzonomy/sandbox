@@ -145,7 +145,7 @@ function validateAmendment(txt) {
  */
 
 function convertArrayOfObjectsToCSV(_data) {
-  var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+  var result, ctr, keys, mainKeys=[], infoKeys=[], columnDelimiter, lineDelimiter, data, res;
 
   data = _data || null;
   if (data == null || !data.length) {return null;}
@@ -153,7 +153,14 @@ function convertArrayOfObjectsToCSV(_data) {
   columnDelimiter = ';';
   lineDelimiter = '\n';
 
-  keys = Object.keys(data[0]);
+  // construct column header
+  data.forEach(function(item) {
+      mainKeys = mainKeys.concat(Object.keys(item));
+      infoKeys = infoKeys.concat(Object.keys(item.info));
+  });
+  mainKeys = arrayUnique(mainKeys);
+  infoKeys = arrayUnique(infoKeys);
+  keys = mainKeys.concat(infoKeys);
 
   result = '';
   result += keys.join(columnDelimiter);
@@ -161,9 +168,22 @@ function convertArrayOfObjectsToCSV(_data) {
 
   data.forEach(function(item) {
       ctr = 0;
-      keys.forEach(function(key) {
+      mainKeys.forEach(function(key) {
           if (ctr > 0) result += columnDelimiter;
-          result += item[key];
+          res = item[key];
+          if (res == undefined) res = "";
+          if (typeof res == "object") res = "[object]";
+          result += '"' + res + '"';
+          ctr++;
+      });
+      ctr = 0;
+      result += columnDelimiter;
+      infoKeys.forEach(function(key) {
+          if (ctr > 0) result += columnDelimiter;
+          res = item.info[key];
+          if (res == undefined) res = "";
+          if (typeof res == "object") res = "[object]";
+          result += '"' + res + '"';
           ctr++;
       });
       result += lineDelimiter;
@@ -177,7 +197,7 @@ function downloadCSV(_data) {
   var csv = convertArrayOfObjectsToCSV(_data);
   if (csv == null) return;
 
-  filename = 'export.csv';
+  filename = "bhb_points_" + FORMAT_DATE_TIME_SHORT(Date.now()) + ".csv";
 
   var blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
 
@@ -198,6 +218,17 @@ function downloadCSV(_data) {
   }
 }
 
+function arrayUnique(array) {
+    var a = array.concat();
+    for(var i=0; i<a.length; ++i) {
+        for(var j=i+1; j<a.length; ++j) {
+            if(a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+
+    return a;
+}
 
 /***********************************************************************
 ***********************************************************************/

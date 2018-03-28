@@ -17,8 +17,8 @@ const POINT_RADIUS = +0,
 			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\nINSERT XML\n</bhb:link>",
 			TEXT_TOOLBOX_ID = "text",
 			// Misc
-			LONGCLICK_LIMIT=500,
-			AUTONAV_INTERVAL=300,
+			LONGCLICK_LIMIT=500, //threshold in ms to detect a long click
+			AUTONAV_INTERVAL=300, //interval in ms for navigating between points
 			// Forces constants
 			DEF_ALPHA = 1, // forces default alpha [0-1] default 1
 			FASTER_DECAY = 1 - Math.pow(0.001, 1 / 100), // accelerate forces when dragging, with 100 ticks
@@ -40,7 +40,7 @@ var D3_UNIVERSE = d3.select("#universe"),
 		VERTICES=[], //array of vertices computed from DATA matrix points
 		VERTICES_POSITIONNING,
 		LONGCLICK_TIMER,
-		NAVPOINT_STOP=false,
+		NAVPOINT_STOP,
 		FORCES_STATUS_DEF={collide:{status:true},center:{status:true},charge:{status:true}},
 		FORCES_STATUS={};
 
@@ -55,8 +55,8 @@ var D3_UNIVERSE = d3.select("#universe"),
 
 function render(_data, _diff){
 	// if diff is true, data has changed
-	if (!_diff) console.log("@ ----- Reload same matrix ----------------------------------------------");
-	if (_diff) console.log("@ ----- Reload with point matrix change ---------------------------------");
+	//if (!_diff) console.log("@ ----- Reload same matrix ----------------------------------------------");
+	//if (_diff) console.log("@ ----- Reload with point matrix change ---------------------------------");
 
 	// ******************************************************
 	// Inits in diffs and not diffs
@@ -78,7 +78,7 @@ function render(_data, _diff){
 	// Beyond this point executed only if diffs in matrix or scene is empty or reinited
 	// ******************************************************
 	if (!_diff && !D3_SCENE.empty()) return false;
-	console.log("@ ----- Redraw graph ----------------------------------------------------");
+	//console.log("@ ----- Redraw graph ----------------------------------------------------");
 
 	// ******************************************************
 	// Scene definition
@@ -409,7 +409,7 @@ function render(_data, _diff){
 	.attr("text-anchor", "middle")
 	.text(function(d) {
 		if (d.tagraw=="bhb:link") {
-			return formatDateP(parseDateBhb(d.source.info.on_clock));
+			return FORMAT_DATE_TIME(PARSE_DATE_BHB(d.source.info.on_clock));
 		} else {
 			return d.source.info.xsl_element;
 		}
@@ -427,8 +427,28 @@ function render(_data, _diff){
 	// Color all bhb:link edges
 	var bhbLinks = D3_SCENE.selectAll(".edges").filter(function(d){return d.tagraw=="bhb:link"})
 	bhbLinks.classed("bhbLink", true);
-	bhbLinks.attr("marker-start", "url(#marker-start-bhbLink)");
-	bhbLinks.attr("marker-end", "url(#marker-end-bhbLink)");
+	bhbLinks.attr("marker-start", function(d){
+		if (d3.select(this).classed("viewed")) {
+			if (d3.select(this).classed("start")) {
+				return "url(#marker-start-position)";
+			} else {
+				return "url(#marker-start-bhbLink)";
+			}
+		} else {
+			return "url(#marker-start-bhbLink)";
+		}
+	});
+	bhbLinks.attr("marker-end", function(d){
+		if (d3.select(this).classed("viewed")) {
+			if (d3.select(this).classed("start")) {
+				return "url(#marker-end-position)";
+			} else {
+				return "url(#marker-end-bhbLink)";
+			}
+		} else {
+			return "url(#marker-end-bhbLink)";
+		}
+	});
 
 	// ******************************************************
 	// Forces and Ticks
@@ -1206,6 +1226,7 @@ function text_nav(_datum){
 	if (!btnNextPt.empty()) {return;} // Exits if already drawned
 
 	// creates dynamic nav buttons
+	// nav to next
 	navTool.append("button")
 	.attr("type","button")
 	.attr("class","btn btn-primary")
@@ -1218,7 +1239,7 @@ function text_nav(_datum){
 		var nextPtId = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
 		setBhbPosition(nextPtId);
 	})
-	/*.on("mouseup", function(){
+	.on("mouseup", function(){
 		clearTimeout(LONGCLICK_TIMER);
 		NAVPOINT_STOP=true;
 	})
@@ -1229,13 +1250,15 @@ function text_nav(_datum){
 			var ptn = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
 				var autonav = setInterval(function(){
 					if (NAVPOINT_STOP) {clearInterval(autonav);}
-					setBhbPosition(ptn)
-					if (ptn.topology=="planar") {clearInterval(autonav);}
+					ptn = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
+					setBhbPosition(ptn);
+					//if (ptn.topology=="planar") {clearInterval(autonav);} // TODO: fix to make it stop !
 				},AUTONAV_INTERVAL);
 		},LONGCLICK_LIMIT);
-	})*/
+	})
 	;
 
+	// nav to peer
 	navTool.append("button")
 	.attr("type","button")
 	.attr("class","btn btn-primary")
@@ -1250,6 +1273,7 @@ function text_nav(_datum){
 		simulateClick(document.getElementById(peerPtId));
 	});
 
+	// nav to before
 	navTool.append("button")
 	.attr("type","button")
 	.attr("class","btn btn-secondary")
@@ -1264,6 +1288,7 @@ function text_nav(_datum){
 		simulateClick(document.getElementById(beforePtId));
 	});
 
+	// unselect
 	navTool.append("button")
 	.attr("type","button")
 	.attr("class","btn btn-secondary")
@@ -1277,6 +1302,17 @@ function text_nav(_datum){
 		D3_SCENE.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
 		D3_SCENE.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
 		unselectVertices()
+	});
+
+	// export to csv TODO: remove ? (tech option)
+	navTool.append("button")
+	.attr("type","button")
+	.attr("class","btn btn-secondary")
+	.attr("id",TEXT_TOOLBOX_ID + "-export")
+	.text(String.fromCharCode(8862))
+	.attr("title", "export bhb points to csv")
+	.on("click", function(d) {
+		downloadCSV(DATA);
 	});
 }
 
@@ -1450,8 +1486,6 @@ function vertexToString(_vertex, _hash){
 		return vertexString;
 	}
 }
-
-
 
 	// ******************************************************					_______________________________
 	// Applying Forces to elements
