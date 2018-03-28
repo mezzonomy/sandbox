@@ -54,9 +54,9 @@ var D3_UNIVERSE,
  */
 
 function render(_data, _diff){
-	// if diff is true, data has changed
-	//if (!_diff) console.log("@ ----- Reload same matrix ----------------------------------------------");
-	//if (_diff) console.log("@ ----- Reload with point matrix change ---------------------------------");
+	// if diff is true, data matrix has changed
+	// if (!_diff) console.log("@ ----- Reload same matrix ----------------------------------------------");
+	// if (_diff) console.log("@ ----- Reload with point matrix change ---------------------------------");
 
 	// ******************************************************
 	// Inits in diffs and not diffs
@@ -75,6 +75,21 @@ function render(_data, _diff){
 	if (oldBhbMode !== CURRENT_BHB_MODE) {
 		if (!D3_SCENE.empty()) D3_SCENE.remove(); //removes but does not empty the selection
 		D3_SCENE = D3_UNIVERSE.select("svg#scene"); // reinit scene selection
+	}
+
+	// amend from this position
+	//TODO: Test Only Validate positionning and coherence before real implementation
+	if (CURRENT_BHB_MODE == "text") {
+		D3_UNIVERSE.select("#worspace-amend-from-text").remove();
+		D3_UNIVERSE.select("#bhb-text").append("button")
+		.attr("type","button")
+		.attr("class","btn btn-secondary")
+		.attr("id", "worspace-amend-from-text")
+		.text(String.fromCharCode(43))
+		.attr("title", "Edit from this point")
+		.on("click", function(d) {
+			AmendFromPoint(document.getElementById(TEXT_TOOLBOX_ID + "-point").value);
+		});
 	}
 
   if (!_diff) selectPoint();
@@ -513,27 +528,34 @@ function render(_data, _diff){
 					(getAbsCoord(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND,
 					"lbl_"+d.id, d.topology)});
 
+				/* ticks control*/
+				var ticksDone = (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay())));
+				var ticksTotal = (Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay())));
+				var percentCpt = Math.floor(100*(ticksDone / ticksTotal));
 				/* log forces status
 				var logforces = D3_UNIVERSE.select("#perspective-footer").select("#logforces");
 				if (logforces.empty) D3_UNIVERSE.select("#perspective-footer").insert("div").attr("id","logforces");
 				var logforcesHTML = '<p class="small">';
-				logforcesHTML += "alpha:" + this.alpha() + "<br/>";
-				logforcesHTML += "alpha target:" + this.alphaTarget() + "<br/>";
-				logforcesHTML += "alpha decay:" + this.alphaDecay() + "<br/>";
-				logforcesHTML += "ticks done:" + (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))) + "<br/>";
-				logforcesHTML += "total ticks number:" + (Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay()))) + "<br/>";
-				logforcesHTML += "ticks before savepoint (if 0):" + (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50) + "<br/>";
+				logforcesHTML += "alpha: " + this.alpha() + "<br/>";
+				logforcesHTML += "alpha target: " + this.alphaTarget() + "<br/>";
+				logforcesHTML += "alpha decay: " + this.alphaDecay() + "<br/>";
+				logforcesHTML += "ticks done: " + ticksDone + "<br/>";
+				logforcesHTML += "total ticks number: " + ticksTotal + "<br/>";
+				logforcesHTML += "ticks before savepoint (if 0): " + (ticksTotal%50) + "<br/>";
+				logforcesHTML += "collide status: " +  (this.force("collide") != undefined) + " <br/>";
 				logforcesHTML += "</p>";
-				logforces.html(logforcesHTML);
-				*/
+				logforces.html(logforcesHTML);*/
+
+				//release collide at beginning then restore it
+				//if (percentCpt < 20) this.force("collide", null);
+				//if (percentCpt > 20) this.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;}));
 
 				// Log progess on freeze force button
 				if (!PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").empty()) {
-					var cpt = Math.floor(100*((Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))) / (Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay())))))
-					if (cpt%5 ==0) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text("Freeze (running..." + cpt +"%)");
+					if (percentCpt%5 ==0) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text("Freeze (running..." + percentCpt +"%)");
 				}
 				//save positionning every 50 ticks
-				if (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay()))%50 == 0) storeLocalVertexPositionning
+				if (ticksDone%50 == 0) storeLocalVertexPositionning
 			}
 			catch(error) {
 				//console.log("shadow tick !");
@@ -669,7 +691,7 @@ function dragstarted(d) {
 	d3.event.sourceEvent.stopPropagation();
 	if (!d3.event.active) {
 		//keep only links and collide forces
-		VERTICES_POSITIONNING.force("center", null).force("charge", null);
+		//VERTICES_POSITIONNING.force("center", null).force("charge", null);
 		VERTICES_POSITIONNING.alphaTarget(REHEAT_ALPHATARGET).alphaDecay(FASTER_DECAY).restart();
 	}
 	d.fx = d.x;
@@ -689,8 +711,8 @@ function dragended(d) {
 		//restore & relaunch forces
 		var xc= D3_SCENE.property("clientWidth") / 2;
 		var yc= D3_SCENE.property("clientHeight") / 2;
-		VERTICES_POSITIONNING.force("center", d3.forceCenter(xc,yc))
-		VERTICES_POSITIONNING.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));
+		//VERTICES_POSITIONNING.force("center", d3.forceCenter(xc,yc))
+		//VERTICES_POSITIONNING.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));
 		VERTICES_POSITIONNING.alphaTarget(DEF_ALPHATARGET).alphaDecay(DEF_DECAY);
 	}
 	//d.fx = null, d.fy = null;
@@ -1166,6 +1188,7 @@ function selectPoint(_ptId, _openToolbox) {
 	document.getElementById(TEXT_TOOLBOX_ID + "-peer").value = pt.peer;
 	var ptbefore = D3_SCENE.selectAll(".point").filter(function(s){return s.next == pt.point;}).datum();
 	document.getElementById(TEXT_TOOLBOX_ID + "-before").value = ptbefore.point;
+	console.log("Click on point: ", pt, "value: ", text_readInfo(pt))
 	text_nav(pt);
 	// reinit prevously selected point
 	var pointsViewed = D3_SCENE.selectAll(".viewed").classed("viewed",false);
@@ -1319,6 +1342,31 @@ function text_nav(_datum){
 	.on("click", function(d) {
 		downloadCSV(DATA);
 	});
+
+	// amend from this position
+	navTool.append("button")
+	.attr("type","button")
+	.attr("class","btn btn-secondary")
+	.attr("id",TEXT_TOOLBOX_ID + "-amend")
+	.text(String.fromCharCode(43))
+	.attr("title", "Edit from this point")
+	.on("click", function(d) {
+		AmendFromPoint(document.getElementById(TEXT_TOOLBOX_ID + "-point").value);
+	});
+}
+
+function AmendFromPoint(_pt) {
+	var point = D3_SCENE.select('#' + _pt);
+	// init and open amend toobox
+	alertInit();
+	if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
+		D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
+	}
+	var path = point.datum().path;
+	var order = point.datum().order;
+	document.getElementById(AMEND_TOOLBOX_ID + "-point").value = point.datum().point;
+	document.getElementById(AMEND_TOOLBOX_ID + "-next").value = point.datum().next;
+	document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
 }
 
 
