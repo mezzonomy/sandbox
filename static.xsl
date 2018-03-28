@@ -33,36 +33,6 @@
 	   S T A T I C
      = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 
-<xsl:template name="workspace">
-	<xsl:param name="mode"/>
-	<xsl:choose>
-		 <xsl:when test="$mode = 'graph'">
-			 <xsl:call-template name="bhbgraph"/>
-		 </xsl:when>
-		 <xsl:when test="$mode = 'text'">
-			 <xsl:call-template name="bhbtext"/>
-		 </xsl:when>
-	</xsl:choose>
-</xsl:template>
-
-<xsl:template name="mini_workspace">
-	<xsl:param name="mode"/>
-	<xsl:choose>
-		 <xsl:when test="$mode = 'text'">
-			 <xsl:call-template name="bhbgraph"/>
-		 </xsl:when>
-		 <xsl:when test="$mode = 'graph'">
-			 <xsl:call-template name="bhbtext"/>
-		 </xsl:when>
-</xsl:choose>
-</xsl:template>
-
-<xsl:template name="bhbtext">
-	<div id="bhb-text">
-			 <xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
-	</div>
-</xsl:template>
-
 <xsl:template match="xsl:warning" mode="xsl:default">
 		<xsl:text>Please select a point</xsl:text>
 </xsl:template>
@@ -88,6 +58,8 @@
 		<xsl:text>)</xsl:text>
 </xsl:template>
 
+<!-- Toolboxes -->
+<!-- Toolboxes - Perspective-->
 <xsl:template name="perspective">
 	<xsl:param name="navorder"/>
 	<xsl:param name="mode"/>
@@ -161,6 +133,7 @@
 	</div>
 </xsl:template>
 
+<!-- Toolboxes - Explorer-->
 <xsl:template name="explorer">
 	<xsl:param name="navorder"/>
 	<xsl:param name="mode"/>
@@ -232,6 +205,7 @@
 		<li class="{$toolbox_ID}-history-date"><xsl:value-of select="@on:clock"/></li>
 </xsl:template>
 
+<!-- Toolboxes - Perspective-->
 <xsl:template name="amendment">
 	<xsl:param name="navorder"/>
 	<xsl:param name="mode"/>
@@ -269,13 +243,13 @@
 				<label for="{$toolbox_ID}-editzone">Edit Amendment</label>
 				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="7" class="form-control" placeholder="Please drop a vertex arc here to create a new amendment" spellcheck="false" required="required" oninput="validateAmendment('{$toolbox_ID}-editzone')" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
 				<div id="{$toolbox_ID}-editinfo" class="alert"/>
-				<!--<button type="button" id="amendment-checkbtn" name="amendment-checkbtn" class="btn btn-info left" onclick="validateAmendment('amendment-editzone')">check</button>-->
 				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">validate</button>
 			</form>
 		</div>
 	</div>
 </xsl:template>
 
+<!-- Toolboxes - Text-->
 <xsl:template name="text">
 	<xsl:param name="navorder"/>
 	<xsl:param name="mode"/>
@@ -288,7 +262,7 @@
 					<xsl:text>toolbox lower-right closed</xsl:text>
 				</xsl:when>
 				<xsl:when test="$mode = 'text'">
-					<xsl:text>toolbox nav-upper closed</xsl:text>
+					<xsl:text>toolbox nav-upper opened</xsl:text>
 				</xsl:when>
 			</xsl:choose>
 		</xsl:attribute>

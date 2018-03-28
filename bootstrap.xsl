@@ -71,9 +71,8 @@
 	<html>
 		<head>
 			<title>
-				<!--xsl:value-of select="$situation"/-->
-				<xsl:text>SANDBOX [</xsl:text>
-				<xsl:value-of select="$perspective/@username" />
+				<xsl:text>Sandbox&#160;[</xsl:text>
+				<xsl:value-of select="$perspective/@username"/>
 				<xsl:text>]</xsl:text>
 			</title>
 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
@@ -105,11 +104,39 @@
 	</html>
 </xsl:template>
 
+<!-- Workspaces layout-->
+<xsl:template name="workspace">
+	<xsl:param name="mode"/>
+	<xsl:choose>
+		 <xsl:when test="$mode = 'graph'">
+			 <xsl:call-template name="bhbgraph"/>
+		 </xsl:when>
+		 <xsl:when test="$mode = 'text'">
+			 <xsl:call-template name="bhbtext"/>
+		 </xsl:when>
+	</xsl:choose>
+</xsl:template>
 
-<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	   J A V A S C R I P T   I N T E R F A C E
-     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
+<xsl:template name="mini_workspace">
+	<xsl:param name="mode"/>
+	<xsl:choose>
+		 <xsl:when test="$mode = 'text'">
+			 <xsl:call-template name="bhbgraph"/>
+		 </xsl:when>
+		 <xsl:when test="$mode = 'graph'">
+			 <xsl:call-template name="bhbtext"/>
+		 </xsl:when>
+	 </xsl:choose>
+</xsl:template>
 
+<!-- Text -->
+<xsl:template name="bhbtext">
+	<div id="bhb-text">
+			 <xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
+	</div>
+</xsl:template>
+
+<!-- Graph (point matrix) & fire render js UI (default render)-->
 <xsl:template name="bhbgraph">
 		<xsl:variable name="js">
 			<xsl:apply-templates mode="spheric"/>

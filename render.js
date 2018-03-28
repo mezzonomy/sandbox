@@ -62,14 +62,23 @@ function render(_data, _diff){
 	// Inits in diffs and not diffs
 	// ******************************************************
 	init_timeRangeSlider();
-	CURRENT_BHB_POSITION=document.getElementById("universe").dataset.bhbposition;
+	CURRENT_BHB_POSITION = document.getElementById("universe").dataset.bhbposition;
+	var oldBhbMode = CURRENT_BHB_MODE; // save previous mode
 	CURRENT_BHB_MODE=document.getElementById("universe").dataset.bhbmode;
+
+	//check for mode change and switch existing scene
+	if (oldBhbMode !== CURRENT_BHB_MODE) {
+		if (!D3_SCENE.empty()) D3_SCENE.remove(); //removes but does not empty the selection
+		D3_SCENE = D3_UNIVERSE.select("svg#scene"); // reinit scene selection
+	}
+
   if (!_diff) selectPoint();
 
 	// ******************************************************
-	// Beyond this point executed only if diffs in matrix
+	// Beyond this point executed only if diffs in matrix or scene is empty or reinited
 	// ******************************************************
-	if (!_diff) return false;
+	if (!_diff && !D3_SCENE.empty()) return false;
+	console.log("@ ----- Redraw graph ----------------------------------------------------");
 
 	// ******************************************************
 	// Scene definition
@@ -118,6 +127,9 @@ function render(_data, _diff){
 	function zoomed() {
 		container.attr("transform", d3.event.transform);
 	}
+
+	//change zoom level if mini-workspace
+	if (CURRENT_BHB_MODE=='text') D3_SCENE.call(ZOOM.transform, d3.zoomIdentity.scale(1/5));
 
 	// ******************************************************
 	// get forces settings from localstore
@@ -907,7 +919,7 @@ function AddButtonsToPerspective(){
 	if (btnResetZoom.empty()) {
 			btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-zoom").text("zoom");
 			btnResetZoom.on("click", function(){
-				if (D3_UNIVERSE.select("#toolboxes").classed("graph")) {
+				if (CURRENT_BHB_MODE == 'graph') {
 					D3_SCENE.transition()
 					.duration(750)
 					.call(ZOOM.transform, d3.zoomIdentity);
