@@ -28,13 +28,13 @@ const POINT_RADIUS = +0,
 			DEF_ALPHATARGET = 0;
 
 // Global variables
-var D3_UNIVERSE = d3.select("#universe"),
-		D3_SCENE = D3_UNIVERSE.select("svg#scene"), //svg selection
-		DOM_SCENE = document.getElementById("scene"), // Dom object byid scene (maybe null if no scene yet)
-		PERSPECTIVE_TOOLBOX_FOOTER = D3_UNIVERSE.select("#perspective-footer"), // Where to add buttons and log in the perspective toolbox
+var D3_UNIVERSE,
+		D3_SCENE, //svg selection
+		DOM_SCENE, // Dom object byid scene (maybe null if no scene yet)
+		PERSPECTIVE_TOOLBOX_FOOTER, // Where to add buttons and log in the perspective toolbox
 		CURRENT_BHB_POSITION,
 		CURRENT_BHB_MODE,
-		ZOOM = d3.zoom(), // d3 zoom
+		ZOOM, // d3 zoom
 		VERTEX_LAST_POSITION=[], // array of vertices last positions and rotations
 		VERTICES_BY_HC=[], // d3 map of vertices indexed by Hash code (for naming svg groups)
 		VERTICES=[], //array of vertices computed from DATA matrix points
@@ -61,6 +61,11 @@ function render(_data, _diff){
 	// ******************************************************
 	// Inits in diffs and not diffs
 	// ******************************************************
+	D3_UNIVERSE = d3.select("#universe");
+	D3_SCENE = D3_UNIVERSE.select("svg#scene");
+	DOM_SCENE = document.getElementById("scene");
+	PERSPECTIVE_TOOLBOX_FOOTER = D3_UNIVERSE.select("#perspective-footer");
+	ZOOM = d3.zoom();
 	init_timeRangeSlider();
 	CURRENT_BHB_POSITION = document.getElementById("universe").dataset.bhbposition;
 	var oldBhbMode = CURRENT_BHB_MODE; // save previous mode
