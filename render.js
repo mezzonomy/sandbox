@@ -921,24 +921,24 @@ function createMarkers(_defs) {
 	_defs.append("marker")
 		.attr("id", "marker-start-position")
 		.attr("class", "marker-std")
-		.attr("markerWidth", "40")
-		.attr("markerHeight", "40")
+		.attr("markerWidth", "30")
+		.attr("markerHeight", "30")
 		.attr("refX", "10")
-		.attr("refY", "20")
+		.attr("refY", "15")
 		.attr("orient", "auto")
 		.append("path")
-		.attr("d", "M35 35 L5 20 L35 5 M5 20 L10 20")
+		.attr("d", "M25 25 L5 15 L25 5 M5 15 L10 15")
 		.attr("class","marker-std");
 	_defs.append("marker")
 		.attr("id", "marker-end-position")
 		.attr("class", "marker-std")
-		.attr("markerWidth", "40")
-		.attr("markerHeight", "40")
-		.attr("refX", "30")
-		.attr("refY", "20")
+		.attr("markerWidth", "30")
+		.attr("markerHeight", "30")
+		.attr("refX", "20")
+		.attr("refY", "15")
 		.attr("orient", "auto")
 		.append("path")
-		.attr("d", "M5 35 L35 20 L5 5 M35 20 L30 20")
+		.attr("d", "M5 25 L25 15 L5 5 M25 15 L20 15")
 		.attr("class","marker-std");
 
 	//Duplicate for bhbLinks
@@ -1379,45 +1379,6 @@ function switchView(){
 	if (CURRENT_BHB_MODE == "graph") setBhbMode("text");
 	if (CURRENT_BHB_MODE == "text") setBhbMode("graph");
 }
-
-/*function switchView(){
-	if (D3_UNIVERSE.select("#toolboxes").classed("graph")) { //swith to text mode
-		//Move the toolbox to top
-		D3_UNIVERSE.select("#toolboxes").classed("graph", false).classed("text", true);
-		D3_UNIVERSE.select("#placeholder").classed("graph", false).classed("text", true);
-		D3_UNIVERSE.selectAll(".toolbox").classed("upper-left", false).classed("upper-right", false).classed("lower-left", false).classed("lower-right", false).classed("nav-upper", true);
-		//Move graphic into menu content and vice versa
-		var currentParent = document.getElementById("placeholder");
-		var newParent = document.getElementById("mini-placeholder");
-		var newParentContent = document.getElementById("mini-placeholder").innerHTML;
-		newParent.innerHTML="";
-		newParent.appendChild(currentParent.childNodes[0]);
-		currentParent.innerHTML=newParentContent;
-		// Zoom on graphic
-		D3_SCENE.transition()
-		.duration(750)
-		.call(ZOOM.transform, d3.zoomIdentity.scale(1/5));
-	} else { //swith to graph mode
-		//Move toolboxes to corners
-		D3_UNIVERSE.select("#toolboxes").classed("graph", true).classed("text", false);
-		D3_UNIVERSE.select("#placeholder").classed("graph", true).classed("text", false);
-		D3_UNIVERSE.select("#explorer").classed("nav-upper", false).classed("upper-left", true);
-		D3_UNIVERSE.select("#amendment").classed("nav-upper", false).classed("upper-right", true);
-		D3_UNIVERSE.select("#perspective").classed("nav-upper", false).classed("lower-left", true);
-		D3_UNIVERSE.select("#text").classed("nav-upper", false).classed("lower-right", true);
-		//Move graphic into menu content and vice versa
-		var currentParent = document.getElementById("mini-placeholder");
-		var newParent = document.getElementById("placeholder");
-		var newParentContent = document.getElementById("placeholder").innerHTML;
-		newParent.innerHTML="";
-		newParent.appendChild(currentParent.childNodes[0]);
-		currentParent.innerHTML=newParentContent;
-		// Zoom on graphic
-		D3_SCENE.transition()
-		.duration(750)
-		.call(ZOOM.transform, d3.zoomIdentity);
-	}
-}*/
 
 /*
  * Bhb Queries

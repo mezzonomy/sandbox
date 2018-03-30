@@ -229,7 +229,7 @@
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
 			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
 				<on:submit create="bhb:block">
-					<on:attribute name="body" script="_get('{$toolbox_ID}-editzone').value"/>
+					<on:attribute name="body" script="_get('{$toolbox_ID}-editzone').value.replace(/\u0022/g, String.fromCharCode(39))"/> <!--replaces " by ' :-)-->
 					<bhb:copy-of select="bhb:parse(@body)"/>
 				</on:submit>
 				<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value=""/>

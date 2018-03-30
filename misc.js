@@ -118,7 +118,6 @@ function removeModal (){
   return false;
 }
 
-
 /**
  * complete amendment for xml wellformedness
  * and send validation code
