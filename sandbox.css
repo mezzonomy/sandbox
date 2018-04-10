@@ -313,17 +313,17 @@ div.cols-two {
 }
 
 div.closed > .toolbox-header {
-	background-image: url(icon-open.png);
+	background-image: url(icon-open.svg);
 	background-repeat: no-repeat;
 	background-position: right;
-	background-size: auto .4rem;
+	background-size: auto 1rem;
 }
 
 div.opened > .toolbox-header {
-	background-image: url(icon-close.png);
+	background-image: url(icon-close.svg);
 	background-repeat: no-repeat;
 	background-position: right;
-	background-size: auto .4rem;
+	background-size: auto 1rem;
 }
 
 .toolbox-body > p {
