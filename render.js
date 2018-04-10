@@ -1338,7 +1338,7 @@ function text_nav(_datum){
 	.attr("class","btn btn-secondary")
 	.attr("id",TEXT_TOOLBOX_ID + "-export")
 	.text(String.fromCharCode(8862))
-	.attr("title", "export bhb points to csv")
+	.attr("title", "export modal matrix points to csv")
 	.on("click", function(d) {
 		downloadCSV(DATA);
 	});

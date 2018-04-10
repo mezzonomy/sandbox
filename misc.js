@@ -30,15 +30,31 @@ function closeLoader() {
  * Open/close the current toolbox by changing classes on the element
  * css classed .closed and .opened must be defined
  *
- * @param tlbx {dom elt} dom element typically "this"
+ * @param _elt {dom elt} dom element typically "this"
  * @returns changes the classes on the element opened => closed or closed => opened
  * @example <div id="{$toolbox_ID}" class="toolbox lower-left opened" onclick="ui_tlbx_toggle(this);">
  */
-function ui_tlbx_toggle(tlbx) {
-  if (d3.select(tlbx).classed("opened")) {
-      d3.select(tlbx).classed("opened", false).classed("closed", true);
+function ui_tlbx_toggle(_elt) {
+  if (d3.select(_elt).classed("opened")) {
+      d3.select(_elt).classed("opened", false).classed("closed", true);
   } else {
-    d3.select(tlbx).classed("closed", false).classed("opened", true);
+    d3.select(_elt).classed("closed", false).classed("opened", true);
+  }
+}
+
+/**
+ * wrap/unwrap the current div by changing classes on the element
+ * css classed .wraped and .unwraped must be defined
+ *
+ * @param _elt {dom elt} dom element typically "this"
+ * @returns changes the classes on the element opened => closed or closed => opened
+ * @example <div class="e wrap" onclick="ui_wrap_toggle(this);">
+ */
+function ui_wrap_toggle(_elt) {
+  if (d3.select(_elt).classed("wraped")) {
+      d3.select(_elt).classed("wraped", false).classed("unwraped", true);
+  } else {
+    d3.select(_elt).classed("unwraped", false).classed("wraped", true);
   }
 }
 
@@ -196,7 +212,7 @@ function downloadCSV(_data) {
   var csv = convertArrayOfObjectsToCSV(_data);
   if (csv == null) return;
 
-  filename = "bhb_points_" + FORMAT_DATE_TIME_SHORT(Date.now()) + ".csv";
+  filename = "modal_matrix_" + FORMAT_DATE_TIME_SHORT(Date.now()) + ".csv";
 
   var blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
 
