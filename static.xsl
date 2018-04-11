@@ -308,7 +308,8 @@
 			<SPAN class="m" data-elt="{$nodeName}">
 				<xsl:call-template name="entity-ref">
 					<xsl:with-param name="name">#60</xsl:with-param>
-				</xsl:call-template></SPAN>
+				</xsl:call-template>
+			</SPAN>
 			<SPAN>
 				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
 				<xsl:apply-templates select="." mode="xsl:name"/>

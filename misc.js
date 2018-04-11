@@ -161,6 +161,9 @@ function validateAmendment(txt) {
 
 function convertArrayOfObjectsToCSV(_data) {
   var result, ctr, keys, mainKeys=[], infoKeys=[], columnDelimiter, lineDelimiter, data, res;
+  // sort columns (the columns not stated will be listed anyway, at the end & not sorted)
+  var mainColsOrder = ["path","order","point","next","peer"];
+  var infoColsOrder = ["xsl_element"];
 
   data = _data || null;
   if (data == null || !data.length) {return null;}
@@ -173,8 +176,30 @@ function convertArrayOfObjectsToCSV(_data) {
       mainKeys = mainKeys.concat(Object.keys(item));
       infoKeys = infoKeys.concat(Object.keys(item.info));
   });
+
   mainKeys = arrayUnique(mainKeys);
   infoKeys = arrayUnique(infoKeys);
+
+  //sort columns
+  mainColsOrder.forEach(function(item, cpt){
+    var elt, idx = mainKeys.indexOf(item);
+    if (idx > -1) {
+      elt = mainKeys.splice(idx,1);
+      mainKeys.splice(cpt,0,elt[0]);
+    }
+    cpt+=1;
+  });
+
+  infoColsOrder.forEach(function(item, cpt){
+    var elt, idx = infoKeys.indexOf(item);
+    if (idx > -1) {
+      elt = infoKeys.splice(idx,1);
+      infoKeys.splice(cpt,0,elt[0]);
+    }
+    cpt+=1;
+  });
+
+  //concat columns
   keys = mainKeys.concat(infoKeys);
 
   result = '';
@@ -187,7 +212,7 @@ function convertArrayOfObjectsToCSV(_data) {
           if (ctr > 0) result += columnDelimiter;
           res = item[key];
           if (res == undefined) res = "";
-          if (typeof res == "object") res = "[object]";
+          if (typeof res == "object") res = "->";
           result += '"' + res + '"';
           ctr++;
       });
