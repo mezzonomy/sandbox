@@ -1,6 +1,6 @@
 /*START rewrites/add some classes from default.css*/
 .bhb {font:small; color: #777;}
-.notbhb {color: black;}
+.notbhb {color: blue;}
 div.link{
   border-style: solid;
   border-color: #777;
