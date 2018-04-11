@@ -156,17 +156,29 @@ function validateAmendment(txt) {
 /***********************************************************************
 ***********************************************************************/
 /**
- * Code for exporting data to csv (inspired from https://halistechnology.com/2015/05/28/use-javascript-to-export-your-data-as-csv/)
+ * Code for exporting csv
  */
 
-function convertArrayOfObjectsToCSV(_data) {
-  var result, ctr, keys, mainKeys=[], infoKeys=[], columnDelimiter, lineDelimiter, data, res;
+function convertArrayOfObjectsToCSV(_data, _sorted) {
+  var result, ctr, keys, mainKeys=[], infoKeys=[], pointsIds=[],  pointsIdsEncoded=[], columnDelimiter, lineDelimiter, data, sorted, res;
   // sort columns (the columns not stated will be listed anyway, at the end & not sorted)
   var mainColsOrder = ["path","order","point","next","peer"];
   var infoColsOrder = ["xsl_element"];
+  var colsId = ["point", "next", "peer"];
 
   data = _data || null;
   if (data == null || !data.length) {return null;}
+  sorted = _sorted || false;
+
+  // sort data
+  if (sorted) {
+    data.sort(function(a,b){
+      var aa = a.path + a.order;
+      var bb = b.path + b.order;
+      return aa.localeCompare(bb);
+    });
+  }
+
 
   columnDelimiter = ';';
   lineDelimiter = '\n';
@@ -206,11 +218,13 @@ function convertArrayOfObjectsToCSV(_data) {
   result += keys.join(columnDelimiter);
   result += lineDelimiter;
 
+  //fill columns & get points id from point/next/peer in an array
   data.forEach(function(item) {
       ctr = 0;
       mainKeys.forEach(function(key) {
           if (ctr > 0) result += columnDelimiter;
           res = item[key];
+          if (colsId.indexOf(key) > -1) pointsIds.push(res.replace(/B_/, "").replace(/T_/, ""));
           if (res == undefined) res = "";
           if (typeof res == "object") res = "->";
           result += '"' + res + '"';
@@ -229,12 +243,34 @@ function convertArrayOfObjectsToCSV(_data) {
       result += lineDelimiter;
   });
 
+  if (sorted) {
+    pointsIds = arrayUnique(pointsIds);
+
+    // encode the points
+    var signs="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    pointsIds.forEach(function(item, i) {
+      var input = /*Number(item)*/ i+1;
+      var output="";
+      while (input>0) {
+        output = signs[(input%signs.length)+1] + output;
+        input -= (input%signs.length);
+        input = input/signs.length;
+      }
+      pointsIdsEncoded.push(output);
+    })
+
+    // replace points ids with encoded points
+    pointsIds.forEach(function(item, i) {
+      result = result.split(item).join(pointsIdsEncoded[i]);
+     })
+  }
+
   return result;
 }
 
-function downloadCSV(_data) {
+function downloadCSV(_data, _sorted) {
   var data, filename, link;
-  var csv = convertArrayOfObjectsToCSV(_data);
+  var csv = convertArrayOfObjectsToCSV(_data, _sorted);
   if (csv == null) return;
 
   filename = "modal_matrix_" + FORMAT_DATE_TIME_SHORT(Date.now()) + ".csv";

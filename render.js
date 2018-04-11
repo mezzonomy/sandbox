@@ -1356,6 +1356,17 @@ function text_nav(_datum){
 		downloadCSV(DATA);
 	});
 
+	// export to csv ordered and anonymised TODO: remove ? (tech option)
+	navTool.append("button")
+	.attr("type","button")
+	.attr("class","btn btn-secondary")
+	.attr("id",TEXT_TOOLBOX_ID + "-export")
+	.text(String.fromCharCode(8862))
+	.attr("title", "export modal matrix points sorted & anonymised to csv")
+	.on("click", function(d) {
+		downloadCSV(DATA, true);
+	});
+
 	// amend from this position
 	navTool.append("button")
 	.attr("type","button")
