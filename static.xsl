@@ -295,6 +295,176 @@
 </xsl:template>
 
 <!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+	   Rewrites defaultss.xsl templates for sandbox and add new ones
+     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
+		 <xsl:template match="*" mode="xsl:default">
+		 	<xsl:variable name="nodeName" select="local-name(.)"/>
+		 	<DIV>
+		 		<xsl:attribute name="class">
+		 			<xsl:text>e unwraped </xsl:text>
+		 			<xsl:value-of select="$nodeName"/>
+		 		</xsl:attribute>
+		 		<DIV class="INDENT">
+		 			<SPAN class="m" data-elt="{$nodeName}">
+		 				<xsl:call-template name="entity-ref">
+		 					<xsl:with-param name="name">#60</xsl:with-param>
+		 				</xsl:call-template></SPAN>
+		 			<SPAN>
+		 				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
+		 				<xsl:apply-templates select="." mode="xsl:name"/>
+		 				<xsl:if test="@*">
+		 					<xsl:text> </xsl:text>
+		 				</xsl:if>
+		 			</SPAN>
+		 			<xsl:apply-templates select="@*" mode="xsl:default"/>
+		 			<SPAN class="m" data-elt="{$nodeName}">
+		 				<xsl:text>/&gt;</xsl:text>
+		 			</SPAN>
+		 		</DIV>
+		 	</DIV>
+		 </xsl:template>
+
+		 <xsl:template match="*[text() and not (comment() or processing-instruction())]" mode="xsl:default">
+		 	<DIV class="e">
+		 		<DIV>
+		 			<SPAN class="m">
+		 				<xsl:call-template name="entity-ref">
+		 					<xsl:with-param name="name">#60</xsl:with-param>
+		 				</xsl:call-template>
+		 			</SPAN>
+		 			<SPAN>
+		 				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
+		 				<xsl:apply-templates select="." mode="xsl:name"/>
+		 				<xsl:if test="@*">
+		 					<xsl:text> </xsl:text>
+		 				</xsl:if>
+		 			</SPAN>
+		 			<xsl:apply-templates select="@*" mode="xsl:default"/>
+		 			<SPAN class="m">
+		 				<xsl:text>></xsl:text>
+		 			</SPAN>
+		 			<SPAN class="tx">
+		 				<xsl:value-of select="."/>
+		 			</SPAN>
+		 			<SPAN class="m">
+		 				<xsl:call-template name="entity-ref">
+		 					<xsl:with-param name="name">#60</xsl:with-param>
+		 				</xsl:call-template>/</SPAN>
+		 			<SPAN>
+		 				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
+		 				<xsl:apply-templates select="." mode="xsl:name"/>
+		 			</SPAN>
+		 			<SPAN class="m" data-elt="{$nodeName}">
+		 				<xsl:text>></xsl:text>
+		 			</SPAN>
+		 		</DIV>
+		 	</DIV>
+		 </xsl:template>
+
+		 <xsl:template match="*[*]" priority="20" mode="xsl:default">
+		 	<xsl:variable name="nodeName" select="local-name(.)"/>
+		 	<DIV>
+		 		<xsl:attribute name="class">
+		 			<xsl:text>e unwraped </xsl:text>
+		 			<xsl:value-of select="$nodeName"/>
+		 		</xsl:attribute>
+		 		<DIV class="c">
+		 			<SPAN class="m" data-elt="{$nodeName}">
+		 				<xsl:call-template name="entity-ref">
+		 					<xsl:with-param name="name">#60</xsl:with-param>
+		 				</xsl:call-template>
+		 			</SPAN>
+		 			<SPAN>
+		 				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
+		 				<xsl:apply-templates select="." mode="xsl:name"/>
+		 				<xsl:if test="@*">
+		 					<xsl:text> </xsl:text>
+		 				</xsl:if>
+		 			</SPAN>
+		 			<xsl:apply-templates select="@*" mode="xsl:default"/>
+		 			<SPAN class="m" data-elt="{$nodeName}">
+		 				<xsl:text>></xsl:text>
+		 			</SPAN>
+		 		</DIV>
+		 		<DIV>
+		 			<xsl:apply-templates mode="xsl:default"/>
+		 			<DIV>
+		 				<SPAN class="m" data-elt="{$nodeName}">
+		 					<xsl:call-template name="entity-ref">
+		 						<xsl:with-param name="name">#60</xsl:with-param>
+		 					</xsl:call-template>/</SPAN>
+		 				<SPAN>
+		 					<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
+		 					<xsl:apply-templates select="." mode="xsl:name"/>
+		 				</SPAN>
+		 				<SPAN class="m" data-elt="{$nodeName}">
+		 					<xsl:text>></xsl:text>
+		 				</SPAN>
+		 			</DIV>
+		 		</DIV>
+		 	</DIV>
+		 </xsl:template>
+
+		 <xsl:template match="bhb:link" mode="xsl:name">
+		 	<span>
+		 		<xsl:attribute name="title">
+		 			<xsl:value-of select="namespace-uri(.)"/>
+		 			<xsl:text>:</xsl:text>
+		 			<xsl:value-of select="local-name(.)"/>
+		 		</xsl:attribute>
+		 		<xsl:attribute name="class">
+		 			<xsl:text>bhb </xsl:text>
+		 			<xsl:value-of select="local-name(.)"/>
+		 		</xsl:attribute>
+		 		<xsl:text>amendment</xsl:text>
+		 	</span>
+		 </xsl:template>
+
+		 <xsl:template match="*" mode="xsl:name">
+		 	<span class="notbhb">
+		 		<xsl:value-of select="name(.)"/>
+		 	</span>
+		 </xsl:template>
+
+		 <xsl:template match="@on:clock" mode="xsl:default">
+		 	<xsl:call-template name="entity-ref">
+		 		<xsl:with-param name="name">#32</xsl:with-param>
+		 	</xsl:call-template>
+		 		<span class="bhb on_clock">
+		 			<xsl:attribute name="title">
+		 				<xsl:value-of select="namespace-uri(.)"/>
+		 				<xsl:text>:</xsl:text>
+		 				<xsl:value-of select="local-name(.)"/>
+		 				<xsl:text>:</xsl:text>
+		 				<xsl:value-of select="."/>
+		 			</xsl:attribute>
+		 			<xsl:attribute name="data-on_clock">
+		 				<xsl:value-of select="."/>
+		 			</xsl:attribute>
+		 			<xsl:text>on:clock="</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text>
+		 		</span>
+		 </xsl:template>
+
+		 <xsl:template match="@bhb:symbol" mode="xsl:default">
+		 	<xsl:call-template name="entity-ref">
+		 		<xsl:with-param name="name">#32</xsl:with-param>
+		 	</xsl:call-template>
+		 		<span class="bhb on_symbol">
+		 			<xsl:attribute name="title">
+		 				<xsl:value-of select="namespace-uri(.)"/>
+		 				<xsl:text>:</xsl:text>
+		 				<xsl:value-of select="local-name(.)"/>
+		 				<xsl:text>:</xsl:text>
+		 				<xsl:value-of select="."/>
+		 			</xsl:attribute>
+		 			<xsl:attribute name="data-on_symbol">
+		 				<xsl:value-of select="."/>
+		 			</xsl:attribute>
+		 			<xsl:text>bhb:symbol="</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text>
+		 		</span>
+		 </xsl:template>
+
+<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 	   W A S T E B A S K E T
      = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 

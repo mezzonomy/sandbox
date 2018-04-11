@@ -76,8 +76,8 @@
 				<xsl:text>]</xsl:text>
 			</title>
 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8" />
 			<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8" />
+			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8" />
 			<link type="text/css" rel="stylesheet" href="sandbox/render.css" charset="utf-8" />
 			<link type="text/css" rel="stylesheet" href="sandbox/time-range-slider.css" charset="utf-8" />
 			<script src="sandbox/misc.js" type="text/javascript"></script>
