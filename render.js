@@ -92,7 +92,7 @@ function render(_data, _diff){
 		});
 	}
 
-  if (!_diff) selectPoint();
+  if (!_diff && !D3_SCENE.empty()) selectPoint();
 
 	// ******************************************************
 	// Beyond this point executed only if diffs in matrix or scene is empty or reinited
@@ -111,6 +111,19 @@ function render(_data, _diff){
 		}
 	}
 	DOM_SCENE = document.getElementById("scene");
+
+	// if text mode, adds a listener to close menus if workspace is clicked
+	if (CURRENT_BHB_MODE=='text') {
+		D3_UNIVERSE.select("#workspace").on("click", function(d) {
+			D3_UNIVERSE.selectAll("#toolboxes").select("#explorer").classed("opened", false).classed("closed", true);
+			D3_UNIVERSE.selectAll("#toolboxes").select("#perspective").classed("opened", false).classed("closed", true);
+			D3_UNIVERSE.selectAll("#toolboxes").select("#amendment").classed("opened", false).classed("closed", true);
+			//console.log("Click on text background:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+		})
+	} else {
+			D3_UNIVERSE.select("#workspace").on("click", null);
+	}
+
 	// ******************************************************
 	// svg definitions
 	// ******************************************************
@@ -149,7 +162,7 @@ function render(_data, _diff){
 	}
 
 	//change zoom level if mini-workspace
-	if (CURRENT_BHB_MODE=='text') D3_SCENE.call(ZOOM.transform, d3.zoomIdentity.scale(1/5));
+	if (CURRENT_BHB_MODE=='text') D3_SCENE.call(ZOOM.transform, d3.zoomIdentity.scale(1/4));
 
 	// ******************************************************
 	// get forces settings from localstore
@@ -460,7 +473,7 @@ function render(_data, _diff){
 	});
 	bhbLinks.attr("marker-end", function(d){
 		if (d3.select(this).classed("viewed")) {
-			if (d3.select(this).classed("start")) {
+			if (d3.select(this).classed("end")) {
 				return "url(#marker-end-position)";
 			} else {
 				return "url(#marker-end-bhbLink)";
