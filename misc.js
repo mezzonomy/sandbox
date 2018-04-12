@@ -235,6 +235,7 @@ function convertArrayOfObjectsToCSV(_data, _sorted) {
       infoKeys.forEach(function(key) {
           if (ctr > 0) result += columnDelimiter;
           res = item.info[key];
+          if (sorted && key=="on_clock") res="0000-00-00T00:00:00Z"; //time is set to 0
           if (res == undefined) res = "";
           if (typeof res == "object") res = "[object]";
           result += '"' + res + '"';

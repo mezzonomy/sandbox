@@ -1359,7 +1359,7 @@ function text_nav(_datum){
 	// export to csv ordered and anonymised TODO: remove ? (tech option)
 	navTool.append("button")
 	.attr("type","button")
-	.attr("class","btn btn-secondary")
+	.attr("class","btn btn-dark")
 	.attr("id",TEXT_TOOLBOX_ID + "-export")
 	.text(String.fromCharCode(8862))
 	.attr("title", "export modal matrix points sorted & anonymised to csv")
