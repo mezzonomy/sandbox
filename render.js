@@ -44,13 +44,27 @@ var D3_UNIVERSE,
 		FORCES_STATUS_DEF={collide:{status:true},center:{status:true},charge:{status:true}},
 		FORCES_STATUS={};
 
-		// TEST DMA
-		//document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID","somepath").replace("$$ORDER","order");
-		//var codeMirror_config={lineNumbers: true, mode: "xml", matchClosing: true, alignCDATA: true, htmlMode: false};
-		//if (d3.select("#universe").select(".CodeMirror").empty()) {
-		//	var myCodeMirror = CodeMirror.fromTextArea(document.getElementById(AMEND_EDITZONE_ID), codeMirror_config);
-		//}
-		// END TEST DMA
+		// TEST DMADMA
+		document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID","somepath").replace("$$ORDER","order");
+		var cm_config = {lineNumbers: true,
+			mode: "xml",
+			matchClosing: true,
+			alignCDATA: true,
+			htmlMode: false,
+			matchBrackets: true,
+			matchTags: {bothTags: true},
+			extraKeys: {"Ctrl-J": "toMatchingTag"}
+		};
+		if (d3.select("#universe").select(".CodeMirror").empty()) {
+			var cm_editor = CodeMirror.fromTextArea(document.getElementById(AMEND_EDITZONE_ID), cm_config);
+			cm_editor.setSize("100%","10rem")
+			cm_editor.on("change", function(cm){
+				document.getElementById(AMEND_EDITZONE_ID).value=cm.getValue();
+				simulateOnchange(document.getElementById(AMEND_EDITZONE_ID));
+				//console.log(cm.getValue());
+			})
+		}
+		// END TEST DMADMA
 
 
 /***********************************************************************
@@ -743,9 +757,9 @@ function dragended(d) {
 	*/
 function arcDragStarted(d) {
 	d3.event.sourceEvent.stopPropagation();
-	D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).attr("placeholder","drag the selected arc here to amend it !");
+	//TEST DMADMA D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).attr("placeholder","drag the selected arc here to amend it !");
 	d3.select(this).classed("dragging",true)
-	D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("targeted", true);
+	//TEST DMADMA D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("targeted", true);
 	setBhbPosition(d.point);
 	// TODO: fix adding dataTransfert API to drag/drop outside the browser
 	//console.log("arcDragStarted started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
@@ -753,11 +767,11 @@ function arcDragStarted(d) {
 
 function arcDragged(d) {
 	d3.select(this).attr("transform", "translate("+  d3.event.x + "," + d3.event.y + ")");
-	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
+	/* TEST DMADMA if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
 		D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("zoom11", true);
 	} else {
 		D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("zoom11", false);
-	}
+	}*/
 	if (d3.event.sourceEvent.target.id == AMEND_TOOLBOX_ID) {
 		if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
 			D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
@@ -769,20 +783,25 @@ function arcDragged(d) {
 
 function arcDragEnded(d) {
 	//d3.select(this).classed("dragging", false);
-	if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
+	if (!d3.event.sourceEvent.target.className.length) {
+		d3.select(this).attr("transform", null);
+		return;
+	}
+	if (d3.event.sourceEvent.target.className.startsWith("CodeMirror")) {
 		alertInit();
 		var path = d3.event.subject.path;
 		var order = d3.event.subject.order;
 		document.getElementById(AMEND_TOOLBOX_ID + "-point").value = d.point;
 		document.getElementById(AMEND_TOOLBOX_ID + "-next").value = d.next;
-		document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
+		//TEST DMADMA document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
 	}
-	D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID)
+	/*TEST DMADMA D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID)
 	.classed("targeted", false).classed("zoom11", false)
 	.on("focus",function(d){
 		D3_SCENE.selectAll(".arc.edited").classed("edited",false);
 		d3.select(this).classed("edited",true);
-	});
+	});*/
+	cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order));
 	d3.select(this).attr("transform", null); //return arc to initial position
 	//console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
@@ -1100,7 +1119,8 @@ function amendFromText(_path, _point, _next, _order) {
 	var order = _order;
 	document.getElementById(AMEND_TOOLBOX_ID + "-point").value = _point; //TBD
 	document.getElementById(AMEND_TOOLBOX_ID + "-next").value = _next; //TBD
-	document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
+	cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order));
+	//DMADMA TEST document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
 }
  /**
 	* Adding control buttons in the perspective footer

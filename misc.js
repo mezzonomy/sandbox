@@ -76,7 +76,7 @@ var simulateClick = function (elem) {
 };
 
 /**
- * Simulate a click event.
+ * Simulate a change event.
  * @public
  * @param {Element} elem  the element to simulate a click on
  */
