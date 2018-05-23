@@ -62,9 +62,14 @@ div.unwraped{
 	font-style: italic;
 }
 
-nav.placeholder_amend {
+nav.placeholder_amend_hidden {
 	display: none;
 }
+
+nav.placeholder_amend_display {
+	color: red;
+}
+
 /* END text mode svg */
 
 *, ::after, ::before {

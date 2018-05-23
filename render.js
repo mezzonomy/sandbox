@@ -992,58 +992,71 @@ function textModeInteraction() {
 		}
 		D3_UNIVERSE.selectAll(".navbar-text-node").remove();
 		d3.select(this).classed("deployed", true);
+		var point = this.parentElement.dataset;
 		var editBox = d3.select(this.parentElement).insert("nav",":nth-child(2)");
 		editBox.attr("class","navbar-text-node");
-		var editbox_btn_before = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("class","btn btn-primary").text("before");
-		var editbox_btn_after = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("class","btn btn-primary").text("after");
-		var editbox_btn_push = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("class","btn btn-primary").text("push");
-		var editbox_btn_append = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("class","btn btn-primary").text("append");
+		var editbox_btn_before = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("before");
+		var editbox_btn_after = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("after");
+		var editbox_btn_push = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("push");
+		var editbox_btn_append = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("append");
 		// listeners to create interactions on each button
 		// before
-		editbox_btn_before.on("mouseover", function(d){
-			var placeholder = d3.select(this.parentElement.parentElement.parentElement.parentElement).insert("div",":first-child").attr("class","placeholder_insert").append("span").text("\u2945");
+		editbox_btn_before.on("mouseover", function(){
+			displayAmendPlaceholder(this.dataset.identity, "before");
 		});
 		editbox_btn_before.on("mouseout", function(d){
-			D3_UNIVERSE.selectAll(".placeholder_insert").remove();
+			hideAmendPlaceholders();
 		});
 		editbox_btn_before.on("click", function(d){
 			event.stopPropagation();
-			amendFromText("somePath", "somePoint", "someNext", "before");
+			amendFromText(this.dataset.path, "T_" + this.dataset.identity, "", "before");
 		});
+
 		// after
 		editbox_btn_after.on("mouseover", function(d){
-			var placeholder = d3.select(this.parentElement.parentElement.parentElement.parentElement).insert("div").attr("class","placeholder_insert").append("span").text("\u2945");
+			displayAmendPlaceholder(this.dataset.identity, "after");
 		});
 		editbox_btn_after.on("mouseout", function(d){
-			D3_UNIVERSE.selectAll(".placeholder_insert").remove();
+			hideAmendPlaceholders();
 		});
 		editbox_btn_after.on("click", function(d){
 			event.stopPropagation();
-			amendFromText("somePath", "somePoint", "someNext", "after");
+			amendFromText(this.dataset.path, "T_" + this.dataset.identity, "", "after");
 		});
+
 		// append
 		editbox_btn_append.on("mouseover", function(d){
-			var placeholder = d3.select(this.parentElement.parentElement.parentElement).insert("div").attr("class","placeholder_insert").append("span").text("\u2945");
+			displayAmendPlaceholder(this.dataset.identity, "append");
 		});
 		editbox_btn_append.on("mouseout", function(d){
-			D3_UNIVERSE.selectAll(".placeholder_insert").remove();
+			hideAmendPlaceholders();
 		});
 		editbox_btn_append.on("click", function(d){
 			event.stopPropagation();
-			amendFromText("somePath", "somePoint", "someNext", "append");
+			amendFromText(this.dataset.path, "T_" + this.dataset.identity, "", "append");
 		});
+
 		// push
 		editbox_btn_push.on("mouseover", function(d){
-			var placeholder = d3.select(this.parentElement.parentElement.parentElement).insert("div",":nth-child(2)").attr("class","placeholder_insert").append("span").text("\u2945");
+			displayAmendPlaceholder(this.dataset.identity, "push");
 		});
 		editbox_btn_push.on("mouseout", function(d){
-			D3_UNIVERSE.selectAll(".placeholder_insert").remove();
+			hideAmendPlaceholders();
 		});
 		editbox_btn_push.on("click", function(d){
 			event.stopPropagation();
-			amendFromText("somePath", "somePoint", "someNext", "push");
+			amendFromText(this.dataset.path, "T_" + this.dataset.identity, "", "push");
 		});
 	});
+}
+
+function displayAmendPlaceholder(_id, _order) {
+	var placeholder = D3_UNIVERSE.selectAll("nav.placeholder_amend_hidden[data-identity='" + _id + "']." + _order);
+	placeholder.classed("placeholder_amend_hidden", false).classed("placeholder_amend_display", true);
+}
+
+function hideAmendPlaceholders() {
+	D3_UNIVERSE.selectAll("nav.placeholder_amend_display").classed("placeholder_amend_hidden", true).classed("placeholder_amend_display", false);
 }
 
 function textModeDates() { // TODO: finish
