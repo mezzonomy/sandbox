@@ -999,6 +999,7 @@ function textModeInteraction() {
 		var editbox_btn_after = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("after");
 		var editbox_btn_push = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("push");
 		var editbox_btn_append = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("append");
+		var editbox_btn_select = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-secondary").text("select");
 		// listeners to create interactions on each button
 		// before
 		editbox_btn_before.on("mouseover", function(){
@@ -1046,6 +1047,12 @@ function textModeInteraction() {
 		editbox_btn_push.on("click", function(d){
 			event.stopPropagation();
 			amendFromText(this.dataset.path, "T_" + this.dataset.identity, "", "push");
+		});
+
+		// select point
+		editbox_btn_select.on("click", function(d){
+			event.stopPropagation();
+			setBhbPosition("T_" + this.dataset.identity);
 		});
 	});
 }
@@ -1496,7 +1503,8 @@ function text_nav(_datum){
 		downloadCSV(DATA, true);
 	});
 
-	// amend from this position
+	//TODO: REMOVE Done from text interaction
+	/* // amend from this position
 	navTool.append("button")
 	.attr("type","button")
 	.attr("class","btn btn-secondary")
@@ -1506,6 +1514,7 @@ function text_nav(_datum){
 	.on("click", function(d) {
 		amendFromPoint(document.getElementById(TEXT_TOOLBOX_ID + "-point").value);
 	});
+	*/
 }
 
 /**
