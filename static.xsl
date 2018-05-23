@@ -61,11 +61,10 @@
 <!-- Toolboxes -->
 <!-- Toolboxes - Perspective-->
 <xsl:template name="perspective">
-	<xsl:param name="navorder"/>
 	<xsl:param name="mode"/>
 	<xsl:variable name="toolbox_ID">perspective</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Perspective</xsl:variable>
-	<div id="{$toolbox_ID}" order="{$navorder}">
+	<div id="{$toolbox_ID}">
 		<xsl:attribute name="class">
 			<xsl:choose>
 				<xsl:when test="$mode = 'graph'">
@@ -135,11 +134,10 @@
 
 <!-- Toolboxes - Explorer-->
 <xsl:template name="explorer">
-	<xsl:param name="navorder"/>
 	<xsl:param name="mode"/>
 	<xsl:variable name="toolbox_ID">explorer</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Explorer</xsl:variable>
-	<div id="{$toolbox_ID}" order="{$navorder}">
+	<div id="{$toolbox_ID}">
 		<xsl:attribute name="class">
 			<xsl:choose>
 				<xsl:when test="$mode = 'graph'">
@@ -207,12 +205,11 @@
 
 <!-- Toolboxes - Perspective-->
 <xsl:template name="amendment">
-	<xsl:param name="navorder"/>
 	<xsl:param name="mode"/>
 	<xsl:param name="role"/>
 	<xsl:variable name="toolbox_ID">amendment</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Amendment</xsl:variable>
-	<div id="{$toolbox_ID}" order="{$navorder}">
+	<div id="{$toolbox_ID}">
 		<xsl:attribute name="class">
 			<xsl:choose>
 				<xsl:when test="$mode = 'graph'">
@@ -241,7 +238,7 @@
 					<xsl:attribute name="value"><xsl:value-of select="$role"/></xsl:attribute>
 				</input>
 				<label for="{$toolbox_ID}-editzone">Edit Amendment</label>
-				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="7" class="form-control" placeholder="Please drop a vertex arc here to create a new amendment" spellcheck="false" required="required" oninput="validateAmendment('{$toolbox_ID}-editzone')" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
+				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="13" class="form-control" placeholder="Please drop a vertex arc here to create a new amendment" spellcheck="false" required="required" oninput="validateAmendment('{$toolbox_ID}-editzone')" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
 				<div id="{$toolbox_ID}-editinfo" class="alert"/>
 				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">&#10003;</button>
 			</form>
@@ -251,11 +248,10 @@
 
 <!-- Toolboxes - Text-->
 <xsl:template name="text">
-	<xsl:param name="navorder"/>
 	<xsl:param name="mode"/>
 	<xsl:variable name="toolbox_ID">text</xsl:variable>
 	<xsl:variable name="toolbox_LBL">Text</xsl:variable>
-	<div id="{$toolbox_ID}" order="{$navorder}">
+	<div id="{$toolbox_ID}">
 		<xsl:attribute name="class">
 			<xsl:choose>
 				<xsl:when test="$mode = 'graph'">
@@ -271,19 +267,19 @@
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
 			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
-				<h6>Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="openModal(document.getElementById('bhb-text').innerHTML,'Content','max-width: 90%; margin-top: 10px;');">
+				<h6 data-bhbmode="{$mode}">Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="openModal(document.getElementById('bhb-text').innerHTML,'Content','max-width: 90%; margin-top: 10px;');">
 				<span>&#8599;</span>
 				</button>
 				<button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="switchView();">
 			 <span>&#8621;</span>
 		 </button>
 				</h6>
-				<div id="mini-workspace">
+				<div id="mini-workspace" data-bhbmode="{$mode}">
 					<xsl:call-template name="mini_workspace">
 						<xsl:with-param name="mode" select="$mode"/>
 					</xsl:call-template>
 				</div>
-				<div id="{$toolbox_ID}-pointnavtool">
+				<div id="{$toolbox_ID}-pointnavtool" data-bhbmode="{$mode}">
 					<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-next" name="{$toolbox_ID}-next" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-peer" name="{$toolbox_ID}-peer" type="hidden" value=""/>
@@ -299,13 +295,18 @@
      = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 <xsl:template match="*" mode="xsl:default">
 	<xsl:variable name="nodeName" select="local-name(.)"/>
-	<DIV>
+	<DIV data-elt="{$nodeName}">
 		<xsl:attribute name="class">
 			<xsl:text>e unwraped </xsl:text>
 			<xsl:value-of select="$nodeName"/>
 		</xsl:attribute>
+		<xsl:attribute name="data-dmadmatest">
+			<xsl:text>dmadmatest: </xsl:text>
+			<xsl:value-of select="@bhb:path"/>
+		</xsl:attribute>
+		<NAV class="placeholder_amend before"/>
 		<DIV class="INDENT">
-			<SPAN class="m" data-elt="{$nodeName}">
+			<SPAN class="m">
 				<xsl:call-template name="entity-ref">
 					<xsl:with-param name="name">#60</xsl:with-param>
 				</xsl:call-template>
@@ -318,10 +319,26 @@
 				</xsl:if>
 			</SPAN>
 			<xsl:apply-templates select="@*" mode="xsl:default"/>
-			<SPAN class="m" data-elt="{$nodeName}">
+			<!--<SPAN class="m"> No more auto close node, but close node on same line
 				<xsl:text>/&gt;</xsl:text>
+			</SPAN>-->
+			<SPAN class="m">
+				<xsl:text>&gt;</xsl:text>
+			</SPAN>
+			<NAV class="placeholder_amend push append"/>
+			<SPAN class="m endtag">
+				<xsl:call-template name="entity-ref">
+					<xsl:with-param name="name">#60</xsl:with-param>
+				</xsl:call-template>/</SPAN>
+			<SPAN>
+				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
+				<xsl:apply-templates select="." mode="xsl:name"/>
+			</SPAN>
+			<SPAN class="m">
+				<xsl:text>></xsl:text>
 			</SPAN>
 		</DIV>
+		<NAV class="placeholder_amend after"/>
 	</DIV>
 </xsl:template>
 
@@ -355,7 +372,7 @@
 				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
 				<xsl:apply-templates select="." mode="xsl:name"/>
 			</SPAN>
-			<SPAN class="m" data-elt="{$nodeName}">
+			<SPAN class="m">
 				<xsl:text>></xsl:text>
 			</SPAN>
 		</DIV>
@@ -364,18 +381,23 @@
 
 <xsl:template match="*[*]" priority="20" mode="xsl:default">
 	<xsl:variable name="nodeName" select="local-name(.)"/>
-	<DIV>
+	<DIV data-elt="{$nodeName}">
 		<xsl:attribute name="class">
 			<xsl:text>e unwraped </xsl:text>
 			<xsl:value-of select="$nodeName"/>
 		</xsl:attribute>
+		<xsl:attribute name="data-dmadmatest">
+			<xsl:text>dmadmatest: </xsl:text>
+			<xsl:value-of select="@bhb:path"/>
+		</xsl:attribute>
+		<NAV class="placeholder_amend before"/>
 		<DIV class="c">
-			<SPAN class="m" data-elt="{$nodeName}">
+			<SPAN class="m">
 				<xsl:call-template name="entity-ref">
 					<xsl:with-param name="name">#60</xsl:with-param>
 				</xsl:call-template>
 			</SPAN>
-			<SPAN>
+			<SPAN onclick="ui_wrap_toggle(this.parentNode.parentNode);">
 				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
 				<xsl:apply-templates select="." mode="xsl:name"/>
 				<xsl:if test="@*">
@@ -383,14 +405,16 @@
 				</xsl:if>
 			</SPAN>
 			<xsl:apply-templates select="@*" mode="xsl:default"/>
-			<SPAN class="m" data-elt="{$nodeName}">
+			<SPAN class="m">
 				<xsl:text>></xsl:text>
 			</SPAN>
 		</DIV>
 		<DIV>
+			<NAV class="placeholder_amend push"/>
 			<xsl:apply-templates mode="xsl:default"/>
-			<DIV>
-				<SPAN class="m" data-elt="{$nodeName}">
+			<NAV class="placeholder_amend append"/>
+			<DIV class="endtag">
+				<SPAN class="m">
 					<xsl:call-template name="entity-ref">
 						<xsl:with-param name="name">#60</xsl:with-param>
 					</xsl:call-template>/</SPAN>
@@ -398,10 +422,11 @@
 					<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
 					<xsl:apply-templates select="." mode="xsl:name"/>
 				</SPAN>
-				<SPAN class="m" data-elt="{$nodeName}">
+				<SPAN class="m">
 					<xsl:text>></xsl:text>
 				</SPAN>
 			</DIV>
+			<NAV class="placeholder_amend after"/>
 		</DIV>
 	</DIV>
 </xsl:template>
@@ -463,6 +488,21 @@
 			</xsl:attribute>
 			<xsl:text>bhb:symbol="</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text>
 		</span>
+</xsl:template>
+
+<xsl:template match="@*" mode="xsl:default">
+	<xsl:call-template name="entity-ref">
+		<xsl:with-param name="name">#32</xsl:with-param>
+	</xsl:call-template>
+	<SPAN>
+		<xsl:attribute name="class"><xsl:if test="xsl:*/@*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
+		<xsl:value-of select="name(.)"/>
+	</SPAN>
+	<SPAN class="m">="</SPAN>
+	<SPAN class="av">
+		<xsl:apply-templates select="." mode="xsl:attribute"/>
+	</SPAN>
+	<SPAN class="m">"</SPAN>
 </xsl:template>
 
 <!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =

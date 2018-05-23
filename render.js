@@ -1,8 +1,8 @@
 /**
- * @file render.js
- * @copyright (c) 2014-2018, sarl mezzònomy
- * @author mezzònomy
- */
+	* @file render.js
+	* @copyright (c) 2014-2018, sarl mezzònomy
+	* @author mezzònomy
+	*/
 
 // Global Constants
 const POINT_RADIUS = +0,
@@ -44,14 +44,23 @@ var D3_UNIVERSE,
 		FORCES_STATUS_DEF={collide:{status:true},center:{status:true},charge:{status:true}},
 		FORCES_STATUS={};
 
+		// TEST DMA
+		//document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID","somepath").replace("$$ORDER","order");
+		//var codeMirror_config={lineNumbers: true, mode: "xml", matchClosing: true, alignCDATA: true, htmlMode: false};
+		//if (d3.select("#universe").select(".CodeMirror").empty()) {
+		//	var myCodeMirror = CodeMirror.fromTextArea(document.getElementById(AMEND_EDITZONE_ID), codeMirror_config);
+		//}
+		// END TEST DMA
+
+
 /***********************************************************************
 ***********************************************************************/
 /**
- * Main render function. Called each time by the engine via websockets
- * @param _data {array} Array of QA points
- * @param _diff {boolean} true if data array of point has changed
- * @returns a svg display of the vertices
- */
+	* Main render function. Called each time by the engine via websockets
+	* @param _data {array} Array of QA points
+	* @param _diff {boolean} true if data array of point has changed
+	* @returns a svg display of the vertices
+	*/
 
 function render(_data, _diff){
 	// if diff is true, data matrix has changed
@@ -77,22 +86,12 @@ function render(_data, _diff){
 		D3_SCENE = D3_UNIVERSE.select("svg#scene"); // reinit scene selection
 	}
 
-	// amend from this position
-	//TODO: Test Only Validate positionning and coherence before real implementation
+	// Alter text mode to allow user interaction
 	if (CURRENT_BHB_MODE == "text") {
-		D3_UNIVERSE.select("#worspace-amend-from-text").remove();
-		D3_UNIVERSE.select("#bhb-text").append("button")
-		.attr("type","button")
-		.attr("class","btn btn-secondary")
-		.attr("id", "worspace-amend-from-text")
-		.text(String.fromCharCode(43))
-		.attr("title", "Edit from this point")
-		.on("click", function(d) {
-			AmendFromPoint(document.getElementById(TEXT_TOOLBOX_ID + "-point").value);
-		});
+		textModeInteraction();
 	}
 
-  if (!_diff && !D3_SCENE.empty()) selectPoint();
+	if (!_diff && !D3_SCENE.empty()) selectPoint();
 
 	// ******************************************************
 	// Beyond this point executed only if diffs in matrix or scene is empty or reinited
@@ -131,7 +130,7 @@ function render(_data, _diff){
 
 	if (defs.empty()){
 		defs = D3_SCENE.append("defs");
-		createMarkers(defs);
+		createMarkers(defs); 	// add markers for graph edges
 		}
 
 	// ******************************************************
@@ -317,8 +316,8 @@ function render(_data, _diff){
 	// ******************************************************
 	// Entering arcs within vertex's group grotate
 	var arcs = d3.arc()
-	    .outerRadius(function(d){return d.radius;})
-	    .innerRadius(function(d){return d.radius * ARC_INNER_RADIUS;} );
+	.outerRadius(function(d){return d.radius;})
+	.innerRadius(function(d){return d.radius * ARC_INNER_RADIUS;});
 
 	vertexGroupRotate
 	.selectAll(".arc")
@@ -587,27 +586,25 @@ function render(_data, _diff){
 /** End of main render function ***************************************
 ***********************************************************************/
 
-
-/*
- * Vertex Computation
- */
+// ******************************************************
+// Vertex Computation
+// ******************************************************
 
 /**
- * Compute an array of vertices from a list of QAPoints The computation is done
- * until vertices are complete with a max number of iteration fixed by
- * VERTEX_COMPUTATION_MAX_ITERATION Also outputs logs and a div of the vertices
- * computed Vertices : bp = begin point id ep = end point id pc = point count hc =
- * hash of the segments segments = array of point objects
- * - computation of "oldest point" for the vertex
- * - computation of topology
- *
- * @param QApointsList {array} QApointsList - array of QApoints (point, next, peer, type)
- * @returns an array of vertex objectedges with a sub array of segments : the points of the vertex
- */
+	* Compute an array of vertices from a list of QAPoints The computation is done
+	* until vertices are complete with a max number of iteration fixed by
+	* VERTEX_COMPUTATION_MAX_ITERATION Also outputs logs and a div of the vertices
+	* computed Vertices : bp = begin point id ep = end point id pc = point count hc =
+	* hash of the segments segments = array of point objects
+	* - computation of "oldest point" for the vertex
+	* - computation of topology
+	*
+	* @param QApointsList {array} QApointsList - array of QApoints (point, next, peer, type)
+	* @returns an array of vertex objectedges with a sub array of segments : the points of the vertex
+	*/
 function vertexComputation(QApointsList){
 	// Logging QApointsList to console TODO: remove
 	console.log("Render ", QApointsList.length, " points. Details: ", QApointsList);
-
 	// Vertices computation from the entering QA points list
 	// sr stands for (S)egment (R)econstruction
 	var sr=[];
@@ -696,10 +693,13 @@ function vertexComputation(QApointsList){
 	return sr;
 }
 
-/*
- * Drag and drop listeners
- */
+// ******************************************************
+// Drag and drop listeners
+// ******************************************************
 
+/**
+	* Drag and drop vertices
+	*/
 function dragstarted(d) {
 	d3.event.sourceEvent.stopPropagation();
 	if (!d3.event.active) {
@@ -738,6 +738,9 @@ function dragended(d) {
 	//console.log("VertexDragEvent ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 
+/**
+	* Drag and drop arcs (points)
+	*/
 function arcDragStarted(d) {
 	d3.event.sourceEvent.stopPropagation();
 	D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).attr("placeholder","drag the selected arc here to amend it !");
@@ -784,129 +787,128 @@ function arcDragEnded(d) {
 	//console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 
-/*
- * SVG positionning tool
- */
+// ******************************************************
+// SVG positionning tools
+// ******************************************************
 
- /**
-  * Utility to find absolute x,y coordinates of a dom element in zoomed contexts
-  * @param elt {string}  elt - element dom id string
-  * @returns {object} svg point - point coordinates {x,y}
-  */
- function getAbsCoord(elt) {
- 	if (DOM_SCENE.getElementById(elt)) { // to filter phantom s : TODO: improve by suppressing these fantom Edges
- 		var ptn = DOM_SCENE.getElementById(elt);
- 		var matrixPt = ptn.getCTM(); //get current elt transformation on svg
- 		var pt = DOM_SCENE.createSVGPoint(); //create new point on the svg
- 		pt.x = +ptn.getAttribute("cx");
- 		pt.y = +ptn.getAttribute("cy");
- 		var ptt = pt.matrixTransform(matrixPt); // apply coord translation on the new point
- 		var zm = d3.zoomTransform(DOM_SCENE); // get zoom transform of the viewport (x,y,k)
- 		ptt.x = (ptt.x - zm.x) / zm.k; // reverse the zoom translation on x
- 		ptt.y = (ptt.y - zm.y) / zm.k; // reverse the zoom translation on y
- 		return {
- 			x: ptt.x,
- 			y: ptt.y,
- 			pxy: ptt.x + " " + ptt.y
- 		};
- 	} else {
- 			//console.log ("Internal Error: ", "getAbsCoord()", " While trying to found elt position of: ", elt); // not logged
- 			return {x:0, y:0}; //No error if elt not found
- 	}
- }
+/**
+	* Utility to find absolute x,y coordinates of a dom element in zoomed contexts
+	* @param elt {string}  elt - element dom id string
+	* @returns {object} svg point - point coordinates {x,y}
+	*/
+function getAbsCoord(elt) {
+	if (DOM_SCENE.getElementById(elt)) { // to filter phantom s : TODO: improve by suppressing these fantom Edges
+		var ptn = DOM_SCENE.getElementById(elt);
+		var matrixPt = ptn.getCTM(); //get current elt transformation on svg
+		var pt = DOM_SCENE.createSVGPoint(); //create new point on the svg
+		pt.x = +ptn.getAttribute("cx");
+		pt.y = +ptn.getAttribute("cy");
+		var ptt = pt.matrixTransform(matrixPt); // apply coord translation on the new point
+		var zm = d3.zoomTransform(DOM_SCENE); // get zoom transform of the viewport (x,y,k)
+		ptt.x = (ptt.x - zm.x) / zm.k; // reverse the zoom translation on x
+		ptt.y = (ptt.y - zm.y) / zm.k; // reverse the zoom translation on y
+		return {
+			x: ptt.x,
+			y: ptt.y,
+			pxy: ptt.x + " " + ptt.y
+		};
+	} else {
+			//console.log ("Internal Error: ", "getAbsCoord()", " While trying to found elt position of: ", elt); // not logged
+			return {x:0, y:0}; //No error if elt not found
+	}
+}
 
- /*
-  * Functions to compute path for edges
-  */
+// ******************************************************
+// Functions to compute path for edges
+// ******************************************************
+/**
+	* function for computing the planar Edges
+	*
+	* @param s {string:point id} - point object from
+	* @param t {string:point id} - point object to
+	* @returns {string} - svg path for the edge
+	*/
+function drawPlanar(s, t){
+	var path="M" + getAbsCoord(s).pxy + "L" + getAbsCoord(t).pxy;
+	return {path:path};
+}
 
- /**
-  * function for computing the planar Edges
-  *
-  * @param s {string:point id} - point object from
-  * @param t {string:point id} - point object to
-  * @returns {string} - svg path for the edge
-  */
- function drawPlanar(s, t){
- 	var path="M" + getAbsCoord(s).pxy + "L" + getAbsCoord(t).pxy;
- 	return {path:path};
- }
+/**
+	* function for computing the spheric Edges
+	*
+	* @param s {string:point id} - point object from
+	* @param v {string:vertex id} - point object to
+	* @returns {string} - svg path for the edge
+	*/
+function drawSpheric(s, v){
+	var path="M" + getAbsCoord(s).pxy + "L" + ((getAbsCoord(s).x - getAbsCoord(v).x) * BEYOND) + " " + ((getAbsCoord(s).y - getAbsCoord(v).y) * BEYOND);
+	return {path:path};
+}
 
- /**
-  * function for computing the spheric Edges
-  *
-  * @param s {string:point id} - point object from
-  * @param v {string:vertex id} - point object to
-  * @returns {string} - svg path for the edge
-  */
- function drawSpheric(s, v){
- 	var path="M" + getAbsCoord(s).pxy + "L" + ((getAbsCoord(s).x - getAbsCoord(v).x) * BEYOND) + " " + ((getAbsCoord(s).y - getAbsCoord(v).y) * BEYOND);
- 	return {path:path};
- }
+/**
+	* function for computing the hyperbolics edges
+	*
+	* @param s {object:point} - point object from
+	* @param t {object:point} - point object to
+	* @returns {string} - svg path for the bezier curve
+	*/
+function drawHyperbolic(s, t) {
+		var radius = Math.sqrt(s.ptX*s.ptX + s.ptY*s.ptY)
+		// With the help of Mr. Poincare
+		var xm = (s.ptX + t.ptX)/2.
+		var ym = (s.ptY + t.ptY)/2.
+		var rm = Math.sqrt(xm*xm + ym*ym)
+		path =  "M" + s.ptX + "," + s.ptY
+		if (rm < 0.001) {
+			path += "L" + t.ptX + "," + t.ptY;
+			return {path:path};}
+		var tm = Math.atan2(ym, xm)
+				rm = radius * radius / rm
+		var xr = s.ptX - Math.cos(tm) * rm
+		var yr = s.ptY - Math.sin(tm) * rm
+		var rf = Math.sqrt(xr*xr + yr*yr)
+		kind   = (Math.sin(t.startAngle - s.startAngle) < 0) ?
+			" 0 0 1" : " 0 0 0"
+		path   += "A " + rf + " " + rf + kind;
+		path   += " " + t.ptX + "," + t.ptY;
+	return {path:path};
+}
 
- /**
-  * function for computing the hyperbolics edges
-  *
-  * @param s {object:point} - point object from
-  * @param t {object:point} - point object to
-  * @returns {string} - svg path for the bezier curve
-  */
- function drawHyperbolic(s, t) {
- 		var radius = Math.sqrt(s.ptX*s.ptX + s.ptY*s.ptY)
- 		// With the help of Mr. Poincare
- 		var xm = (s.ptX + t.ptX)/2.
- 		var ym = (s.ptY + t.ptY)/2.
- 		var rm = Math.sqrt(xm*xm + ym*ym)
- 		path =  "M" + s.ptX + "," + s.ptY
- 		if (rm < 0.001) {
- 			path += "L" + t.ptX + "," + t.ptY;
- 			return {path:path};}
- 		var tm = Math.atan2(ym, xm)
- 	 	    rm = radius * radius / rm
- 		var xr = s.ptX - Math.cos(tm) * rm
- 		var yr = s.ptY - Math.sin(tm) * rm
- 		var rf = Math.sqrt(xr*xr + yr*yr)
- 		kind   = (Math.sin(t.startAngle - s.startAngle) < 0) ?
- 			" 0 0 1" : " 0 0 0"
- 		path   += "A " + rf + " " + rf + kind;
- 		path   += " " + t.ptX + "," + t.ptY;
- 	return {path:path};
- }
-
- /**
-  * function for computing label orientation of a line
-  *
-  * @param x1..y2 {num} - num - coordinates of the begin/end of the edge
-  * @param lblId optional {string} - id - uid of the label to get correct positionning
-  * @param topology {string} - Topology
-  * @returns {string} - A SVG rotate transformation string
-  */
- function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
- 	lblId = lblId || "";
- 	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
- 	var labelBox;
- 	if (topology == "planar") {
- 		if (Math.abs(rt) < 90) {
- 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 + Math.abs((y2-y1)/2)) + "," + (-3) + ")";
- 		} else {
- 			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 - Math.abs((y2-y1)/2)) + "," + (-3) + ")";
- 		}
- 	}
- 	if (topology == "spheric") {
+/**
+	* function for computing label orientation of a line
+	*
+	* @param x1..y2 {num} - num - coordinates of the begin/end of the edge
+	* @param lblId optional {string} - id - uid of the label to get correct positionning
+	* @param topology {string} - Topology
+	* @returns {string} - A SVG rotate transformation string
+	*/
+function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
+	lblId = lblId || "";
+	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
+	var labelBox;
+	if (topology == "planar") {
+		if (Math.abs(rt) < 90) {
+			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 + Math.abs((y2-y1)/2)) + "," + (-3) + ")";
+		} else {
+			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 - Math.abs((y2-y1)/2)) + "," + (-3) + ")";
+		}
+	}
+	if (topology == "spheric") {
  		labelBoxW = document.getElementById(lblId).getBBox().width;
- 		if (Math.abs(rt) < 90) {
- 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (labelBoxW) + "," + (-3) + ")";
- 		} else {
- 			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + (-labelBoxW) + "," + (-3) + ")";
- 		}
- 	}
- }
+		if (Math.abs(rt) < 90) {
+			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (labelBoxW) + "," + (-3) + ")";
+		} else {
+			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + (-labelBoxW) + "," + (-3) + ")";
+		}
+	}
+}
 
- /**
-  * creating markers definitions for the svg
-  *
-  * @param _defs {d3 selection} - d3 selection of the svg def tag where to create markers
-  * @returns {-} - Adds def definition of markers and duplicates them for coloring
-  */
+/**
+	* creating markers definitions for the svg
+	*
+	* @param _defs {d3 selection} - d3 selection of the svg def tag where to create markers
+	* @returns {-} - Adds def definition of markers and duplicates them for coloring
+	*/
 function createMarkers(_defs) {
 	//Normal design
 	_defs.append("marker")
@@ -962,17 +964,131 @@ function createMarkers(_defs) {
 		.attr("class","marker-bhbLink");
 }
 
-/*
- * Misc Functions
- */
+/**
+	* Text mode interactions
+	*
+	* @param
+	* @returns {-} - Adds listeners to add interactions on the text mode
+	*/
+function textModeInteraction() {
+	//textModeDates();
+	// reinit icons
+	D3_UNIVERSE.selectAll(".icon-edit").remove();
+	D3_UNIVERSE.selectAll(".endtag").classed("entagpadding",false);
+	// create edit icons
+	var xmlNode = D3_UNIVERSE.selectAll("div.e");
+	var editIcons = xmlNode.insert("img", ":first-child")
+	.attr("src","/sandbox/edit.svg")
+	.attr("class", "icon-edit");
+	D3_UNIVERSE.selectAll(".endtag").classed("entagpadding",true);
+	// listener to create the menu for editing a node
+	editIcons.on("click", function(d){
+		event.stopPropagation();
+		D3_UNIVERSE.selectAll("img.deployed").classed("deployed", false);
+		//toggle on click
+		if (!d3.select(this.parentElement).select(".navbar-text-node").empty()) {
+			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
+			return;
+		}
+		D3_UNIVERSE.selectAll(".navbar-text-node").remove();
+		d3.select(this).classed("deployed", true);
+		var editBox = d3.select(this.parentElement).insert("nav",":nth-child(2)");
+		editBox.attr("class","navbar-text-node");
+		var editbox_btn_before = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("class","btn btn-primary").text("before");
+		var editbox_btn_after = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("class","btn btn-primary").text("after");
+		var editbox_btn_push = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("class","btn btn-primary").text("push");
+		var editbox_btn_append = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("class","btn btn-primary").text("append");
+		// listeners to create interactions on each button
+		// before
+		editbox_btn_before.on("mouseover", function(d){
+			var placeholder = d3.select(this.parentElement.parentElement.parentElement.parentElement).insert("div",":first-child").attr("class","placeholder_insert").append("span").text("\u2945");
+		});
+		editbox_btn_before.on("mouseout", function(d){
+			D3_UNIVERSE.selectAll(".placeholder_insert").remove();
+		});
+		editbox_btn_before.on("click", function(d){
+			event.stopPropagation();
+			amendFromText("somePath", "somePoint", "someNext", "before");
+		});
+		// after
+		editbox_btn_after.on("mouseover", function(d){
+			var placeholder = d3.select(this.parentElement.parentElement.parentElement.parentElement).insert("div").attr("class","placeholder_insert").append("span").text("\u2945");
+		});
+		editbox_btn_after.on("mouseout", function(d){
+			D3_UNIVERSE.selectAll(".placeholder_insert").remove();
+		});
+		editbox_btn_after.on("click", function(d){
+			event.stopPropagation();
+			amendFromText("somePath", "somePoint", "someNext", "after");
+		});
+		// append
+		editbox_btn_append.on("mouseover", function(d){
+			var placeholder = d3.select(this.parentElement.parentElement.parentElement).insert("div").attr("class","placeholder_insert").append("span").text("\u2945");
+		});
+		editbox_btn_append.on("mouseout", function(d){
+			D3_UNIVERSE.selectAll(".placeholder_insert").remove();
+		});
+		editbox_btn_append.on("click", function(d){
+			event.stopPropagation();
+			amendFromText("somePath", "somePoint", "someNext", "append");
+		});
+		// push
+		editbox_btn_push.on("mouseover", function(d){
+			var placeholder = d3.select(this.parentElement.parentElement.parentElement).insert("div",":nth-child(2)").attr("class","placeholder_insert").append("span").text("\u2945");
+		});
+		editbox_btn_push.on("mouseout", function(d){
+			D3_UNIVERSE.selectAll(".placeholder_insert").remove();
+		});
+		editbox_btn_push.on("click", function(d){
+			event.stopPropagation();
+			amendFromText("somePath", "somePoint", "someNext", "push");
+		});
+	});
+}
+
+function textModeDates() { // TODO: finish
+	var dates=D3_UNIVERSE.selectAll("span.on_clock");
+	/*dates.each(function(d){
+		d.text(function(r) {
+			return FORMAT_DATE_TIME(PARSE_DATE_BHB(d.dataset(on_clock)));
+		})
+	});*/
+}
+
+// ******************************************************
+// Misc Functions
+// ******************************************************
 
  /**
-  * Adding control buttons in the perspective footer
+	* Amend using the Amendment textarea
+	*
+	* @param {_path} string - the current point path string
+	* @param {_point} string - the point id
+	* @param {_next} string - the next point id
+	* @param {_order} string - The order where to amend (before, after,...)
+	* @returns {-} - Fill the textarea with amendment
+	*/
+function amendFromText(_path, _point, _next, _order) {
+	// Open the amend tooblox
+	if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
+		D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
+	}
+	// initiate amend the tooblox
+	alertInit();
+	// fill the fields
+	var path = _path;
+	var order = _order;
+	document.getElementById(AMEND_TOOLBOX_ID + "-point").value = _point; //TBD
+	document.getElementById(AMEND_TOOLBOX_ID + "-next").value = _next; //TBD
+	document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
+}
+ /**
+	* Adding control buttons in the perspective footer
 	* Buttons are not redrawn if exists (re enters)
-  *
-  * @param -
-  * @returns {-} - Adds buttons
-  */
+	*
+	* @param -
+	* @returns {-} - Adds buttons
+	*/
 function AddButtonsToPerspective(){
 	// reset zoom
 	var btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnReset-zoom");
@@ -1040,10 +1156,10 @@ function AddButtonsToPerspective(){
 }
 
 /**
- * To redraw edges when a single Vertex is rotated
- * @param _vertexhc {string}  hash code (id) of a vertex
- * @returns {nothing} - Redraw the edges
- */
+	* To redraw edges when a single Vertex is rotated
+	* @param _vertexhc {string}  hash code (id) of a vertex
+	* @returns {nothing} - Redraw the edges
+	*/
 function redrawEdgesforOneVertex(_vertexhc) {
 	var trueVertexhc=Number(_vertexhc.replace("grotate_",""));
 
@@ -1069,12 +1185,12 @@ function redrawEdgesforOneVertex(_vertexhc) {
 }
 
 /**
- * Unselect all previously selected vertex and Select a vertex (if not already selected),
- * and change the layout.
- *
- * @param {_vertex} - dom element object - must be a root group of a vertex
- * @returns nothing (select the vertex)
- */
+	* Unselect all previously selected vertex and Select a vertex (if not already selected),
+	* and change the layout.
+	*
+	* @param {_vertex} - dom element object - must be a root group of a vertex
+	* @returns nothing (select the vertex)
+	*/
 function selectVertex(_vertex){
 	// 1. unselect all vertices
 	unselectVertices();
@@ -1093,11 +1209,11 @@ function selectVertex(_vertex){
 		point.classed("point-displayed", true);
 		internalEdges.classed("notselectable", true);
 		arc.call(d3.drag() //add edit arc listener
-					.filter(function(d){return !this.classList.contains("notdisplayed");}) //not fired if arc is not displayed (removing the handler is buggy)
-					.clickDistance(10)
-					.on("start", arcDragStarted)
-					.on("drag", arcDragged)
-					.on("end", arcDragEnded));
+		.filter(function(d){return !this.classList.contains("notdisplayed");}) //not fired if arc is not displayed (removing the handler is buggy)
+		.clickDistance(10)
+		.on("start", arcDragStarted)
+		.on("drag", arcDragged)
+		.on("end", arcDragEnded));
 		point.on("click", function(d) {
 			d3.event.stopPropagation();
 			console.log("click on point: ", d.point);
@@ -1108,10 +1224,10 @@ function selectVertex(_vertex){
 }
 
 /**
- * unselect vertices
- *
- * @returns nothing (unselect all vertices)
- */
+	* unselect vertices
+	*
+	* @returns nothing (unselect all vertices)
+	*/
 function unselectVertices(){
 	D3_SCENE.selectAll(".focused").classed("focused", false);
 	D3_SCENE.selectAll(".notselectable").classed("notselectable", false);
@@ -1123,10 +1239,10 @@ function unselectVertices(){
 }
 
 /**
- * unselect a vertex
- *
- * @returns nothing (unselect one given vertex)
- */
+	* unselect a vertex
+	*
+	* @returns nothing (unselect one given vertex)
+	*/
 function unselectVertex(_vertex){
 	D3_SCENE.select("#" + _vertex).selectAll(".focused").classed("focused", false);
 	D3_SCENE.select("#" + _vertex).selectAll(".notselectable").classed("notselectable", false);
@@ -1138,10 +1254,10 @@ function unselectVertex(_vertex){
 }
 
 /**
- * unselect & unpin vertices
- *
- * @returns nothing (unselect all vertices and resets fixed position)
- */
+	* unselect & unpin vertices
+	*
+	* @returns nothing (unselect all vertices and resets fixed position)
+	*/
 function unpinVertices(){
 	D3_SCENE.selectAll(".gvertex").each(function(d){d.fx=null;d.fy=null;});
 	D3_SCENE.selectAll(".gvertex").select(".vertexCircle").classed("pinned", false);
@@ -1150,10 +1266,10 @@ function unpinVertices(){
 }
 
 /**
- * pin vertices
- *
- * @returns nothing (unselect all vertices and resets fixed position)
- */
+	* pin vertices
+	*
+	* @returns nothing (unselect all vertices and resets fixed position)
+	*/
 function pinVertex(_vertex) {
 	D3_SCENE.select("#" + _vertex).select(".vertexCircle").classed("pinned", true);
 	if (D3_SCENE.select("#" + _vertex).select("image").empty()) {
@@ -1168,10 +1284,10 @@ function pinVertex(_vertex) {
 }
 
 /**
- * unpin a single vertex
- *
- * @returns nothing (unselect a vertex)
- */
+	* unpin a single vertex
+	*
+	* @returns nothing (unselect a vertex)
+	*/
 function unpinVertex(_vertex){
 	D3_SCENE.select("#" + _vertex).each(function(d){d.fx=null;d.fy=null;});
 	D3_SCENE.select("#" + _vertex).select(".vertexCircle").classed("pinned", false);
@@ -1180,12 +1296,12 @@ function unpinVertex(_vertex){
 }
 
 /**
- * Sets display according to point position selected in the bhb
- *
- * @param {_ptId} - String point ID, the point must be setted before by setBhbPosition()
- *                  Optional. if null, the point defined on universe (data-data-bhbposition)
- * @returns {pt.datum()} (select the point and populates & open text nav)
- */
+	* Sets display according to point position selected in the bhb
+	*
+	* @param {_ptId} - String point ID, the point must be setted before by setBhbPosition()
+	*                  Optional. if null, the point defined on universe (data-data-bhbposition)
+	* @returns {pt.datum()} (select the point and populates & open text nav)
+	*/
 function selectPoint(_ptId, _openToolbox) {
 	_ptId = _ptId || CURRENT_BHB_POSITION;
 	_openToolbox = _openToolbox || false;
@@ -1236,10 +1352,10 @@ function selectPoint(_ptId, _openToolbox) {
 }
 
 /**
- * print out info on point (deprecated, not really used except for information)
- * @param {_datum} - d3 datum object - point
- * @returns a xml node string with the info
- */
+	* print out info on point (deprecated, not really used except for information)
+	* @param {_datum} - d3 datum object - point
+	* @returns a xml node string with the info
+	*/
 function text_readInfo(_datum){
 	var output = "";
 	// tag value
@@ -1256,10 +1372,10 @@ function text_readInfo(_datum){
 }
 
 /**
- * Creates the toolbox text navbar
- * @param {_datum} - d3 datum object - point
- * @returns a navbar (does it once for all, if the navbar is drawn, it won't be again)
- */
+	* Creates the toolbox text navbar
+	* @param {_datum} - d3 datum object - point
+	* @returns a navbar (does it once for all, if the navbar is drawn, it won't be again)
+	*/
 function text_nav(_datum){
 	//nav buttons
 	var navTool = D3_UNIVERSE.select("#" + TEXT_TOOLBOX_ID + "-pointnavtool");
@@ -1285,7 +1401,7 @@ function text_nav(_datum){
 		NAVPOINT_STOP=true;
 	})
 	.on("mousedown", function(){
-  	LONGCLICK_TIMER = window.setTimeout(function(){
+		LONGCLICK_TIMER = window.setTimeout(function(){
 			console.log("longclick detected");
 			NAVPOINT_STOP=false;
 			var ptn = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
@@ -1375,140 +1491,137 @@ function text_nav(_datum){
 	.text(String.fromCharCode(43))
 	.attr("title", "Edit from this point")
 	.on("click", function(d) {
-		AmendFromPoint(document.getElementById(TEXT_TOOLBOX_ID + "-point").value);
+		amendFromPoint(document.getElementById(TEXT_TOOLBOX_ID + "-point").value);
 	});
 }
 
-function AmendFromPoint(_pt) {
+/**
+	* Amend using the Amendment textarea from a point name
+	*
+	* @param {_pt} - a point id
+	* @returns {-} - Fill the textarea with amendment
+	*/
+function amendFromPoint(_pt) {
 	var point = D3_SCENE.select('#' + _pt);
 	// init and open amend toobox
-	alertInit();
-	if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
-		D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
-	}
-	var path = point.datum().path;
-	var order = point.datum().order;
-	document.getElementById(AMEND_TOOLBOX_ID + "-point").value = point.datum().point;
-	document.getElementById(AMEND_TOOLBOX_ID + "-next").value = point.datum().next;
-	document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
+	amendFromText(point.datum().path, point.datum().point,  point.datum().next, point.datum().order);
 }
 
 
- /**
-  * Switch view from graph to text mode
-  *
-  * @returns {-} switch mode
-  */
+/**
+	* Switch view from graph to text mode
+	*
+	* @returns {-} switch mode
+	*/
 function switchView(){
 	if (CURRENT_BHB_MODE == "graph") setBhbMode("text");
 	if (CURRENT_BHB_MODE == "text") setBhbMode("graph");
 }
 
-/*
- * Bhb Queries
- */
-
- /**
-  * bhbquery to set a new point
-  * @param {_pt} - a point id
-  * @returns sends a query to the server, returns the point
-  */
- function setBhbPosition(_pt){
- 		_snd({bhb:"query", ["{bhb://the.hypertext.blockchain}position"]: _pt});
- 		return _pt;
- }
-
- /**
-  * bhbquery to change view mode
-  * @param {_mode} - mode : graph, test...
-  * @returns sends a query to the server, returns the mode
-  */
- function setBhbMode(_mode){
- 		_snd({bhb:"query", ["{bhb://the.hypertext.blockchain}mode"]: _mode});
- 		return _mode;
- }
-
- /*
-  * Functions to store local information
-  */
-
- /**
-  * Store localy the position of the vertices (both tanslation & rotation) in the global variable vertexLastPosition
-  *
-  * @param _verticesbyHc {d3map} - map of drawn vertices to register their transformations
-  * @returns {-} - Stores positionning as a json string in nav's localStorage
-  */
- function storeLocalVertexPositionning(_verticesbyHc){
- 	//console.log("store positionning");
- 	var tf_vtx, tf_vtxRt;
- 	var vtxLastPosbyPt = d3.map(VERTEX_LAST_POSITION, function(d) {return d.oPt});
- 	_verticesbyHc.each(function (d) {
- 		if (document.getElementById("gvertex_" + d.hc).attributes.transform){
- 			tf_vtx = document.getElementById("gvertex_" + d.hc).attributes.transform.value;
- 		} else {
- 			tf_vtx = "";
- 		}
- 		if (document.getElementById("grotate_" + d.hc).attributes.transform){
- 			tf_vtxRt = document.getElementById("grotate_" + d.hc).attributes.transform.value;
- 		} else {
- 			tf_vtxRt = "rotate(0)";
- 		}
- 		if (!vtxLastPosbyPt.get(d.oldestPoint)) {
- 				VERTEX_LAST_POSITION.push({hc:d.hc, oPt:d.oldestPoint, oX: d.x, oY: d.y, oTf:tf_vtx, oRt:tf_vtxRt});
- 		} else {
- 			vtxLastPosbyPt.get(d.oldestPoint).oX=d.x;
- 			vtxLastPosbyPt.get(d.oldestPoint).oY=d.y;
- 			vtxLastPosbyPt.get(d.oldestPoint).oTf=tf_vtx;
- 			vtxLastPosbyPt.get(d.oldestPoint).oRt=tf_vtxRt;
-
- 		}
- 		var vertexLastPosition_json = JSON.stringify(VERTEX_LAST_POSITION);
- 		localStorage.setItem("vertexLastPosition_json", vertexLastPosition_json);
-
- 		storeLocalForcesStatus();
- 	})
- }
-
- /**
-  * Store localy the forces settings
-  *
-  * @returns {-} - Stores forces settings as a json string in nav's localStorage
-  */
- function storeLocalForcesStatus(){
- 		localStorage.setItem("forcesStatus_json", JSON.stringify(FORCES_STATUS));
- }
-
-/*
- * Misc functions
- */
+// ******************************************************
+// Bhb Queries
+// ******************************************************
 
 /**
- * Hash function Returns a integer value from a string with d2jb algo. If string
- * length is 0, returns 0. See website below
- *
- * @see http://erlycoder.com/49/javascript-hash-functions-to-convert-string-into-integer-hash-
- * @param _str {string} str - js string value
- * @returns {integer} hascode - 32bit integer
- */
-function hashCode(_str){
-    var hash = 0;
-    if (_str.length == 0) return hash;
-    for (var i=0; i < _str.length; i++) {
-        var char = _str.charCodeAt(i);
-        hash = ((hash<<5)-hash)+char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
+	* bhbquery to set a new point
+	* @param {_pt} - a point id
+	* @returns sends a query to the server, returns the point
+	*/
+function setBhbPosition(_pt){
+		_snd({bhb:"query", ["{bhb://the.hypertext.blockchain}position"]: _pt});
+		return _pt;
 }
 
 /**
- * Prints a Vertex as a string of the points segments or a hash of the value
- * Default is hash
- *
- * @param {object:vertex} - vertex object as defined in the code : {bp:point, ep:next, pc:1, hc:"", segments:segments}
- * @param {boolean} - hash - if true returns a hash, otherwise the chain of the points.
- * @returns {chain|integer} - chain or hascode - 32bit integer depending of hash param value
- */
+	* bhbquery to change view mode
+	* @param {_mode} - mode : graph, test...
+	* @returns sends a query to the server, returns the mode
+	*/
+function setBhbMode(_mode){
+		_snd({bhb:"query", ["{bhb://the.hypertext.blockchain}mode"]: _mode});
+		return _mode;
+}
+
+// ******************************************************
+// Functions to store local information
+// ******************************************************
+
+/**
+	* Store localy the position of the vertices (both tanslation & rotation) in the global variable vertexLastPosition
+	*
+	* @param _verticesbyHc {d3map} - map of drawn vertices to register their transformations
+	* @returns {-} - Stores positionning as a json string in nav's localStorage
+	*/
+function storeLocalVertexPositionning(_verticesbyHc){
+	//console.log("store positionning");
+	var tf_vtx, tf_vtxRt;
+	var vtxLastPosbyPt = d3.map(VERTEX_LAST_POSITION, function(d) {return d.oPt});
+	_verticesbyHc.each(function (d) {
+		if (document.getElementById("gvertex_" + d.hc).attributes.transform){
+			tf_vtx = document.getElementById("gvertex_" + d.hc).attributes.transform.value;
+		} else {
+			tf_vtx = "";
+		}
+		if (document.getElementById("grotate_" + d.hc).attributes.transform){
+			tf_vtxRt = document.getElementById("grotate_" + d.hc).attributes.transform.value;
+		} else {
+			tf_vtxRt = "rotate(0)";
+		}
+		if (!vtxLastPosbyPt.get(d.oldestPoint)) {
+				VERTEX_LAST_POSITION.push({hc:d.hc, oPt:d.oldestPoint, oX: d.x, oY: d.y, oTf:tf_vtx, oRt:tf_vtxRt});
+		} else {
+			vtxLastPosbyPt.get(d.oldestPoint).oX=d.x;
+			vtxLastPosbyPt.get(d.oldestPoint).oY=d.y;
+			vtxLastPosbyPt.get(d.oldestPoint).oTf=tf_vtx;
+			vtxLastPosbyPt.get(d.oldestPoint).oRt=tf_vtxRt;
+		}
+		var vertexLastPosition_json = JSON.stringify(VERTEX_LAST_POSITION);
+		localStorage.setItem("vertexLastPosition_json", vertexLastPosition_json);
+
+		storeLocalForcesStatus();
+	})
+}
+
+/**
+	* Store localy the forces settings
+	*
+	* @returns {-} - Stores forces settings as a json string in nav's localStorage
+	*/
+function storeLocalForcesStatus(){
+		localStorage.setItem("forcesStatus_json", JSON.stringify(FORCES_STATUS));
+}
+
+// ******************************************************
+// Misc functions
+// ******************************************************
+
+/**
+	* Hash function Returns a integer value from a string with d2jb algo. If string
+	* length is 0, returns 0. See website below
+	*
+	* @see http://erlycoder.com/49/javascript-hash-functions-to-convert-string-into-integer-hash-
+	* @param _str {string} str - js string value
+	* @returns {integer} hascode - 32bit integer
+	*/
+function hashCode(_str){
+	var hash = 0;
+	if (_str.length == 0) return hash;
+	for (var i=0; i < _str.length; i++) {
+		var char = _str.charCodeAt(i);
+		hash = ((hash<<5)-hash)+char;
+		hash = hash & hash; // Convert to 32bit integer
+	}
+	return hash;
+}
+
+/**
+	* Prints a Vertex as a string of the points segments or a hash of the value
+	* Default is hash
+	*
+	* @param {object:vertex} - vertex object as defined in the code : {bp:point, ep:next, pc:1, hc:"", segments:segments}
+	* @param {boolean} - hash - if true returns a hash, otherwise the chain of the points.
+	* @returns {chain|integer} - chain or hascode - 32bit integer depending of hash param value
+	*/
 function vertexToString(_vertex, _hash){
 	_hash = (typeof _hash !== 'undefined') ? _hash : true;
 
@@ -1525,13 +1638,13 @@ function vertexToString(_vertex, _hash){
 	}
 }
 
-	// ******************************************************					_______________________________
-	// Applying Forces to elements
-	//			1. forceCenter: center vertices                                   F O R C E S
-	//			2. forceCollide: colliding vertices												_______________________________
-	//			3. forceManyBody: Electrostatic force
-	//			4. qa_linkPoints: edge-directed force and rotation
-	// ******************************************************
+// ******************************************************					_______________________________
+// Applying Forces to elements
+//			1. forceCenter: center vertices                                   F O R C E S
+//			2. forceCollide: colliding vertices												_______________________________
+//			3. forceManyBody: Electrostatic force
+//			4. qa_linkPoints: edge-directed force and rotation
+// ******************************************************
 
 // forces status examples : VERTICES_POSITIONNING.force("link").links(), VERTICES_POSITIONNING.force("center").x()
 
@@ -1561,159 +1674,159 @@ function qa_vertices_forces(edges, vertices) {
 }
 
 function qa_constant$6(x) {
-  return function() {
-    return x;
-  };
+	return function() {
+		return x;
+	};
 }
+
 function qa_jiggle() {
-  return (Math.random() - 0.5) * 1e-6;
+	return (Math.random() - 0.5) * 1e-6;
 }
 
 function qa_linkPoints(links) {
-  var id = d3.index,
-      strength = qa_constant$6(.1),
-      strengths,
-      distance = qa_defaultStrength,
-      distances,
-      vertices,
-      count,
-      bias,
-      iterations = 1;
-  if (links == null) links = [];
+	var id = d3.index,
+		strength = qa_constant$6(.1),
+		strengths,
+		distance = qa_defaultStrength,
+		distances,
+		vertices,
+		count,
+		bias,
+		iterations = 1;
+		if (links == null) links = [];
 
-  function qa_defaultStrength(link) {
-    return 1 / Math.min(count[link.source.index], count[link.target.index]);
-  }
+function qa_defaultStrength(link) {
+	return 1 / Math.min(count[link.source.index], count[link.target.index]);
+}
 
-  function getAbsTheta(point) {
-		var d = document.getElementById("grotate_" + point.hc);
-		if (!d) return 0;
-		var theta = Number(d.attributes.transform.value.replace("rotate(", "").replace(")",""));
-		if (isNaN(theta)) {theta = 0;}
-		theta /= 180.0; theta *= Math.PI;
-		theta += Math.atan2(point.ptY, point.ptX);
-		return theta;
-	}
+function getAbsTheta(point) {
+	var d = document.getElementById("grotate_" + point.hc);
+	if (!d) return 0;
+	var theta = Number(d.attributes.transform.value.replace("rotate(", "").replace(")",""));
+	if (isNaN(theta)) {theta = 0;}
+	theta /= 180.0; theta *= Math.PI;
+	theta += Math.atan2(point.ptY, point.ptX);
+	return theta;
+}
+
 /** --------------------------------------------------------------------
- * Defining a new force for vertices positioning driven by points' positions and links
- * Driven from original link function from d3 4.12.2 (https://d3js.org/)
- * Require several new properties in the link definition
- */
+	* Defining a new force for vertices positioning driven by points' positions and links
+	* Driven from original link function from d3 4.12.2 (https://d3js.org/)
+	* Require several new properties in the link definition
+	*/
 
-  function force(alpha) {
-	  /* left bound for spheric binding to it
-      for (var i = 0, x_min = 10000000000000.0; i < links.length; ++i) {
-      	var link = links[i], source = link.source;
-			x_min = Math.min(getAbsCoord(source.point).x, x_min)
-		}; */
+function force(alpha) {
+	/* left bound for spheric binding to it
+	for (var i = 0, x_min = 10000000000000.0; i < links.length; ++i) {
+	var link = links[i], source = link.source;
+	x_min = Math.min(getAbsCoord(source.point).x, x_min)
+	}; */
 
-    for (var i = 0; i < links.length; ++i) {
-      var f    = alpha * strengths[i];	//force intensity
-      var b    = bias[i];	// force bias
-      var link = links[i], source = link.source, target = link.target;	// link data
-			var d_tgt, d_src; try {
-			d_tgt = D3_SCENE.select("#gvertex_"+target.hc).datum();
-			d_src = D3_SCENE.select("#gvertex_"+source.hc).datum();
-		} catch (e) {
-			//console.log("(error - data) i:", i, "id: ", links[i].id);
-			continue;
-		}																				/* vertex d3 data */
-		if (link.topology=='spheric') continue;
+	for (var i = 0; i < links.length; ++i) {
+		var f    = alpha * strengths[i];	//force intensity
+		var b    = bias[i];	// force bias
+		var link = links[i], source = link.source, target = link.target;	// link data
+		var d_tgt, d_src; try {
+		d_tgt = D3_SCENE.select("#gvertex_"+target.hc).datum();
+		d_src = D3_SCENE.select("#gvertex_"+source.hc).datum();
+	} catch (e) {
+	//console.log("(error - data) i:", i, "id: ", links[i].id);
+	continue;
+	}																				/* vertex d3 data */
+	if (link.topology=='spheric') continue;
 		var src_rot = getAbsTheta(source),
-		    tgt_rot = getAbsTheta(target);
+				tgt_rot = getAbsTheta(target);
 		var xy_src  = getAbsCoord(source.point),
-		    xy_tgt  = getAbsCoord(target.point);
+				xy_tgt  = getAbsCoord(target.point);
 		var x = xy_tgt.x + d_tgt.vx - xy_src.x - d_src.vx|| qa_jiggle(),
-		    y = xy_tgt.y + d_tgt.vy - xy_src.y - d_src.vy|| qa_jiggle();
+				y = xy_tgt.y + d_tgt.vy - xy_src.y - d_src.vy|| qa_jiggle();
 		// -------------------------------------------------------------
 		var angle = Math.atan2(y, x);
 		var vtt   = tgt_rot - angle + Math.PI,
-		    vst   = src_rot - angle;
+				vst   = src_rot - angle;
 		vtt %= 2 * Math.PI; if (vtt > Math.PI) vtt -= 2 * Math.PI;
 		vst %= 2 * Math.PI; if (vst > Math.PI) vst -= 2 * Math.PI;
 		// link spin (beware of native multiplier 180. / TT)
-	    d_tgt.spin -= vtt ; d_src.spin -= vst ;
+		d_tgt.spin -= vtt ; d_src.spin -= vst ;
 		// -------------------------------------------------------------
-		x   -=  distances[i] * Math.cos(src_rot);
-		y   -=  distances[i] * Math.sin(src_rot);
-	    var l = Math.sqrt(x * x + y * y); x /= l;y /= l; /*unit vector*/
-	    var int = f * l, flx = x * int, fly = y * int;  /*force vector*/
+		x -= distances[i] * Math.cos(src_rot);
+		y -= distances[i] * Math.sin(src_rot);
+		var l = Math.sqrt(x * x + y * y); x /= l;y /= l; /*unit vector*/
+		var int = f * l, flx = x * int, fly = y * int;  /*force vector*/
 		// link force
 		d_tgt.vx -= flx * b; d_src.vx += flx * (1 - b);
 		d_tgt.vy -= fly * b; d_src.vy += fly * (1 - b);
 		//console.log("[planar]", i, x, y, l, tgt_rot, src_rot, '[success]', d_tgt.vx, d_tgt.vy, d_src.vx, d_src.vy);
-      }
-    }
+	}
+}
 
-  function initialize() {
-    if (!vertices) return;
+function initialize() {
+	if (!vertices) return;
+	var i,
+	n = vertices.length,
+	m = links.length,
+	vertexById = d3.map(vertices, id),
+	link;
 
-    var i,
-        n = vertices.length,
-        m = links.length,
-        vertexById = d3.map(vertices, id),
-        link;
+	for (i = 0, count = new Array(n); i < m; ++i) {
+		link = links[i];
+		link.index = i;
+		if (typeof link.source !== "object") link.source = find(vertexById, link.source);
+		if (typeof link.target !== "object") link.target = find(vertexById, link.target);
+		count[link.source.index] = (count[link.source.index] || 0) + 1;
+		count[link.target.index] = (count[link.target.index] || 0) + 1;
+	}
 
-    for (i = 0, count = new Array(n); i < m; ++i) {
-      link = links[i];
-			link.index = i;
-      if (typeof link.source !== "object") link.source = find(vertexById, link.source);
-      if (typeof link.target !== "object") link.target = find(vertexById, link.target);
-      count[link.source.index] = (count[link.source.index] || 0) + 1;
-      count[link.target.index] = (count[link.target.index] || 0) + 1;
-    }
+	for (i = 0, bias = new Array(m); i < m; ++i) {
+		link = links[i];
+		bias[i] = count[link.source.index] / (count[link.source.index] + count[link.target.index]);
+	}
 
-    for (i = 0, bias = new Array(m); i < m; ++i) {
-      link = links[i];
-			bias[i] = count[link.source.index] / (count[link.source.index] + count[link.target.index]);
-    }
+	strengths = new Array(m);
+	qa_initializeStrength();
+	distances = new Array(m);
+	qa_initializeDistance();
+}
 
-    strengths = new Array(m);
-		qa_initializeStrength();
-    distances = new Array(m);
-		qa_initializeDistance();
-  }
+function qa_initializeStrength() {
+	if (!vertices) return;
 
-  function qa_initializeStrength() {
-    if (!vertices) return;
+	for (var i = 0, n = links.length; i < n; ++i) {
+		strengths[i] = +strength(links[i], i, links);
+	}
+}
 
-    for (var i = 0, n = links.length; i < n; ++i) {
-      strengths[i] = +strength(links[i], i, links);
-    }
-  }
+function qa_initializeDistance() {
+	if (!vertices) return;
+	for (var i = 0, n = links.length; i < n; ++i) {
+		distances[i] = +distance(links[i], i, links);
+	}
+}
 
-  function qa_initializeDistance() {
-    if (!vertices) return;
+force.initialize = function(_) {
+	vertices = _;
+	initialize();
+};
 
-    for (var i = 0, n = links.length; i < n; ++i) {
-      distances[i] = +distance(links[i], i, links);
-    }
-  }
+force.links = function(_) {
+	return arguments.length ? (links = _, initialize(), force) : links;
+};
 
-  force.initialize = function(_) {
-    vertices = _;
-    initialize();
-  };
+force.id = function(_) {
+	return arguments.length ? (id = _, force) : id;
+};
 
-  force.links = function(_) {
-    return arguments.length ? (links = _, initialize(), force) : links;
-  };
+force.iterations = function(_) {
+	return arguments.length ? (iterations = +_, force) : iterations;
+};
 
-  force.id = function(_) {
-    return arguments.length ? (id = _, force) : id;
-  };
+force.strength = function(_) {
+	return arguments.length ? (strength = typeof _ === "function" ? _ : qa_constant$6(+_), qa_initializeStrength(), force) : strength;
+};
 
-  force.iterations = function(_) {
-    return arguments.length ? (iterations = +_, force) : iterations;
-  };
+force.distance = function(_) {
+	return arguments.length ? (distance = typeof _ === "function" ? _ : qa_constant$6(+_), qa_initializeDistance(), force) : distance;
+};
 
-  force.strength = function(_) {
-    return arguments.length ? (strength = typeof _ === "function" ? _ : qa_constant$6(+_), qa_initializeStrength(), force) : strength;
-  };
-
-  force.distance = function(_) {
-    return arguments.length ? (distance = typeof _ === "function" ? _ : qa_constant$6(+_), qa_initializeDistance(), force) : distance;
-  };
-
-  return force;
+return force;
 }

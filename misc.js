@@ -51,6 +51,7 @@ function ui_tlbx_toggle(_elt) {
  * @example <div class="e wrap" onclick="ui_wrap_toggle(this);">
  */
 function ui_wrap_toggle(_elt) {
+	event.stopPropagation();
   if (d3.select(_elt).classed("wraped")) {
       d3.select(_elt).classed("wraped", false).classed("unwraped", true);
   } else {

@@ -1,16 +1,71 @@
 /*START rewrites/add some classes from default.css*/
 .bhb {font:small; color: #777;}
-.notbhb {color: blue;}
+.notbhb {color: #007bff;}
 div.link{
   border-style: solid;
   border-color: #777;
   border-width: thin;
 }
 span[data-elt="link"] {color: #777;}
-
-.e   {margin-left:1em; text-indent:unset; margin-right:1em}
+.av  {color:black; font-weight:medium;}
+.m   {color:#777; font-weight:light;}
+.e   {margin-left:1em; text-indent:unset; margin-right:1em;}
 /*rewrites some classes from default.css*/
 /*END rewrites some classes from default.css*/
+/* text mode SVG */
+.icon-edit{
+	float: left;
+	margin-top: .375rem;
+	width: 15px;
+	height: 15px;
+	user-select: none;
+}
+div.entagpadding{ /*To match the indentation of the edit icon*/
+	margin-left: 15px
+}
+.icon-edit:hover{
+	background-color: #007bff;
+}
+.icon-edit-placeholder{
+	float: left;
+	margin-top: .375rem;
+}
+div.wraped{
+	height: 1.2em;
+	overflow: hidden;
+	font-style: italic;
+  font-weight: lighter;
+}
+div.wraped > div::after{
+	content:"[...]";
+	color:darkgrey;
+}
+div.unwraped{
+}
+/*div.e:hover{
+	border-left-color: darkgreen;
+	border-left-width: thin;
+	border-left-style: solid;
+	border-bottom-color: darkgreen;
+	border-bottom-width: thin;
+	border-bottom-style: solid;
+}*/
+.deployed {
+ background-color: #007bff;
+}
+.on_symbol {
+	color:magenta;
+	font-style: italic;
+}
+.on_clock {
+	color:green;
+	font-style: italic;
+}
+
+nav.placeholder_amend {
+	display: none;
+}
+/* END text mode svg */
 
 *, ::after, ::before {
     box-sizing: border-box;
@@ -25,13 +80,14 @@ html {
 
 body {
 	margin: 0;
-	font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+	font-family: -apple-system,BlinkMacSystemFont,"Ubuntu","Roboto","Segoe UI","Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
 	font-size: 1rem;
 	font-weight: 400;
 	height: 100%;
 	line-height: 1.5;
   text-align: left;
-  background-color: #8bc34a;
+	background-color: #cddc39; /*#9e9e9e*/
+	/*background: linear-gradient(to bottom, #000000 0%,#cddc39 .5%,#cddc39 100%);*/
 }
 
 .left {
@@ -43,7 +99,8 @@ body {
 }
 
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
-    margin-bottom: .5rem;
+    margin-bottom: .375rem;
+		margin-bottom: 0;
     font-family: inherit;
     font-weight: 500;
     line-height: 1.2;
@@ -51,8 +108,8 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    margin-top: 0;
-    margin-bottom: .5rem;
+    margin-top: .375rem;
+    margin-bottom: 0;
 }
 .h1, h1 {
     font-size: 2.5rem;
@@ -75,7 +132,7 @@ h1, h2, h3, h4, h5, h6 {
 
 p {
     margin-top: 0;
-    margin-bottom: 1rem;
+    margin-bottom: .5rem;
 }
 i, cite, em, var, address, dfn {
     font-style: italic;
@@ -115,23 +172,44 @@ span.braille-sign {
 
 #toolboxes.graph {
 }
+
 #toolboxes.text {
-  position: sticky;
-  top:10px;
-  height:100px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap:wrap;
-  justify-content:space-between;
-  align-items: baseline;
-  align-content: flex-start;
+	z-index: 500;
+	position: fixed;
+	width:99%;
+	top:10px;
+	height:70px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap:nowrap;
+	justify-content:space-between;
+	align-items: baseline;
+	align-content: flex-start;
+}
+
+div#explorer{
+	order:10;
+	flex-grow: .1;
+}
+div#perspective{
+	order:20;
+	flex-grow: .1;
+}
+div#amendment{
+	order:30;
+	flex-grow: .1;
+}
+div#text{
+	order:40;
+	flex-grow: .5;
 }
 
 #workspace.graph {
   height: 100%
 }
 #workspace.text {
-  padding-left: 10px;
+  padding-left: 3.5rem;
+	padding-top: 100px;
 }
 
 div.upper-left {
@@ -159,7 +237,6 @@ div.lower-right {
 	width:300px;
 }
 div.nav-upper {
-  flex-shrink:1;
   flex-basis:200px;
 }
 
@@ -177,10 +254,23 @@ div#workspace > div#bhb-text {
 
 div#mini-workspace > div#bhb-text {
 	overflow-y: scroll;
-	height: 15em;
+	height: 20em;
 	line-height: 1;
 	font-size: small;
 	font-weight: 100;
+}
+
+h6[data-bhbmode=text] {
+	position:absolute;
+}
+
+div#mini-workspace[data-bhbmode=text] {
+	height: 25em;
+}
+
+div#text-pointnavtool[data-bhbmode=text]{
+	bottom: -22em;
+	position: absolute;
 }
 
 /*modal*/
@@ -306,7 +396,7 @@ div.render-scene {
 	height: 100%;
 }
 
-svg {
+svg#scene {
 	width: 100%;
 	height: 100%;
 }
@@ -314,14 +404,16 @@ svg {
 .toolbox {
 	padding: 5px;
 	z-index:100;
-	opacity:.8;
+	opacity:.7;
 	background-color: white;
+	box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
 }
 
 .toolbox-header > p {
 	font-size: .9rem;
 	font-weight: bold;
-	margin-top: 1em;
+	margin-top: .5em;
+	user-select: none;
 }
 
 div.cols-two {
@@ -377,13 +469,20 @@ button, input {
 
 label {
     display: inline-block;
-    margin-bottom: .5rem;
+    /*margin-bottom: .5rem;*/
 }
-
 
 /*user form*/
 form {
 	font-size: .7rem;
+}
+
+textarea#amendment-editzone{
+	line-height: 1.2;
+	font-size: small;
+	font-weight: 100;
+	font-family: monospace;
+	color: black;
 }
 
 .form-control {
@@ -576,7 +675,32 @@ table {
 	    color: white;
 	}
 
-
+/* Navbar*/
+.navbar-text-node {
+	position:absolute;
+	/*opacity:.5;*/
+	margin-top: -1rem;
+	margin-left: -4.5rem;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: flex-start;
+	align-items: flex-end;
+	align-content: flex-start;
+}
+.navbar-text-node-elt {
+	flex-basis: 5rem;
+	flex:none;
+}
+.placeholder_insert{
+	position: absolute;
+	margin-top: -1.5rem;
+	margin-left: 1rem;
+	color:red;
+	font-size: 2rem;
+	font-weight: bold;
+}
+/* Misc*/
 	#popup {
 		width: 160px;
 		position:fixed;
