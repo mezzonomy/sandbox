@@ -14,7 +14,7 @@ const POINT_RADIUS = +0,
 			// Elements & seelctions
 			AMEND_TOOLBOX_ID = "amendment",
 			AMEND_EDITZONE_ID = "amendment-editzone",
-			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\nINSERT XML\n</bhb:link>",
+			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\nINSERT XML\n</bhb:link>\n\n\n\n\n\n\n\n\n\n",
 			TEXT_TOOLBOX_ID = "text",
 			// Misc
 			LONGCLICK_LIMIT=500, //threshold in ms to detect a long click
@@ -45,19 +45,21 @@ var D3_UNIVERSE,
 		FORCES_STATUS={};
 
 		// TEST DMADMA
-		document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID","somepath").replace("$$ORDER","order");
 		var cm_config = {lineNumbers: true,
 			mode: "xml",
 			matchClosing: true,
 			alignCDATA: true,
 			htmlMode: false,
 			matchBrackets: true,
+			lineNumbers:true,
+			lineWrapping:true,
 			matchTags: {bothTags: true},
-			extraKeys: {"Ctrl-J": "toMatchingTag"}
+			extraKeys: {"Ctrl-J": "toMatchingTag"},
+			value:"\n\n\n\n\n\n\n\n\n\n\n\n\n",
 		};
 		if (d3.select("#universe").select(".CodeMirror").empty()) {
 			var cm_editor = CodeMirror.fromTextArea(document.getElementById(AMEND_EDITZONE_ID), cm_config);
-			cm_editor.setSize("100%","10rem")
+			cm_editor.setSize("190px","10rem")
 			cm_editor.on("change", function(cm){
 				document.getElementById(AMEND_EDITZONE_ID).value=cm.getValue();
 				simulateOnchange(document.getElementById(AMEND_EDITZONE_ID));
