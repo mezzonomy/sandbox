@@ -224,21 +224,19 @@
 			<p><xsl:value-of select="$toolbox_LBL"/><i class="small">&#160;as&#160;<xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</i></p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
-			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
+			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0); initAmendment();">
 				<on:submit create="bhb:block">
 					<on:attribute name="body" script="_get('{$toolbox_ID}-editzone').value.replace(/\u0022/g, String.fromCharCode(39))"/> <!--replaces " by ' :-)-->
 					<bhb:copy-of select="bhb:parse(@body)"/>
 				</on:submit>
-				<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value=""/>
-				<input id="{$toolbox_ID}-next" name="{$toolbox_ID}-next" type="hidden" value=""/>
 				<input id="{$toolbox_ID}-user" name="{$toolbox_ID}-user" type="hidden" required="required">
 					<xsl:attribute name="value"><xsl:value-of select="$perspective/@username"/></xsl:attribute>
 				</input>
 				<input id="{$toolbox_ID}-role" name="{$toolbox_ID}-role" type="hidden" required="required">
 					<xsl:attribute name="value"><xsl:value-of select="$role"/></xsl:attribute>
 				</input>
-				<label for="{$toolbox_ID}-editzone">Edit Amendment</label>
-				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="13" class="form-control" placeholder="Please drop a vertex arc here to create a new amendment" spellcheck="false" required="required" oninput="validateAmendment('{$toolbox_ID}-editzone')" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
+				<label for="{$toolbox_ID}-editzone">Edit Amendment<i class="small">&#160;(glisser un vertex ou un noeud)</i></label>
+				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="13" class="form-control" spellcheck="false" required="required" oninput="validateAmendment('{$toolbox_ID}-editzone')" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
 				<div id="{$toolbox_ID}-editinfo" class="alert"/>
 				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">&#10003;</button>
 			</form>

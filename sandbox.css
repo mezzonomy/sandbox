@@ -1,3 +1,6 @@
+/* CodeMirror specific to sandbox*/
+.sb-cm-drop { background-color: #ff7; }
+.sb-cm-insert { background-color: #7bff77; }
 /*START rewrites/add some classes from default.css*/
 .bhb {font:small; color: #777;}
 .notbhb {color: #007bff;}
@@ -227,7 +230,7 @@ div.upper-right {
 	position: absolute;
 	top:10px;
 	right:10px;
-	width:200px;
+	width:300px;
 }
 div.lower-left {
 	position: absolute;

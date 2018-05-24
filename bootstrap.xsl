@@ -86,6 +86,8 @@
 			<script src="sandbox/misc.js" type="text/javascript"></script>
 			<script src="sandbox/d3-wlibrairies.js" type="text/javascript"></script>
 			<script src="sandbox/codemirror/lib/codemirror.js" type="text/javascript"></script>
+			<script src="sandbox/codemirror/addon/search/search.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/search/searchcursor.js" type="text/javascript" defer="defer"></script>			
 			<script src="sandbox/codemirror/addon/fold/xml-fold.js" type="text/javascript" defer="defer"></script>
 			<script src="sandbox/codemirror/addon/edit/matchtags.js" type="text/javascript" defer="defer"></script>
 			<script src="sandbox/codemirror/addon/hint/show-hint.js" type="text/javascript" defer="defer"></script>

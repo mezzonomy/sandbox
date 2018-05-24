@@ -14,7 +14,11 @@ const POINT_RADIUS = +0,
 			// Elements & seelctions
 			AMEND_TOOLBOX_ID = "amendment",
 			AMEND_EDITZONE_ID = "amendment-editzone",
-			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\nINSERT XML\n</bhb:link>\n\n\n\n\n\n\n\n\n\n",
+			AMEND_CM_EDITZONE_ID = "cm-" + AMEND_EDITZONE_ID,
+			AMEND_FORM_ID = "amendment-valid-form",
+			AMEND_INSERT_PLACEHOLDER="<_/>"
+			AMEND_INSERT_TEXT="INSERT XML HERE"
+			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\n\t$$TAB" + AMEND_INSERT_TEXT + "\n$$TAB</bhb:link>",
 			TEXT_TOOLBOX_ID = "text",
 			// Misc
 			LONGCLICK_LIMIT=500, //threshold in ms to detect a long click
@@ -44,28 +48,124 @@ var D3_UNIVERSE,
 		FORCES_STATUS_DEF={collide:{status:true},center:{status:true},charge:{status:true}},
 		FORCES_STATUS={};
 
-		// TEST DMADMA
-		var cm_config = {lineNumbers: true,
-			mode: "xml",
-			matchClosing: true,
-			alignCDATA: true,
-			htmlMode: false,
-			matchBrackets: true,
-			lineNumbers:true,
-			lineWrapping:true,
-			matchTags: {bothTags: true},
-			extraKeys: {"Ctrl-J": "toMatchingTag"},
-			value:"\n\n\n\n\n\n\n\n\n\n\n\n\n",
-		};
-		if (d3.select("#universe").select(".CodeMirror").empty()) {
-			var cm_editor = CodeMirror.fromTextArea(document.getElementById(AMEND_EDITZONE_ID), cm_config);
-			cm_editor.setSize("190px","10rem")
-			cm_editor.on("change", function(cm){
-				document.getElementById(AMEND_EDITZONE_ID).value=cm.getValue();
-				simulateOnchange(document.getElementById(AMEND_EDITZONE_ID));
-				//console.log(cm.getValue());
-			})
+// TEST DMADMA
+// ******************************************************
+// Shema autocomplete hints
+// ******************************************************
+var dummy = {
+	attrs: {
+		color: ["red", "green", "blue", "purple", "white", "black", "yellow"],
+		size: ["large", "medium", "small"],
+		description: null
+	},
+	children: []
+};
+var tags = {
+	"!top": ["top"],
+	"!attrs": {
+		id: null,
+		class: ["A", "B", "C"]
+	},
+	top: {
+		attrs: {
+			lang: ["en", "de", "fr", "nl"],
+			freeform: null
+		},
+		children: ["animal", "plant"]
+	},
+	animal: {
+		attrs: {
+			name: null,
+			isduck: ["yes", "no"]
+		},
+		children: ["wings", "feet", "body", "head", "tail"]
+	},
+	plant: {
+		attrs: {name: null},
+		children: ["leaves", "stem", "flowers"]
+	},
+	wings: dummy, feet: dummy, body: dummy, head: dummy, tail: dummy,
+	leaves: dummy, stem: dummy, flowers: dummy
+};
+
+// ******************************************************
+// callback function from completion
+// ******************************************************
+
+function completeAfter(cm, pred) {
+	 var cur = cm.getCursor();
+	 if (!pred || pred()) setTimeout(function() {
+		 if (!cm.state.completionActive)
+			 cm.showHint({completeSingle: false});
+	 }, 100);
+	 return CodeMirror.Pass;
+}
+
+function completeIfAfterLt(cm) {
+	 return completeAfter(cm, function() {
+		 var cur = cm.getCursor();
+		 return cm.getRange(CodeMirror.Pos(cur.line, cur.ch - 1), cur) == "<";
+	 });
+}
+
+function completeIfInTag(cm) {
+	 return completeAfter(cm, function() {
+		 var tok = cm.getTokenAt(cm.getCursor());
+		 if (tok.type == "string" && (!/['"]/.test(tok.string.charAt(tok.string.length - 1)) || tok.string.length == 1)) return false;
+		 var inner = CodeMirror.innerMode(cm.getMode(), tok.state).state;
+		 return inner.tagName;
+	 });
+}
+var cm_config = {lineNumbers: true,
+	mode: "xml",
+	matchClosing: true,
+	alignCDATA: true,
+	htmlMode: false,
+	matchBrackets: true,
+	lineNumbers:true,
+	lineWrapping:true,
+	matchTags: {bothTags: true},
+	extraKeys: {
+		"Ctrl-J": "toMatchingTag",
+		"'<'": completeAfter,
+		"'/'": completeIfAfterLt,
+		"' '": completeIfInTag,
+		"'='": completeIfInTag,
+		"Ctrl-Space": "autocomplete",
+	},
+	hintOptions: {schemaInfo: tags},
+	value:"\n\n\n\n\n\n\n\n\n\n\n\n\n",
+	addModeClass: true,
+};
+if (d3.select("#universe").select("#" + AMEND_CM_EDITZONE_ID).empty()) {
+	var cm_editor = CodeMirror.fromTextArea(document.getElementById(AMEND_EDITZONE_ID), cm_config);
+	d3.select("#" + AMEND_FORM_ID + " >.CodeMirror").attr("id", AMEND_CM_EDITZONE_ID);
+	cm_editor.setSize("290px","10rem");
+	cm_editor.on("change", function(cm){
+		var search_invit = cm_editor.getSearchCursor(AMEND_INSERT_TEXT);
+		var search_placeholder = cm_editor.getSearchCursor(AMEND_INSERT_PLACEHOLDER);
+		while (search_invit.findNext()) {
+			cm_editor.markText(search_invit.from(), search_invit.to(), {className: "sb-cm-insert"});
 		}
+		while (search_placeholder.findNext()) {
+			cm_editor.markText(search_placeholder.from(), search_placeholder.to(), {className: "sb-cm-drop"});
+		}
+		document.getElementById(AMEND_EDITZONE_ID).value=cm.getValue();
+		simulateOnchange(document.getElementById(AMEND_EDITZONE_ID));
+		//console.log(cm.getValue());
+	})
+}
+/**
+	* Reinit Amendment zone
+	* @param -
+	* @returns reinit amendment zone
+	*/
+function initAmendment() {
+ cm_editor.setValue("<_/>");
+}
+
+
+
 		// END TEST DMADMA
 
 
@@ -759,9 +859,8 @@ function dragended(d) {
 	*/
 function arcDragStarted(d) {
 	d3.event.sourceEvent.stopPropagation();
-	//TEST DMADMA D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).attr("placeholder","drag the selected arc here to amend it !");
 	d3.select(this).classed("dragging",true)
-	//TEST DMADMA D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("targeted", true);
+	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", true);
 	setBhbPosition(d.point);
 	// TODO: fix adding dataTransfert API to drag/drop outside the browser
 	//console.log("arcDragStarted started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
@@ -769,41 +868,40 @@ function arcDragStarted(d) {
 
 function arcDragged(d) {
 	d3.select(this).attr("transform", "translate("+  d3.event.x + "," + d3.event.y + ")");
-	/* TEST DMADMA if (d3.event.sourceEvent.target.id == AMEND_EDITZONE_ID) {
-		D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("zoom11", true);
+	if (d3.event.sourceEvent.path.find(function(s){return s.id == AMEND_CM_EDITZONE_ID;})) {
+		D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("zoom11", true);
 	} else {
-		D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID).classed("zoom11", false);
-	}*/
+		D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("zoom11", false);
+	}
 	if (d3.event.sourceEvent.target.id == AMEND_TOOLBOX_ID) {
 		if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
 			D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
 		}
 	}
-	//d3.select(this).classed("dragging", true);
+	d3.select(this).classed("dragging", true);
 	//console.log("arcDragged dragged on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 
 function arcDragEnded(d) {
-	//d3.select(this).classed("dragging", false);
-	if (!d3.event.sourceEvent.target.className.length) {
-		d3.select(this).attr("transform", null);
-		return;
-	}
-	if (d3.event.sourceEvent.target.className.startsWith("CodeMirror")) {
+	d3.select(this).classed("dragging", false);
+	// Value the amendment zone if dropped in
+	if (d3.event.sourceEvent.path.find(function(s){return s.id == AMEND_CM_EDITZONE_ID;})) {
 		alertInit();
 		var path = d3.event.subject.path;
 		var order = d3.event.subject.order;
-		document.getElementById(AMEND_TOOLBOX_ID + "-point").value = d.point;
-		document.getElementById(AMEND_TOOLBOX_ID + "-next").value = d.next;
-		//TEST DMADMA document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
+		var search_placeholder = cm_editor.getSearchCursor(AMEND_INSERT_PLACEHOLDER);
+		// if there is a amendment placeholder, then insert the amendmant there otherwise replace all
+		if (search_placeholder.find()) {
+			// when placeholder found, replace it with new value
+			var tabs=Math.max(1, search_placeholder.from().ch);
+			search_placeholder.replace(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("\t".repeat(tabs)));
+		} else {
+			// replace all
+			cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("") + "\n\n\n\n\n\n\n\n\n\n");
+		}
 	}
-	/*TEST DMADMA D3_UNIVERSE.select("#" + AMEND_EDITZONE_ID)
-	.classed("targeted", false).classed("zoom11", false)
-	.on("focus",function(d){
-		D3_SCENE.selectAll(".arc.edited").classed("edited",false);
-		d3.select(this).classed("edited",true);
-	});*/
-	cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order));
+	// Return all artefacts to initial state
+	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", false).classed("zoom11", false);
 	d3.select(this).attr("transform", null); //return arc to initial position
 	//console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
