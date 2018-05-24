@@ -874,27 +874,48 @@ function arcDragged(d) {
 
 function arcDragEnded(d) {
 	d3.select(this).classed("dragging", false);
-	// Value the amendment zone if dropped in
-	if (d3.event.sourceEvent.path.find(function(s){return s.id == AMEND_CM_EDITZONE_ID;})) {
-		alertInit();
-		var path = d3.event.subject.path;
-		var order = d3.event.subject.order;
-		var search_placeholder = cm_editor.getSearchCursor(AMEND_INSERT_PLACEHOLDER);
-		// if there is a amendment placeholder, then insert the amendmant there otherwise replace all
-		if (search_placeholder.find()) {
-			// when placeholder found, replace it with new value
-			//var tabs=Math.max(1, search_placeholder.from().ch);
-			//search_placeholder.replace(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("\t".repeat(tabs)));
-			search_placeholder.replace(AMEND_TEMPLATE_AUTOCLOSE.replace("$$ID",path).replace("$$ORDER",order));
-		} else {
-			// replace all
-			cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("") + "\n\n\n\n\n\n\n\n\n\n");
-		}
-	}
+	amend(d3.event.subject.path, d3.event.subject.order, false);
 	// Return all artefacts to initial state
 	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", false).classed("zoom11", false);
 	d3.select(this).attr("transform", null); //return arc to initial position
 	//console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+/**
+	* Drag and drop tags (text mode)
+	*/
+function tagDraggedStarted(d) {
+	d3.event.sourceEvent.stopPropagation();
+	d3.select(this).classed("dragging",true)
+	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", true);
+	//setBhbPosition(d.point);
+	// TODO: fix adding dataTransfert API to drag/drop outside the browser
+	//console.log("arcDragStarted started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+function tagDragged(d) {
+	d3.select(this).attr("transform", "translate("+  d3.event.x + "," + d3.event.y + ")");
+	if (d3.event.sourceEvent.path.find(function(s){return s.id == AMEND_CM_EDITZONE_ID;})) {
+		D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("zoom11", true);
+	} else {
+		D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("zoom11", false);
+	}
+	if (d3.event.sourceEvent.target.id == AMEND_TOOLBOX_ID) {
+		if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
+			D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
+		}
+	}
+	d3.select(this).classed("dragging", true);
+	//console.log("arcDragged dragged on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+}
+
+function tagDraggedEnded(d) {
+	d3.select(this).classed("dragging", false);
+	amend(this.dataset.path, "before", false);
+	// Return all artefacts to initial state
+	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", false).classed("zoom11", false);
+	d3.select(this).attr("transform", null); //return arc to initial position
+	console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 
 // ******************************************************
@@ -1082,6 +1103,15 @@ function createMarkers(_defs) {
 	*/
 function textModeInteraction() {
 	//textModeDates();
+
+	// Add dragdrop listeners on elements classed dragxmlelement
+	D3_UNIVERSE.selectAll(".dragxmlelement")
+	.call(d3.drag()
+		.on("start", tagDraggedStarted)
+		.on("drag", tagDragged)
+		.on("end", tagDraggedEnded)
+	);
+
 	// reinit icons
 	D3_UNIVERSE.selectAll(".icon-edit").remove();
 	D3_UNIVERSE.selectAll(".endtag").classed("entagpadding",false);
@@ -1193,26 +1223,46 @@ function textModeDates() { // TODO: finish
 	* Amend using the Amendment textarea
 	*
 	* @param {_path} string - the current point path string
-	* @param {_point} string - the point id
-	* @param {_next} string - the next point id
 	* @param {_order} string - The order where to amend (before, after,...)
 	* @returns {-} - Fill the textarea with amendment
 	*/
-function amendFromText(_path, _point, _next, _order) {
-	// Open the amend tooblox
-	if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
-		D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
-	}
+function amendFromText(_path, _order) {
+	amend(_path, _order, true);
+}
+
+/**
+	* Amend in the amendment tooblox
+	*
+	* @param {_path} string - the current point path string
+	* @param {_order} string - The order where to amend (before, after,...)
+	* @param {_openTooblox} boolean - Optional -default true- The order where to amend (before, after,...)
+	* @returns {-} - Fill the textarea with amendment
+	*/
+function amend(_path, _order, _openTooblox) {
+	_openTooblox = _openTooblox || true;
 	// initiate amend the tooblox
 	alertInit();
+	if (_openTooblox) {
+		if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
+			D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
+		}
+	}
 	// fill the fields
 	var path = _path;
 	var order = _order;
-	document.getElementById(AMEND_TOOLBOX_ID + "-point").value = _point; //TBD
-	document.getElementById(AMEND_TOOLBOX_ID + "-next").value = _next; //TBD
-	cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order));
-	//DMADMA TEST document.getElementById(AMEND_EDITZONE_ID).value = AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order);
+	var search_placeholder = cm_editor.getSearchCursor(AMEND_INSERT_PLACEHOLDER);
+	// if there is a amendment placeholder, then insert the amendmant there otherwise replace all
+	if (search_placeholder.find()) {
+		// when placeholder found, replace it with new value
+		//var tabs=Math.max(1, search_placeholder.from().ch);
+		//search_placeholder.replace(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("\t".repeat(tabs)));
+		search_placeholder.replace(AMEND_TEMPLATE_AUTOCLOSE.replace("$$ID",path).replace("$$ORDER",order));
+	} else {
+		// replace all
+		cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("") + "\n\n\n\n\n\n\n\n\n\n");
+	}
 }
+
  /**
 	* Adding control buttons in the perspective footer
 	* Buttons are not redrawn if exists (re enters)

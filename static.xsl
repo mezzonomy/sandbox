@@ -457,15 +457,21 @@
 			<xsl:value-of select="local-name(.)"/>
 		</xsl:attribute>
 		<xsl:attribute name="class">
-			<xsl:text>bhb </xsl:text>
+			<xsl:text>bhb dragxmlelement </xsl:text>
 			<xsl:value-of select="local-name(.)"/>
+		</xsl:attribute>
+		<xsl:attribute name="data-path">
+			<xsl:value-of select="@on:id"/>
 		</xsl:attribute>
 		<xsl:text>amendment</xsl:text>
 	</span>
 </xsl:template>
 
 <xsl:template match="*" mode="xsl:name">
-	<span class="notbhb">
+	<span class="notbhb dragxmlelement">
+		<xsl:attribute name="data-path">
+			<xsl:value-of select="@on:id"/>
+		</xsl:attribute>
 		<xsl:value-of select="name(.)"/>
 	</span>
 </xsl:template>
