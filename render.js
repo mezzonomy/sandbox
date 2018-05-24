@@ -19,6 +19,7 @@ const POINT_RADIUS = +0,
 			AMEND_INSERT_PLACEHOLDER="<_/>"
 			AMEND_INSERT_TEXT="INSERT XML HERE"
 			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\n\t$$TAB" + AMEND_INSERT_TEXT + "\n$$TAB</bhb:link>",
+			AMEND_TEMPLATE_AUTOCLOSE = "<bhb:link $$ORDER='$$ID'/>",
 			TEXT_TOOLBOX_ID = "text",
 			// Misc
 			LONGCLICK_LIMIT=500, //threshold in ms to detect a long click
@@ -893,8 +894,9 @@ function arcDragEnded(d) {
 		// if there is a amendment placeholder, then insert the amendmant there otherwise replace all
 		if (search_placeholder.find()) {
 			// when placeholder found, replace it with new value
-			var tabs=Math.max(1, search_placeholder.from().ch);
-			search_placeholder.replace(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("\t".repeat(tabs)));
+			//var tabs=Math.max(1, search_placeholder.from().ch);
+			//search_placeholder.replace(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("\t".repeat(tabs)));
+			search_placeholder.replace(AMEND_TEMPLATE_AUTOCLOSE.replace("$$ID",path).replace("$$ORDER",order));
 		} else {
 			// replace all
 			cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("") + "\n\n\n\n\n\n\n\n\n\n");
