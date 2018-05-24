@@ -76,18 +76,21 @@
 				<xsl:text>]</xsl:text>
 			</title>
 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-			<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8" />
-			<link type="text/css" rel="stylesheet" href="sandbox/codemirror/lib/codemirror.css" charset="utf-8" />
-			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8" />
-			<link type="text/css" rel="stylesheet" href="sandbox/render.css" charset="utf-8" />
-			<link type="text/css" rel="stylesheet" href="sandbox/time-range-slider.css" charset="utf-8" />
+			<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/codemirror/lib/codemirror.css" charset="utf-8"/>
+			<link type="text/css" href="sandbox/codemirror/addon/hint/show-hint.css" charset="utf-8"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/render.css" charset="utf-8"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/time-range-slider.css" charset="utf-8"/>
 			<link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,700&amp;subset=latin-ext" rel="stylesheet"/>
 			<script src="sandbox/misc.js" type="text/javascript"></script>
 			<script src="sandbox/d3-wlibrairies.js" type="text/javascript"></script>
 			<script src="sandbox/codemirror/lib/codemirror.js" type="text/javascript"></script>
-			<script src="sandbox/codemirror/addon/fold/xml-fold.js"></script>
-			<script src="sandbox/codemirror/addon/edit/matchtags.js"></script>
-			<script src="sandbox/codemirror/mode/xml/xml.js" type="text/javascript"></script>
+			<script src="sandbox/codemirror/addon/fold/xml-fold.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/edit/matchtags.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/hint/show-hint.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/hint/xml-hint.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/mode/xml/xml.js" type="text/javascript" defer="defer"></script>
 			<script src="sandbox/render.js" type="text/javascript" defer="defer"></script>
 			<script src="sandbox/time-range-slider.js" type="text/javascript" defer="defer"></script>
 		</head>
@@ -167,7 +170,7 @@
 				    }
 				}
 				function wait4render() {
-				    if (typeof d3 != 'undefined' || typeof CodeMirror != 'undefined' || typeof render != 'undefined') {
+				    if (typeof d3 != 'undefined' &amp;&amp; typeof CodeMirror != 'undefined' &amp;&amp; typeof render != 'undefined') {
 							closeLoader();
 							render(DATA, js_diff_matrix);
 				    }
