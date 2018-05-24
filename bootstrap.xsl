@@ -78,7 +78,8 @@
 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 			<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8"/>
 			<link type="text/css" rel="stylesheet" href="sandbox/codemirror/lib/codemirror.css" charset="utf-8"/>
-			<link type="text/css" href="sandbox/codemirror/addon/hint/show-hint.css" charset="utf-8"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/codemirror/addon/hint/show-hint.css" charset="utf-8"/>
+	  	<link type="text/css" rel="stylesheet" href="sandbox/codemirror/addon/fold/foldgutter.css" charset="utf-8"/>>
 			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8"/>
 			<link type="text/css" rel="stylesheet" href="sandbox/render.css" charset="utf-8"/>
 			<link type="text/css" rel="stylesheet" href="sandbox/time-range-slider.css" charset="utf-8"/>
@@ -87,11 +88,18 @@
 			<script src="sandbox/d3-wlibrairies.js" type="text/javascript"></script>
 			<script src="sandbox/codemirror/lib/codemirror.js" type="text/javascript"></script>
 			<script src="sandbox/codemirror/addon/search/search.js" type="text/javascript" defer="defer"></script>
-			<script src="sandbox/codemirror/addon/search/searchcursor.js" type="text/javascript" defer="defer"></script>			
-			<script src="sandbox/codemirror/addon/fold/xml-fold.js" type="text/javascript" defer="defer"></script>
-			<script src="sandbox/codemirror/addon/edit/matchtags.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/search/searchcursor.js" type="text/javascript" defer="defer"></script>
 			<script src="sandbox/codemirror/addon/hint/show-hint.js" type="text/javascript" defer="defer"></script>
 			<script src="sandbox/codemirror/addon/hint/xml-hint.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/fold/foldcode.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/fold/foldgutter.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/fold/brace-fold.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/fold/xml-fold.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/fold/indent-fold.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/fold/markdown-fold.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/fold/comment-fold.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/edit/matchtags.js" type="text/javascript" defer="defer"></script>
+			<script src="sandbox/codemirror/addon/selection/mark-selection.js" type="text/javascript" defer="defer"></script>
 			<script src="sandbox/codemirror/mode/xml/xml.js" type="text/javascript" defer="defer"></script>
 			<script src="sandbox/render.js" type="text/javascript" defer="defer"></script>
 			<script src="sandbox/time-range-slider.js" type="text/javascript" defer="defer"></script>

@@ -53,40 +53,26 @@ var D3_UNIVERSE,
 // ******************************************************
 // Shema autocomplete hints
 // ******************************************************
-var dummy = {
-	attrs: {
-		color: ["red", "green", "blue", "purple", "white", "black", "yellow"],
-		size: ["large", "medium", "small"],
-		description: null
-	},
-	children: []
-};
+var matrix_paths=arrayUnique(DATA.map(a => a.path));
+var matrix_tags=arrayUnique(DATA.map(a => a.info.xsl_element));
+var matrix_attributes= [];
+DATA.forEach(function(item) {
+		matrix_attributes = matrix_attributes.concat(Object.keys(item.info));
+});
+matrix_attributes=arrayUnique(matrix_attributes);
+
 var tags = {
-	"!top": ["top"],
-	"!attrs": {
-		id: null,
-		class: ["A", "B", "C"]
-	},
-	top: {
+	"!top": ["bhb:link"], // root nodes
+	"!attrs": {}, // when no attributes yet
+	"bhb:link" : {
 		attrs: {
-			lang: ["en", "de", "fr", "nl"],
-			freeform: null
+			before: matrix_paths,
+			after: matrix_paths,
+			push: matrix_paths,
+			append: matrix_paths,
 		},
-		children: ["animal", "plant"]
+		children: matrix_tags,
 	},
-	animal: {
-		attrs: {
-			name: null,
-			isduck: ["yes", "no"]
-		},
-		children: ["wings", "feet", "body", "head", "tail"]
-	},
-	plant: {
-		attrs: {name: null},
-		children: ["leaves", "stem", "flowers"]
-	},
-	wings: dummy, feet: dummy, body: dummy, head: dummy, tail: dummy,
-	leaves: dummy, stem: dummy, flowers: dummy
 };
 
 // ******************************************************
@@ -137,6 +123,9 @@ var cm_config = {lineNumbers: true,
 	hintOptions: {schemaInfo: tags},
 	value:"\n\n\n\n\n\n\n\n\n\n\n\n\n",
 	addModeClass: true,
+	tabSize:2,
+	foldGutter: true,
+	gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 };
 if (d3.select("#universe").select("#" + AMEND_CM_EDITZONE_ID).empty()) {
 	var cm_editor = CodeMirror.fromTextArea(document.getElementById(AMEND_EDITZONE_ID), cm_config);
