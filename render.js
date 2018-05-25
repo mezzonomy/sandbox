@@ -16,8 +16,9 @@ const POINT_RADIUS = +0,
 			AMEND_EDITZONE_ID = "amendment-editzone",
 			AMEND_CM_EDITZONE_ID = "cm-" + AMEND_EDITZONE_ID,
 			AMEND_FORM_ID = "amendment-valid-form",
-			AMEND_INSERT_PLACEHOLDER="<_/>"
-			AMEND_INSERT_TEXT="INSERT XML HERE"
+			AMEND_INSERT_PLACEHOLDER="<_/>",
+			AMEND_REINIT = "\n\n\n\n\n\n\n\n\n\n\n\n\n",
+			AMEND_INSERT_TEXT="INSERT XML HERE",
 			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\n\t$$TAB" + AMEND_INSERT_TEXT + "\n$$TAB</bhb:link>",
 			AMEND_TEMPLATE_AUTOCLOSE = "<bhb:link $$ORDER='$$ID'/>",
 			TEXT_TOOLBOX_ID = "text",
@@ -151,10 +152,8 @@ if (d3.select("#universe").select("#" + AMEND_CM_EDITZONE_ID).empty()) {
 	* @returns reinit amendment zone
 	*/
 function initAmendment() {
- cm_editor.setValue("<_/>");
+ cm_editor.setValue(AMEND_REINIT);
 }
-
-
 
 		// END TEST DMADMA
 
@@ -874,7 +873,9 @@ function arcDragged(d) {
 
 function arcDragEnded(d) {
 	d3.select(this).classed("dragging", false);
-	amend(d3.event.subject.path, d3.event.subject.order, false);
+	if (d3.event.sourceEvent.path.find(function(s){return s.id == AMEND_CM_EDITZONE_ID;})) {
+		amend(d3.event.subject.path, d3.event.subject.order, false);
+	}
 	// Return all artefacts to initial state
 	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", false).classed("zoom11", false);
 	d3.select(this).attr("transform", null); //return arc to initial position
