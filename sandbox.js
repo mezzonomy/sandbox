@@ -30805,7 +30805,6 @@ var cm_config = {lineNumbers: true,
 		"Ctrl-Space": "autocomplete",
 	},
 	hintOptions: {schemaInfo: tags},
-	value:"\n\n\n\n\n\n\n\n\n\n\n\n\n",
 	addModeClass: true,
 	tabSize:2,
 	foldGutter: true,
@@ -30824,7 +30823,7 @@ if (d3.select("#universe").select("#" + AMEND_CM_EDITZONE_ID).empty()) {
 		while (search_placeholder.findNext()) {
 			cm_editor.markText(search_placeholder.from(), search_placeholder.to(), {className: "sb-cm-drop"});
 		}
-		document.getElementById(AMEND_EDITZONE_ID).value=cm.getValue();
+		document.getElementById(AMEND_EDITZONE_ID).value = cm.getValue().trim();
 		simulateOnchange(document.getElementById(AMEND_EDITZONE_ID));
 		//console.log(cm.getValue());
 	})
@@ -30949,7 +30948,7 @@ function render(_data, _diff){
 	}
 
 	//change zoom level if mini-workspace
-	if (CURRENT_BHB_MODE=='text') D3_SCENE.call(ZOOM.transform, d3.zoomIdentity.scale(1/4));
+	if (CURRENT_BHB_MODE=='text') D3_SCENE.call(ZOOM.transform, d3.zoomIdentity.scale(1/2));
 
 	// ******************************************************
 	// get forces settings from localstore
@@ -31878,6 +31877,7 @@ function textModeInteraction() {
 		editbox_btn_select.on("click", function(d){
 			event.stopPropagation();
 			setBhbPosition("T_" + this.dataset.identity);
+			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
 		});
 	});
 }

@@ -36,11 +36,6 @@ function closeLoader() {
 function ui_tlbx_toggle(_elt) {
 		_elt.classList.toggle("opened");
 		_elt.classList.toggle("closed");
-		/*if (d3.select(_elt).classed("opened")) {
-			d3.select(_elt).classed("opened", false).classed("closed", true);
-		} else {
-			d3.select(_elt).classed("closed", false).classed("opened", true);
-		}*/
 }
 
 /**
@@ -53,11 +48,8 @@ function ui_tlbx_toggle(_elt) {
 	*/
 function ui_wrap_toggle(_elt) {
 	event.stopPropagation();
-	if (d3.select(_elt).classed("wraped")) {
-		d3.select(_elt).classed("wraped", false).classed("unwraped", true);
-	} else {
-		d3.select(_elt).classed("unwraped", false).classed("wraped", true);
-	}
+	_elt.classList.toggle("wraped");
+	_elt.classList.toggle("unwraped");
 }
 
 /**
@@ -145,6 +137,7 @@ function removeModal() {
 	*/
 function validateAmendment(txt) {
 	var text = document.getElementById(txt).value.trim();
+	if (text == "") {return;} // if the text is empty then no validation
 	var initTxt = "";
 	if (!text.startsWith('<?xml')) {
 		initTxt += '<?xml version="1.0" encoding="UTF-8"?>';
