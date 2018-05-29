@@ -31835,7 +31835,7 @@ function textModeInteraction() {
 		});
 		editbox_btn_before.on("click", function(d){
 			event.stopPropagation();
-			amendFromText(this.dataset.path, "T_" + this.dataset.identity, "", "before");
+			amendFromText(this.dataset.path,"before");
 		});
 
 		// after
@@ -31847,7 +31847,7 @@ function textModeInteraction() {
 		});
 		editbox_btn_after.on("click", function(d){
 			event.stopPropagation();
-			amendFromText(this.dataset.path, "T_" + this.dataset.identity, "", "after");
+			amendFromText(this.dataset.path,"after");
 		});
 
 		// append
@@ -31859,7 +31859,7 @@ function textModeInteraction() {
 		});
 		editbox_btn_append.on("click", function(d){
 			event.stopPropagation();
-			amendFromText(this.dataset.path, "T_" + this.dataset.identity, "", "append");
+			amendFromText(this.dataset.path,"append");
 		});
 
 		// push
@@ -31871,7 +31871,7 @@ function textModeInteraction() {
 		});
 		editbox_btn_push.on("click", function(d){
 			event.stopPropagation();
-			amendFromText(this.dataset.path, "T_" + this.dataset.identity, "", "push");
+			amendFromText(this.dataset.path, "push");
 		});
 
 		// select point
@@ -32372,7 +32372,7 @@ function text_nav(_datum){
 function amendFromPoint(_pt) {
 	var point = D3_SCENE.select('#' + _pt);
 	// init and open amend toobox
-	amendFromText(point.datum().path, point.datum().point,  point.datum().next, point.datum().order);
+	amendFromText(point.datum().path, point.datum().order, true);
 }
 
 
