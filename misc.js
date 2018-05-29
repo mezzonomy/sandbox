@@ -4,7 +4,6 @@
 	* @author mezzònomy
 	*/
 
-
 /**
 	* Init Loader by adding a loader image in the loader div
 	*
@@ -35,11 +34,13 @@ function closeLoader() {
 	* @example <div id="{$toolbox_ID}" class="toolbox lower-left opened" onclick="ui_tlbx_toggle(this);">
 	*/
 function ui_tlbx_toggle(_elt) {
-	if (d3.select(_elt).classed("opened")) {
-		d3.select(_elt).classed("opened", false).classed("closed", true);
-	} else {
-		d3.select(_elt).classed("closed", false).classed("opened", true);
-	}
+		_elt.classList.toggle("opened");
+		_elt.classList.toggle("closed");
+		/*if (d3.select(_elt).classed("opened")) {
+			d3.select(_elt).classed("opened", false).classed("closed", true);
+		} else {
+			d3.select(_elt).classed("closed", false).classed("opened", true);
+		}*/
 }
 
 /**

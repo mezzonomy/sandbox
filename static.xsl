@@ -261,16 +261,19 @@
 			</xsl:choose>
 		</xsl:attribute>
 		<div id="{$toolbox_ID}-header" class="toolbox-header" onclick="ui_tlbx_toggle(this.parentElement);">
-			<p><xsl:value-of select="$toolbox_LBL"/></p>
+			<p>
+				<xsl:value-of select="$toolbox_LBL"/>
+				<xsl:text>    </xsl:text>
+				<button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small; color:red;" onclick="switchView();">
+					<span>&#8621;</span>
+				</button>
+			</p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
 			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0);">
 				<h6 data-bhbmode="{$mode}">Content&#160; <button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="openModal(document.getElementById('bhb-text').innerHTML,'Content','max-width: 90%; margin-top: 10px;');">
 				<span>&#8599;</span>
 				</button>
-				<button type="button" style="padding: 0; margin: 0; background: none; text-align: unset; vertical-align: text-top;line-height: 1.2; font-size: small;" onclick="switchView();">
-			 <span>&#8621;</span>
-		 </button>
 				</h6>
 				<div id="mini-workspace" data-bhbmode="{$mode}">
 					<xsl:call-template name="mini_workspace">
@@ -317,9 +320,6 @@
 				</xsl:if>
 			</SPAN>
 			<xsl:apply-templates select="@*" mode="xsl:default"/>
-			<!--<SPAN class="m"> No more auto close node, but close node on same line
-				<xsl:text>/&gt;</xsl:text>
-			</SPAN>-->
 			<SPAN class="m">
 				<xsl:text>&gt;</xsl:text>
 			</SPAN>
@@ -492,6 +492,25 @@
 				<xsl:value-of select="."/>
 			</xsl:attribute>
 			<xsl:text>on:clock="</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text>
+		</span>
+</xsl:template>
+
+<xsl:template match="@bhb:lock" mode="xsl:default">
+	<xsl:call-template name="entity-ref">
+		<xsl:with-param name="name">#32</xsl:with-param>
+	</xsl:call-template>
+		<span class="bhb bhb_lock">
+			<xsl:attribute name="title">
+				<xsl:value-of select="namespace-uri(.)"/>
+				<xsl:text>:</xsl:text>
+				<xsl:value-of select="local-name(.)"/>
+				<xsl:text>:</xsl:text>
+				<xsl:value-of select="."/>
+			</xsl:attribute>
+			<xsl:attribute name="data-bhb_lock">
+				<xsl:value-of select="."/>
+			</xsl:attribute>
+			<xsl:text>bhb:lock="</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text>
 		</span>
 </xsl:template>
 

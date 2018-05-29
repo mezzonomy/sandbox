@@ -64,7 +64,14 @@ div.unwraped{
 	color:green;
 	font-style: italic;
 }
-
+.bhb_lock {
+	font-size: .2rem;
+	font-family: monospace;
+	display: inline-block;
+	word-break: break-all;
+	width: 8.4rem;
+	color: darkgreen;
+}
 nav.placeholder_amend_hidden {
 	display: none;
 }
