@@ -30497,246 +30497,245 @@ var D3_UNIVERSE,
 // ******************************************************
 
 // Time formaters & parsers
-
-
 const BHB_DATE_ENCODING = "%Y-%m-%dT%H:%M:%SZ"
 var FORMAT_DATE, FORMAT_DATE_P1, FORMAT_DATE_P2, FORMAT_DATE_P3, FORMAT_DATE_TIME,FORMAT_DATE_BHB, PARSE_DATE_BHB;
 
-
-function init_timeRangeSlider() {
-  FORMAT_DATE = d3.timeFormat("%a %_d %b %Y");
-  FORMAT_DATE_P1 = d3.timeFormat("%a %_d");
-  FORMAT_DATE_P2 = d3.timeFormat("%b %Y");
-  FORMAT_DATE_P3 = d3.timeFormat("%H:%M");
-  FORMAT_DATE_TIME = d3.timeFormat("%a %_d %b %y %H:%M:%S");
-  FORMAT_DATE_TIME_SHORT = d3.timeFormat("%Y%m%d-%H%M%S");
-  FORMAT_DATE_BHB = d3.timeFormat(BHB_DATE_ENCODING);
-  PARSE_DATE_BHB = d3.timeParse(BHB_DATE_ENCODING);
-  //delete previous slider
-  d3.select("#explorer-time-slider").select("svg").remove();
-  // Construct time array
-  var historyDates=[];
-  d3.selectAll(".explorer-history-date").each(function() {historyDates.push({date:PARSE_DATE_BHB(this.innerText)});});
-  if (historyDates.length > 0) { // Case no evts
-    // Render the slider
-    // 1. domain
-    var minDate = new Date(historyDates[0].date);
-    var maxDate = Date.now();
-    // 2. sliders
-    if (!document.getElementById("explorer-bhb-from").dataset.bhbdate) {
-      var startDate = minDate;
-      var endDate = new Date(historyDates[historyDates.length -1].date);
-    } else {
-      var startDate = PARSE_DATE_BHB(document.getElementById("explorer-bhb-from").dataset.bhbdate);
-      var endDate = PARSE_DATE_BHB(document.getElementById("explorer-bhb-to").dataset.bhbdate);
-    }
-    // 3. render the slider
-    var divId = "explorer-time-slider";
-    var width = document.getElementById(divId).parentNode.parentNode.clientWidth - 10;
-    timeRangeSlider(historyDates, startDate, endDate, minDate, maxDate, updateDates, divId, width);
-  }
-}
 /**
- * Function to update the explorer toolbox from a time range slider
- * @param _from {string}  from date format
- * @param _to {string}  to date format
- * @returns {nothing} updates bhb
- */
+	* Function to initialize the range slider (create it)
+	* @returns {nothing} replace previous range slider and creates history
+	*/
+function init_timeRangeSlider() {
+	FORMAT_DATE = d3.timeFormat("%a %_d %b %Y");
+	FORMAT_DATE_P1 = d3.timeFormat("%a %_d");
+	FORMAT_DATE_P2 = d3.timeFormat("%b %Y");
+	FORMAT_DATE_P3 = d3.timeFormat("%H:%M");
+	FORMAT_DATE_TIME = d3.timeFormat("%a %_d %b %y %H:%M:%S");
+	FORMAT_DATE_TIME_SHORT = d3.timeFormat("%Y%m%d-%H%M%S");
+	FORMAT_DATE_BHB = d3.timeFormat(BHB_DATE_ENCODING);
+	PARSE_DATE_BHB = d3.timeParse(BHB_DATE_ENCODING);
+	//delete previous slider
+	d3.select("#explorer-time-slider").select("svg").remove();
+	// Construct time array
+	var historyDates=[];
+	d3.selectAll(".explorer-history-date").each(function() {historyDates.push({date:PARSE_DATE_BHB(this.innerText)});});
+	if (historyDates.length > 0) { // Case no evts
+		// Render the slider
+		// 1. domain
+		var minDate = new Date(historyDates[0].date);
+		var maxDate = Date.now();
+		// 2. sliders
+		if (!document.getElementById("explorer-bhb-from").dataset.bhbdate) {
+			var startDate = minDate;
+			var endDate = new Date(historyDates[historyDates.length -1].date);
+		} else {
+			var startDate = PARSE_DATE_BHB(document.getElementById("explorer-bhb-from").dataset.bhbdate);
+			var endDate = PARSE_DATE_BHB(document.getElementById("explorer-bhb-to").dataset.bhbdate);
+		}
+		// 3. render the slider
+		var divId = "explorer-time-slider";
+		var width = document.getElementById(divId).parentNode.parentNode.clientWidth - 10;
+		timeRangeSlider(historyDates, startDate, endDate, minDate, maxDate, updateDates, divId, width);
+	}
+}
+
+/**
+	* Function to update the explorer toolbox from a time range slider
+	* @param _from {string}  from date format
+	* @param _to {string}  to date format
+	* @returns {nothing} updates bhb
+	*/
 function updateDates(_from, _to){
-   var from= new Date(_from);
-   var to=new Date(_to);
-   document.getElementById("explorer-bhb-from").value=FORMAT_DATE_BHB(from);
-   document.getElementById("explorer-bhb-to").value=FORMAT_DATE_BHB(to);
-   var fromQuery = document.getElementById("explorer-bhb-from").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(from));
-   var toQuery = document.getElementById("explorer-bhb-to").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(to));
-   console.log(fromQuery);
-   console.log(toQuery);
-   eval(fromQuery);
-   eval(toQuery);
+	var from= new Date(_from);
+	var to=new Date(_to);	 document.getElementById("explorer-bhb-from").value=FORMAT_DATE_BHB(from);
+	document.getElementById("explorer-bhb-to").value=FORMAT_DATE_BHB(to);
+	var fromQuery = document.getElementById("explorer-bhb-from").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(from));
+	var toQuery = document.getElementById("explorer-bhb-to").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(to));
+	console.log(fromQuery);
+	console.log(toQuery);
+	eval(fromQuery);
+	eval(toQuery);
 }
 
- /**
-  * Function to setup a dual range slider
-  * @param _evts {array}  array of {dates}
-  * @param _d1 {string}  from date format
-  * @param _d2 {string}  to date format
-  * @param _dmin {string}  Minimum range value to date format
-  * @param _dmax {string}  Maximum range value to date format
-  * @param _action {string}  function on update
-  * @param _divId {string}  DOM Id of the container
-  * @param _width {number}  width of the placeholder to draw the slider slider
-  * @returns {nothing} draw a slider
-  */
+/**
+	* Function to setup a dual range slider
+	* @param _evts {array}  array of {dates}
+	* @param _d1 {string}  from date format
+	* @param _d2 {string}  to date format
+	* @param _dmin {string}  Minimum range value to date format
+	* @param _dmax {string}  Maximum range value to date format
+	* @param _action {string}  function on update
+	* @param _divId {string}  DOM Id of the container
+	* @param _width {number}  width of the placeholder to draw the slider slider
+	* @returns {nothing} draw a slider
+	*/
 function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width){
-  var sliderVals=[_d1, _d2];
-  var width = _width - 60;
+	var sliderVals=[_d1, _d2];
+	var width = _width - 60;
+	var x = d3.scaleTime()
+	.domain([_dmin, _dmax])
+	.range([0, width])
+	.clamp(true);
+	var xMin=x(_dmin);
+	var xMax=x(_dmax);
 
-  var x = d3.scaleTime()
-  .domain([_dmin, _dmax])
-  .range([0, width])
-  .clamp(true);
+	// Add svg & main slider group
+	svg = d3.select("#" + _divId).append("svg")
+	.attr('width', width + 30)
+	.attr('height', 80);
 
-  var xMin=x(_dmin);
-  var xMax=x(_dmax);
+	var slider = svg.append("g", ".track-overlay")
+	.attr("class", "slider")
+	.attr("transform", "translate(30,70)");
 
-  // Add svg & main slider group
-  svg = d3.select("#" + _divId).append("svg")
-  .attr('width', width + 30)
-  .attr('height', 80);
+	// Add slider line
+	slider.append("line")
+	.attr("class", "track")
+	.attr("x1", x.range()[0])
+	.attr("x2", x.range()[1]);
 
-  var slider = svg.append("g", ".track-overlay")
-  .attr("class", "slider")
-  .attr("transform", "translate(30,70)");
+	var ghandle = slider.selectAll("g.ghandle")
+	.data([0, 1])
+	.enter().append("g")
+	.attr("class", "ghandle")
+	.attr("transform", function(d) {return "translate(" + x(sliderVals[d])+ ",0)"})
+	.call(d3.drag()
+		.on("start", startDragHandle)
+		.on("drag", dragHandle)
+		.on("end", endDragHandle)
+	);
 
-  // Add slider line
-  slider.append("line")
-  .attr("class", "track")
-  .attr("x1", x.range()[0])
-  .attr("x2", x.range()[1]);
+	ghandle.append("circle")
+	.attr("class", "handle-label")
+	.attr("cy", -34)
+	.attr("cx", 0)
+	.attr("r", 25);
 
-  var ghandle = slider.selectAll("g.ghandle")
-  .data([0, 1])
-  .enter().append("g")
-  .attr("class", "ghandle")
-  .attr("transform", function(d) {return "translate(" + x(sliderVals[d])+ ",0)"})
-  .call(d3.drag()
-    .on("start", startDragHandle)
-    .on("drag", dragHandle)
-    .on("end", endDragHandle)
-  );
+	ghandle.append("text")
+	.attr("text-anchor", "middle")
+	.attr("class", "handle-label part1")
+	.attr("y", -42)
+	.attr("x", 0)
+	.text(function(d) {return FORMAT_DATE_P1(sliderVals[d]);});
 
-  ghandle.append("circle")
-  .attr("class", "handle-label")
-  .attr("cy", -34)
-  .attr("cx", 0)
-  .attr("r", 25);
+	ghandle.append("text")
+	.attr("text-anchor", "middle")
+	.attr("class", "handle-label part2")
+	.attr("y", -30)
+	.attr("x", 0)
+	.text(function(d) {return FORMAT_DATE_P2(sliderVals[d]);});
 
-  ghandle.append("text")
-  .attr("text-anchor", "middle")
-  .attr("class", "handle-label part1")
-  .attr("y", -42)
-  .attr("x", 0)
-  .text(function(d) {return FORMAT_DATE_P1(sliderVals[d]);});
+	ghandle.append("text")
+	.attr("text-anchor", "middle")
+	.attr("class", "handle-label part3")
+	.attr("y", -18)
+	.attr("x", 0)
+	.text(function(d) {return FORMAT_DATE_P3(sliderVals[d]);});
 
-  ghandle.append("text")
-  .attr("text-anchor", "middle")
-  .attr("class", "handle-label part2")
-  .attr("y", -30)
-  .attr("x", 0)
-  .text(function(d) {return FORMAT_DATE_P2(sliderVals[d]);});
+	ghandle.append("polygon")
+	.attr("class", "handle-label")
+	.attr("points", "0,-5 -5,-10 5,-10");
 
-  ghandle.append("text")
-  .attr("text-anchor", "middle")
-  .attr("class", "handle-label part3")
-  .attr("y", -18)
-  .attr("x", 0)
-  .text(function(d) {return FORMAT_DATE_P3(sliderVals[d]);});
+	var selRange = slider.append("line")
+	.attr("class", "sel-range")
+	.attr("x1", x(sliderVals[0]))
+	.attr("x2", x(sliderVals[1]))
+	.call(
+		d3.drag()
+			.on("start", startDragRange)
+			.on("drag", dragRange)
+			.on("end", endDragRange)
+		);
 
-  ghandle.append("polygon")
-  .attr("class", "handle-label")
-  .attr("points", "0,-5 -5,-10 5,-10");
+	// Add date events
+	var gevts = slider
+	.append("g")
+	.attr("class", "evts")
+	.attr("transform", "translate(0,-65)");
 
-  var selRange = slider.append("line")
-  .attr("class", "sel-range")
-  .attr("x1", x(sliderVals[0]))
-  .attr("x2", x(sliderVals[1]))
-  .call(
-      d3.drag()
-        .on("start", startDragRange)
-        .on("drag", dragRange)
-        .on("end", endDragRange)
-  );
+	gevts.selectAll(".evts")
+	.data(_evts, function(d){return d.date})
+	.enter()
+	.append("circle")
+	.attr("class", "evts")
+	.attr("r", 2)
+	.attr("cx", function(d){return x(d.date);})
+	.append("title").text(function(d){return FORMAT_DATE_TIME(d.date);});
 
-  // Add date events
-  var gevts = slider
-  .append("g")
-  .attr("class", "evts")
-  .attr("transform", "translate(0,-65)");
+	// select an history date
+	slider.selectAll("circle.evts").on("click", function(d){
+		var ptx = +d3.select(this).attr("cx");
+		var date = d.date;
+		slider.selectAll("g.ghandle").attr("transform", "translate(" + ptx +",0)");
+		slider.select("line.sel-range").attr("x1", ptx).attr("x2", ptx);
+		sliderVals = [date, date];
+		_action(date,date);
+	});
 
-  gevts.selectAll(".evts")
-  .data(_evts, function(d){return d.date})
-  .enter()
-  .append("circle")
-  .attr("class", "evts")
-  .attr("r", 2)
-  .attr("cx", function(d){return x(d.date);})
-  .append("title").text(function(d){return FORMAT_DATE_TIME(d.date);});
+	function startDragHandle(d){
+		d3.select(this).raise().classed("active", true);
+	}
 
-  // select an history date
-  slider.selectAll("circle.evts").on("click", function(d){
-    var ptx = +d3.select(this).attr("cx");
-    var date = d.date;
-    slider.selectAll("g.ghandle").attr("transform", "translate(" + ptx +",0)");
-    slider.select("line.sel-range").attr("x1", ptx).attr("x2", ptx);
-    sliderVals = [date, date];
-    _action(date,date);
-  });
+	function dragHandle(d){
+		var ptx = d3.event.x;
+		if (ptx > xMax) {ptx = xMax} else if (ptx < xMin) {ptx = xMin}
+		sliderVals[d] = ptx;
+		var selHandle = d3.select(this);
+		selHandle.attr("transform", function(d) {return "translate("+ ptx +",0)"; });
+		selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part1")}).text(function(d) {return FORMAT_DATE_P1(x.invert(ptx));});
+		selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part2")}).text(function(d) {return FORMAT_DATE_P2(x.invert(ptx));});
+		selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part3")}).text(function(d) {return FORMAT_DATE_P3(x.invert(ptx));});
+		var ptx2=x(sliderVals[d==0?1:0]);
+		selRange.attr("x1", ptx).attr("x2", ptx2)
+	}
 
-  function startDragHandle(d){
-    d3.select(this).raise().classed("active", true);
-  }
+	function endDragHandle(d){
+		var v=Math.round(x.invert(d3.event.x));
+		var elt=d3.select(this);
+		sliderVals[d] = v;
+		var v1=Math.min(sliderVals[0], sliderVals[1]);
+		var v2=Math.max(sliderVals[0], sliderVals[1]);
+		elt.classed("active", false).attr("x", x(v));
+		selRange.attr("x1", x(v1)).attr("x2", x(v2))
+		_action(v1,v2);
+	}
 
-  function dragHandle(d){
-    var ptx = d3.event.x;
-    if (ptx > xMax) {ptx = xMax} else if (ptx < xMin) {ptx = xMin}
-    sliderVals[d] = ptx;
-    var selHandle = d3.select(this);
-    selHandle.attr("transform", function(d) {return "translate("+ ptx +",0)"; });
-    selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part1")}).text(function(d) {return FORMAT_DATE_P1(x.invert(ptx));});
-    selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part2")}).text(function(d) {return FORMAT_DATE_P2(x.invert(ptx));});
-    selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part3")}).text(function(d) {return FORMAT_DATE_P3(x.invert(ptx));});
-    var ptx2=x(sliderVals[d==0?1:0]);
-    selRange.attr("x1", ptx).attr("x2", ptx2)
-  }
+	function startDragRange(){
+		d3.select(this).raise().classed("active", true);
+	}
 
-  function endDragHandle(d){
-    var v=Math.round(x.invert(d3.event.x));
-    var elt=d3.select(this);
-    sliderVals[d] = v;
-    var v1=Math.min(sliderVals[0], sliderVals[1]);
-    var v2=Math.max(sliderVals[0], sliderVals[1]);
-    elt.classed("active", false).attr("x", x(v));
-    selRange.attr("x1", x(v1)).attr("x2", x(v2))
-    _action(v1,v2);
-  }
+	function dragRange(){
+		var dx = +d3.event.dx;
+		var ox1 = +d3.select(this).attr("x1");
+		var ox2 = +d3.select(this).attr("x2");
+		var dx1 = ox1 + dx;
+		var dx2 = ox2 + dx;
+		if(dx1 > xMax){dx1 = xMax} else if (dx1 < xMin){dx1 = xMin}
+		if(dx2 > xMax){dx2 = xMax} else if (dx2 < xMin){dx2 = xMin}
+		d3.select(this).attr("x1", dx1);
+		d3.select(this).attr("x2", dx2);
+		ghandle.attr("transform", function(d,i){return "translate(" + (i==0?dx1:dx2) + ",0)";});
+	}
 
-  function startDragRange(){
-  d3.select(this).raise().classed("active", true);
-  }
-
-  function dragRange(){
-  var dx = +d3.event.dx;
-  var ox1 = +d3.select(this).attr("x1");
-  var ox2 = +d3.select(this).attr("x2");
-  var dx1 = ox1 + dx;
-  var dx2 = ox2 + dx;
-  if(dx1 > xMax){dx1 = xMax} else if (dx1 < xMin){dx1 = xMin}
-  if(dx2 > xMax){dx2 = xMax} else if (dx2 < xMin){dx2 = xMin}
-  d3.select(this).attr("x1", dx1);
-  d3.select(this).attr("x2", dx2);
-  ghandle.attr("transform", function(d,i){return "translate(" + (i==0?dx1:dx2) + ",0)";});
-  }
-
-  function endDragRange(d){
-  var ox1 = +d3.select(this).attr("x1");
-  var ox2 = +d3.select(this).attr("x2");
-  var vx1 = Math.round(x.invert(ox1));
-  var vx2 = Math.round(x.invert(ox2));
-  var elt=d3.select(this);
-  var v1=Math.min(vx1, vx2);
-  var v2=Math.max(vx1, vx2);
-  ghandle.attr("transform", function(d,i){return "translate(" + (i==0?ox1:ox2) + ",0)";});
-  elt.classed("active", false);
-  sliderVals = [v1, v2];
-  _action(v1,v2);
-  }
+	function endDragRange(d){
+		var ox1 = +d3.select(this).attr("x1");
+		var ox2 = +d3.select(this).attr("x2");
+		var vx1 = Math.round(x.invert(ox1));
+		var vx2 = Math.round(x.invert(ox2));
+		var elt=d3.select(this);
+		var v1=Math.min(vx1, vx2);
+		var v2=Math.max(vx1, vx2);
+		ghandle.attr("transform", function(d,i){return "translate(" + (i==0?ox1:ox2) + ",0)";});
+		elt.classed("active", false);
+		sliderVals = [v1, v2];
+		_action(v1,v2);
+	}
 }
 
+// ******************************************************
+// Code Edition (Codemirror.js) for editing amendments
+// ******************************************************
 
-// TEST DMADMA
-// ******************************************************
-// Shema autocomplete hints
-// ******************************************************
+// CodeMirror : Schema autocomplete hints
 var matrix_paths=arrayUnique(DATA.map(a => a.path));
 var matrix_tags=arrayUnique(DATA.map(a => a.info.xsl_element));
 var matrix_attributes= [];
@@ -30759,10 +30758,7 @@ var tags = {
 	},
 };
 
-// ******************************************************
-// callback function from completion
-// ******************************************************
-
+// CodeMirror : callback function from completion
 function completeAfter(cm, pred) {
 	 var cur = cm.getCursor();
 	 if (!pred || pred()) setTimeout(function() {
@@ -30787,6 +30783,8 @@ function completeIfInTag(cm) {
 		 return inner.tagName;
 	 });
 }
+
+// CodeMirror : component config options
 var cm_config = {lineNumbers: true,
 	mode: "xml",
 	matchClosing: true,
@@ -30805,29 +30803,36 @@ var cm_config = {lineNumbers: true,
 		"Ctrl-Space": "autocomplete",
 	},
 	hintOptions: {schemaInfo: tags},
+	styleSelectedText: true,
 	addModeClass: true,
 	tabSize:2,
 	foldGutter: true,
 	gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 };
+
+// CodeMirror : component config options
 if (d3.select("#universe").select("#" + AMEND_CM_EDITZONE_ID).empty()) {
 	var cm_editor = CodeMirror.fromTextArea(document.getElementById(AMEND_EDITZONE_ID), cm_config);
 	d3.select("#" + AMEND_FORM_ID + " >.CodeMirror").attr("id", AMEND_CM_EDITZONE_ID);
 	cm_editor.setSize("290px","10rem");
-	cm_editor.on("change", function(cm){
-		var search_invit = cm_editor.getSearchCursor(AMEND_INSERT_TEXT);
-		var search_placeholder = cm_editor.getSearchCursor(AMEND_INSERT_PLACEHOLDER);
-		while (search_invit.findNext()) {
-			cm_editor.markText(search_invit.from(), search_invit.to(), {className: "sb-cm-insert"});
-		}
-		while (search_placeholder.findNext()) {
-			cm_editor.markText(search_placeholder.from(), search_placeholder.to(), {className: "sb-cm-drop"});
-		}
-		document.getElementById(AMEND_EDITZONE_ID).value = cm.getValue().trim();
-		simulateOnchange(document.getElementById(AMEND_EDITZONE_ID));
-		//console.log(cm.getValue());
-	})
 }
+cm_editor.refresh();
+
+// CodeMirror : Listener to change the amendment value (original textarea) and color test
+cm_editor.on("change", function(cm){
+	var search_invit = cm_editor.getSearchCursor(AMEND_INSERT_TEXT);
+	var search_placeholder = cm_editor.getSearchCursor(AMEND_INSERT_PLACEHOLDER);
+	while (search_invit.findNext()) {
+		cm_editor.markText(search_invit.from(), search_invit.to(), {className: "sb-cm-insert"});
+	}
+	while (search_placeholder.findNext()) {
+		cm_editor.markText(search_placeholder.from(), search_placeholder.to(), {className: "sb-cm-drop"});
+	}
+	document.getElementById(AMEND_EDITZONE_ID).value = cm.getValue().trim();
+	simulateOnchange(document.getElementById(AMEND_EDITZONE_ID));
+})
+
+
 /**
 	* Reinit Amendment zone
 	* @param -
@@ -30835,9 +30840,8 @@ if (d3.select("#universe").select("#" + AMEND_CM_EDITZONE_ID).empty()) {
 	*/
 function initAmendment() {
  cm_editor.setValue(AMEND_REINIT);
+ cm_editor.refresh();
 }
-
-		// END TEST DMADMA
 
 
 /***********************************************************************
@@ -31944,7 +31948,8 @@ function amend(_path, _order, _openTooblox) {
 		search_placeholder.replace(AMEND_TEMPLATE_AUTOCLOSE.replace("$$ID",path).replace("$$ORDER",order));
 	} else {
 		// replace all
-		cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join("") + "\n\n\n\n\n\n\n\n\n\n");
+		cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join(""));
+		cm_editor.refresh();
 	}
 }
 
@@ -32374,7 +32379,6 @@ function amendFromPoint(_pt) {
 	// init and open amend toobox
 	amendFromText(point.datum().path, point.datum().order, true);
 }
-
 
 /**
 	* Switch view from graph to text mode

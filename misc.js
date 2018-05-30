@@ -55,9 +55,9 @@ function ui_wrap_toggle(_elt) {
 /**
 	* Simulate a click event.
 	* @public
-	* @param {Element} elem  the element to simulate a click on
+	* @param {Element} elem  the element to simulate a click
 	*/
-var simulateClick = function (elem) {
+var simulateClick = function (_elem) {
 	// Create our event (with options)
 	var evt = new MouseEvent('click', {
 		bubbles: true,
@@ -65,15 +65,15 @@ var simulateClick = function (elem) {
 		view: window
 	});
 	// If cancelled, don't dispatch our event
-	var canceled = !elem.dispatchEvent(evt);
+	var canceled = !_elem.dispatchEvent(evt);
 };
 
 /**
 	* Simulate a change event.
 	* @public
-	* @param {Element} elem  the element to simulate a click on
+	* @param {Element} elem  the element to simulate a change
 	*/
-var simulateOnchange = function(elem) {
+var simulateOnchange = function(_elem) {
 	// Create our event (with options)
 	var evt = new Event('change', {
 		bubbles: true,
@@ -81,7 +81,24 @@ var simulateOnchange = function(elem) {
 		view: window
 	});
 	// If cancelled, don't dispatch our event
-	var canceled = !elem.dispatchEvent(evt);
+	var canceled = !_elem.dispatchEvent(evt);
+};
+
+/**
+	* Simulate an input event.
+	* @public
+	* @param {Element} elem  the element to simulate an input
+	*/
+var simulateOninput = function(_elem, _text) {
+	// Create our event (with options)
+	var evt = new Event('input', {
+		bubbles: true,
+		cancelable: true,
+		view: window
+	});
+	_elem.value += _text;
+	// If cancelled, don't dispatch our event
+	var canceled = !_elem.dispatchEvent(evt);
 };
 
 /**

@@ -236,7 +236,7 @@
 					<xsl:attribute name="value"><xsl:value-of select="$role"/></xsl:attribute>
 				</input>
 				<label for="{$toolbox_ID}-editzone">Edit Amendment<i class="small">&#160;(glisser un vertex ou un noeud)</i></label>
-				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" rows="13" class="form-control" spellcheck="false" required="required" oninput="validateAmendment('{$toolbox_ID}-editzone')" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
+				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" required="required" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
 				<div id="{$toolbox_ID}-editinfo" class="alert"/>
 				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">&#10003;</button>
 			</form>
