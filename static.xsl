@@ -235,8 +235,8 @@
 				<input id="{$toolbox_ID}-role" name="{$toolbox_ID}-role" type="hidden" required="required">
 					<xsl:attribute name="value"><xsl:value-of select="$role"/></xsl:attribute>
 				</input>
-				<label for="{$toolbox_ID}-editzone">Edit Amendment<i class="small">&#160;(glisser un vertex ou un noeud)</i></label>
-				<textarea id="{$toolbox_ID}-editzone" name="{$toolbox_ID}-editzone" required="required" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
+				<label for="{$toolbox_ID}-editzone">Edit Amendment</label>
+				<textarea id="{$toolbox_ID}-editzone" placeholder= "Enter amendment or drag and drop an arc from the graph or an xml node from text... (F11/Esc for full screen editing)" name="{$toolbox_ID}-editzone" class="form-control" required="required" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
 				<div id="{$toolbox_ID}-editinfo" class="alert"/>
 				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">&#10003;</button>
 			</form>

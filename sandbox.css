@@ -1,6 +1,8 @@
 /* CodeMirror specific to sandbox*/
 .sb-cm-drop { background-color: #ff7; }
-.sb-cm-insert { background-color: #7bff77; }
+.sb-cm-insert { background-color: #7bff77;     color: black;}
+.CodeMirror-fullscreen {font-size: large;}
+.CodeMirror-hints {z-index: 100};
 /*START rewrites/add some classes from default.css*/
 .bhb {font:small; color: #777;}
 .notbhb {color: #007bff;}
@@ -189,7 +191,7 @@ span.braille-sign {
 }
 
 #toolboxes.text {
-	z-index: 500;
+	/*z-index: 500;*/
 	position: fixed;
 	width:99%;
 	top:10px;
@@ -418,8 +420,8 @@ svg#scene {
 
 .toolbox {
 	padding: 5px;
-	z-index:100;
-	opacity:.7;
+	z-index:50;
+	opacity:.8;
 	background-color: white;
 	box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
 }

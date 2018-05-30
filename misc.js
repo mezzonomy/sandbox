@@ -85,23 +85,6 @@ var simulateOnchange = function(_elem) {
 };
 
 /**
-	* Simulate an input event.
-	* @public
-	* @param {Element} elem  the element to simulate an input
-	*/
-var simulateOninput = function(_elem, _text) {
-	// Create our event (with options)
-	var evt = new Event('input', {
-		bubbles: true,
-		cancelable: true,
-		view: window
-	});
-	_elem.value += _text;
-	// If cancelled, don't dispatch our event
-	var canceled = !_elem.dispatchEvent(evt);
-};
-
-/**
 	* Opens a modal window with a close button and title and content
 	* @public
 	* @param {string} _text  text content of the window
