@@ -352,10 +352,24 @@ function validateContent(_xml) {
 		}
 	} catch(e) {return true;}
 
+	// Check for link node without child node
+	var it3 = document.evaluate("//*[local-name()='link'][not(normalize-space(.))][not(node())]",_xml);
+	var linkWithoutChild = false;
+	try {
+		var thisNode = it3.iterateNext();
+		while (thisNode) {
+			linkWithoutChild = true;
+			thisNode = it3.iterateNext();
+		}
+	} catch(e) {return true;}
+
+
+
 	// Return results
-	if (textNodes || (placeholder > 0)) {
+	if (textNodes || (placeholder > 0) || linkWithoutChild) {
 		if (insertHere) text = "Please replace '" + AMEND_INSERT_TEXT + "' by a valid amendment. ";
 		if (placeholder > 0) text += "The node '<_/>' is waiting for a drag/drop of another node. "
+		if (linkWithoutChild) text += "Some links nodes don't have child nodes. "
 		return text;
 	} else {
 		return false;

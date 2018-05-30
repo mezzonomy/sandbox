@@ -31008,11 +31008,12 @@ cm_editor.on("change", function(cm){
 /**
 	* Reinit Amendment zone
 	* @param -
-	* @returns reinit amendment zone
+	* @returns reinit amendment zone and close the toolbox
 	*/
 function initAmendment() {
- cm_editor.setValue(AMEND_REINIT);
- cm_editor.refresh();
+	cm_editor.setValue(AMEND_REINIT);
+	cm_editor.refresh();
+	D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", false).classed("closed", true);
 }
 
 
@@ -32011,6 +32012,7 @@ function textModeInteraction() {
 		editbox_btn_before.on("click", function(d){
 			event.stopPropagation();
 			amendFromText(this.dataset.path,"before");
+			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
 		});
 
 		// after
@@ -32023,6 +32025,7 @@ function textModeInteraction() {
 		editbox_btn_after.on("click", function(d){
 			event.stopPropagation();
 			amendFromText(this.dataset.path,"after");
+			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
 		});
 
 		// append
@@ -32035,6 +32038,7 @@ function textModeInteraction() {
 		editbox_btn_append.on("click", function(d){
 			event.stopPropagation();
 			amendFromText(this.dataset.path,"append");
+			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
 		});
 
 		// push
@@ -32047,6 +32051,7 @@ function textModeInteraction() {
 		editbox_btn_push.on("click", function(d){
 			event.stopPropagation();
 			amendFromText(this.dataset.path, "push");
+			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
 		});
 
 		// select point
@@ -32121,7 +32126,6 @@ function amend(_path, _order, _openTooblox) {
 	} else {
 		// replace all
 		cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join(""));
-		cm_editor.refresh();
 	}
 }
 
@@ -32196,7 +32200,21 @@ function AddButtonsToPerspective(){
 			VERTICES_POSITIONNING.restart();
 		});
 	}
+
+	var btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-color-picker");
+	if (btnColorPicker.empty()) {
+		btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.append("input")
+		.attr("type","color")
+		.attr("id","btn-color-picker")
+		.attr("value","#ff0000")
+		.attr("style","width:100%; border:none; borer-radius:5px; margin-top:5px")
+		.attr("onchange", "changeBkgColor(this.value)");
+	}
 }
+function changeBkgColor(_color) {
+	document.body.style.backgroundColor = _color;
+}
+
 
 /**
 	* To redraw edges when a single Vertex is rotated
