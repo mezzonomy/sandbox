@@ -312,23 +312,62 @@ function alertInit() {
 	d3.select(AMENDMENT_EDITINFO).text(null);
 }
 
-function alertSuccess(txt) {
+function alertSuccess(_message) {
 	d3.select(AMENDMENT_EDITINFO).classed("alert-success", true).classed("alert-danger", false);
 	d3.select(AMENDMENT_VALIDATE).attr("disabled", null);
-	d3.select(AMENDMENT_EDITINFO).text(txt);
+	d3.select(AMENDMENT_EDITINFO).text(_message);
 }
 
-function alertFail(txt) {
+function alertFail(_message) {
 	d3.select(AMENDMENT_EDITINFO).classed("alert-success", false).classed("alert-danger", true);
 	d3.select(AMENDMENT_VALIDATE).attr("disabled", "disabled");
-	d3.select(AMENDMENT_EDITINFO).text(txt);
+	d3.select(AMENDMENT_EDITINFO).text(_message);
 }
 
-function validateXML(text) {
+function validateContent(_xml) {
+
+	// Invalid text Nodes (not compatible with sandbox in this version)
+	var it1 = document.evaluate("//text()",_xml);
+	var textNodes = false;
+	var insertHere = false;
+	var text="Invalid text nodes:";
+	try {
+		var thisNode = it1.iterateNext();
+		while (thisNode) {
+			text += (" " + thisNode.textContent.trim());
+			if (thisNode.textContent.trim() == AMEND_INSERT_TEXT) insertHere = true;
+			if (thisNode.textContent.trim() != "") textNodes = true; // do not alert for space or empty text nodes
+			thisNode = it1.iterateNext();
+		}
+	} catch(e) {return true;}
+
+	// Check for placeholder
+	var it2 = document.evaluate("//_",_xml);
+	var placeholder = 0;
+	try {
+		var thisNode = it2.iterateNext();
+		while (thisNode) {
+			placeholder += 1;
+			thisNode = it2.iterateNext();
+		}
+	} catch(e) {return true;}
+
+	// Return results
+	if (textNodes || (placeholder > 0)) {
+		if (insertHere) text = "Please replace '" + AMEND_INSERT_TEXT + "' by a valid amendment. ";
+		if (placeholder > 0) text += "The node '<_/>' is waiting for a drag/drop of another node. "
+		return text;
+	} else {
+		return false;
+	}
+}
+
+
+function validateXML(_text) {
 	if (document.implementation.createDocument){
 		try {
 			var parser=new DOMParser();
-			var xmlDoc=parser.parseFromString(text,"application/xml");
+			var xmlDoc=parser.parseFromString(_text,"application/xml");
 		} catch(err) {
 			alertFail(err.message);
 		}
@@ -336,7 +375,9 @@ function validateXML(text) {
 			checkErrorXML(xmlDoc.getElementsByTagName("parsererror")[0]);
 			alertFail(xt);
 		} else {
-			alertSuccess("Amendment valid");
+			var message = validateContent(xmlDoc);
+			if (!message) alertSuccess("Amendment valid");
+			if (message) alertFail("XML valid. " + message);
 		}
 	} else {
 		alertFail("Your browser cannot handle XML validation");

@@ -32259,7 +32259,7 @@ function selectVertex(_vertex){
 		.on("end", arcDragEnded));
 		point.on("click", function(d) {
 			d3.event.stopPropagation();
-			console.log("click on point: ", d.point);
+			//console.log("click on point: ", d.point);
 			setBhbPosition(d.point);
 			return false;
 		});
@@ -32360,7 +32360,7 @@ function selectPoint(_ptId, _openToolbox) {
 	document.getElementById(TEXT_TOOLBOX_ID + "-peer").value = pt.peer;
 	var ptbefore = D3_SCENE.selectAll(".point").filter(function(s){return s.next == pt.point;}).datum();
 	document.getElementById(TEXT_TOOLBOX_ID + "-before").value = ptbefore.point;
-	console.log("Click on point: ", pt, "value: ", text_readInfo(pt))
+	//console.log("Click on point: ", pt, "value: ", text_readInfo(pt))
 	text_nav(pt);
 	// reinit prevously selected point
 	var pointsViewed = D3_SCENE.selectAll(".viewed").classed("viewed",false);
