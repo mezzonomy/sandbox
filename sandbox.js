@@ -30614,7 +30614,6 @@ const POINT_RADIUS = +0,
 			AMEND_CM_EDITZONE_ID = "cm-" + AMEND_EDITZONE_ID,
 			AMEND_FORM_ID = "amendment-valid-form",
 			AMEND_INSERT_PLACEHOLDER="<_/>",
-			AMEND_REINIT = "\n\n\n\n\n\n\n\n\n\n\n\n\n",
 			AMEND_INSERT_TEXT="INSERT XML HERE",
 			AMEND_TEMPLATE = "<bhb:link $$ORDER='$$ID'>\n\t$$TAB" + AMEND_INSERT_TEXT + "\n$$TAB</bhb:link>",
 			AMEND_TEMPLATE_AUTOCLOSE = "<bhb:link $$ORDER='$$ID'/>",
@@ -30960,7 +30959,7 @@ var cm_config = {lineNumbers: true,
 		"F11": function(cm) {
 			if (!cm.getOption("fullScreen")) {
 				cm.setOption("fullScreen", true);
-				cm.setOption("theme", "material")
+				cm.setOption("theme", "material");
 			} else {
 				cm.setOption("fullScreen", false);
 				cm.setOption("theme","default");
@@ -31004,16 +31003,33 @@ cm_editor.on("change", function(cm){
 	simulateOnchange(document.getElementById(AMEND_EDITZONE_ID));
 })
 
-
 /**
 	* Reinit Amendment zone
 	* @param -
 	* @returns reinit amendment zone and close the toolbox
 	*/
-function initAmendment() {
-	cm_editor.setValue(AMEND_REINIT);
-	cm_editor.refresh();
-	D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", false).classed("closed", true);
+function cmSetTextSelected(_cm, _text) {
+	var search_cursor = _cm.getSearchCursor(_text);
+	if (search_cursor.findNext()) {
+		_cm.setSelection(search_cursor.from(), search_cursor.to());
+		_cm.focus();
+	}
+}
+
+function cmAddDropPlaceholder(_cm) {
+	//if (!_cm.hasFocus()) return // only if the editor has focus
+	_cm.replaceRange(AMEND_INSERT_PLACEHOLDER, _cm.getCursor());
+}
+
+/**
+	* Reinit Amendment zone
+	* @param {_cm} cm editor instance variable
+	* @param {_closeTlbox} boolean Optional, close amendment toolbox. Defaults to false
+	* @returns reinit amendment zone and close the toolbox (at least called on form submit)
+	*/
+function initAmendment(_cm, _closeTlbox) {
+	_cm.setValue("");
+	if (_closeTlbox) D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", false).classed("closed", true);
 }
 
 
@@ -32120,7 +32136,7 @@ function amendFromText(_path, _order) {
 function amend(_path, _order, _openTooblox) {
 	_openTooblox = _openTooblox || true;
 	// initiate amend the tooblox
-	alertInit();
+	amendmentAlertInit();
 	if (_openTooblox) {
 		if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
 			D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
@@ -32140,6 +32156,8 @@ function amend(_path, _order, _openTooblox) {
 		// replace all
 		cm_editor.setValue(AMEND_TEMPLATE.replace("$$ID",path).replace("$$ORDER",order).split("$$TAB").join(""));
 	}
+	cmSetTextSelected(cm_editor, AMEND_INSERT_TEXT);
+	cm_editor.focus()
 }
 
  /**

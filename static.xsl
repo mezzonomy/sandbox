@@ -224,7 +224,7 @@
 			<p><xsl:value-of select="$toolbox_LBL"/><i class="small">&#160;as&#160;<xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</i></p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
-			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0); initAmendment();">
+			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0); initAmendment(cm_editor, true);">
 				<on:submit create="bhb:block">
 					<on:attribute name="body" script="_get('{$toolbox_ID}-editzone').value.replace(/\u0022/g, String.fromCharCode(39))"/> <!--replaces " by ' :-)-->
 					<bhb:copy-of select="bhb:parse(@body)"/>
@@ -235,10 +235,17 @@
 				<input id="{$toolbox_ID}-role" name="{$toolbox_ID}-role" type="hidden" required="required">
 					<xsl:attribute name="value"><xsl:value-of select="$role"/></xsl:attribute>
 				</input>
-				<label for="{$toolbox_ID}-editzone">Edit Amendment</label>
+				<label for="{$toolbox_ID}-editzone">
+					Edit Amendment
+					<xsl:text>    </xsl:text>
+					<button type="button" style="padding: 0; margin: 0; background: none; vertical-align: unset;" onclick="cm_editor.setOption('fullScreen', true); cm_editor.setOption('theme', 'material')">
+						<span>&#8599;</span>
+					</button></label>
 				<textarea id="{$toolbox_ID}-editzone" placeholder= "Enter amendment or drag and drop an arc from the graph or an xml node from text... (F11/Esc for full screen editing)" name="{$toolbox_ID}-editzone" class="form-control" required="required" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
 				<div id="{$toolbox_ID}-editinfo" class="alert"/>
 				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">&#10003;</button>
+				<button type="button" title="Add drop placeholder here (current cursor position)" class="btn btn-secondary right" onclick="cmAddDropPlaceholder(cm_editor);">_</button>
+				<button type="button" title="Clear amendment" class="btn btn-secondary right" onclick="initAmendment(cm_editor, false);">&#x000D7;</button>
 			</form>
 		</div>
 	</div>
@@ -486,7 +493,7 @@
 		</xsl:attribute>
 		<xsl:attribute name="data-identity">
 			<xsl:value-of select="@bhb:identity"/>
-		</xsl:attribute>		
+		</xsl:attribute>
 		<xsl:value-of select="name(.)"/>
 	</span>
 </xsl:template>

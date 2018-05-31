@@ -137,7 +137,10 @@ function removeModal() {
 	*/
 function validateAmendment(txt) {
 	var text = document.getElementById(txt).value.trim();
-	if (text == "") {return;} // if the text is empty then no validation
+	if (text == "") { // if the text is empty then no validation
+		amendmentAlertInit();
+		return;
+	}
 	var initTxt = "";
 	if (!text.startsWith('<?xml')) {
 		initTxt += '<?xml version="1.0" encoding="UTF-8"?>';
@@ -306,26 +309,25 @@ var xt="", h3OK=1;
 var AMENDMENT_EDITINFO = document.getElementById("amendment-editinfo");
 var AMENDMENT_VALIDATE = document.getElementById("amendment-validbtn");
 
-function alertInit() {
+function amendmentAlertInit() {
 	d3.select(AMENDMENT_EDITINFO).classed("alert-success", false).classed("alert-danger", false);
 	d3.select(AMENDMENT_VALIDATE).attr("disabled", "disabled");
 	d3.select(AMENDMENT_EDITINFO).text(null);
 }
 
-function alertSuccess(_message) {
+function amendmentAlertSuccess(_message) {
 	d3.select(AMENDMENT_EDITINFO).classed("alert-success", true).classed("alert-danger", false);
 	d3.select(AMENDMENT_VALIDATE).attr("disabled", null);
 	d3.select(AMENDMENT_EDITINFO).text(_message);
 }
 
-function alertFail(_message) {
+function amendmentAlertFail(_message) {
 	d3.select(AMENDMENT_EDITINFO).classed("alert-success", false).classed("alert-danger", true);
 	d3.select(AMENDMENT_VALIDATE).attr("disabled", "disabled");
 	d3.select(AMENDMENT_EDITINFO).text(_message);
 }
 
-function validateContent(_xml) {
-
+function amendmentValidateContent(_xml) {
 	// Invalid text Nodes (not compatible with sandbox in this version)
 	var it1 = document.evaluate("//text()",_xml);
 	var textNodes = false;
@@ -381,18 +383,18 @@ function validateXML(_text) {
 			var parser=new DOMParser();
 			var xmlDoc=parser.parseFromString(_text,"application/xml");
 		} catch(err) {
-			alertFail(err.message);
+			amendmentAlertFail(err.message);
 		}
 		if (xmlDoc.getElementsByTagName("parsererror").length>0) {
 			checkErrorXML(xmlDoc.getElementsByTagName("parsererror")[0]);
-			alertFail(xt);
+			amendmentAlertFail(xt);
 		} else {
-			var message = validateContent(xmlDoc);
-			if (!message) alertSuccess("Amendment valid");
-			if (message) alertFail("XML valid. " + message);
+			var message = amendmentValidateContent(xmlDoc);
+			if (!message) amendmentAlertSuccess("Amendment valid");
+			if (message) amendmentAlertFail("XML valid. " + message);
 		}
 	} else {
-		alertFail("Your browser cannot handle XML validation");
+		amendmentAlertFail("Your browser cannot handle XML validation");
 	}
 }
 
