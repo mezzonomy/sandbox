@@ -355,15 +355,13 @@ function validateContent(_xml) {
 	// Check for link node without child node
 	var it3 = document.evaluate("//*[local-name()='link'][not(normalize-space(.))][not(node())]",_xml);
 	var linkWithoutChild = false;
-	try {
+	/*try {
 		var thisNode = it3.iterateNext();
 		while (thisNode) {
 			linkWithoutChild = true;
 			thisNode = it3.iterateNext();
 		}
-	} catch(e) {return true;}
-
-
+	} catch(e) {return true;}*/
 
 	// Return results
 	if (textNodes || (placeholder > 0) || linkWithoutChild) {

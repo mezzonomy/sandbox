@@ -31409,7 +31409,7 @@ function render(_data, _diff){
 		} else {
 			return d.source.info.xsl_element;
 		}
-		});
+	});
 
 	var edgeLbl =  container.selectAll(".edgeLbl");
 
@@ -31754,7 +31754,10 @@ function tagDraggedStarted(d) {
 }
 
 function tagDragged(d) {
-	d3.select(this).style("position","absolute").style("display","block").style("top", d3.event.y).style("left", d3.event.x);
+	d3.select(this).style("position","fixed")
+	.style("display","block")
+	.style("left", event.clientX +"px")
+	.style("top", event.clientY +"px");
 	if (d3.event.sourceEvent.path.find(function(s){return s.id == AMEND_CM_EDITZONE_ID;})) {
 		D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("zoom11", true);
 	} else {
@@ -31928,24 +31931,24 @@ function createMarkers(_defs) {
 	_defs.append("marker")
 		.attr("id", "marker-start-position")
 		.attr("class", "marker-std")
-		.attr("markerWidth", "30")
-		.attr("markerHeight", "30")
-		.attr("refX", "10")
-		.attr("refY", "15")
+		.attr("markerWidth", "15")
+		.attr("markerHeight", "20")
+		.attr("refX", "7.5")
+		.attr("refY", "10")
 		.attr("orient", "auto")
 		.append("path")
-		.attr("d", "M25 25 L5 15 L25 5 M5 15 L10 15")
-		.attr("class","marker-std");
+		.attr("d", "M10 15 L1.5 10 L10 5 M1.5 10 L7.5 10")
+		.attr("class","marker-std")
 	_defs.append("marker")
 		.attr("id", "marker-end-position")
 		.attr("class", "marker-std")
-		.attr("markerWidth", "30")
-		.attr("markerHeight", "30")
-		.attr("refX", "20")
-		.attr("refY", "15")
+		.attr("markerWidth", "15")
+		.attr("markerHeight", "20")
+		.attr("refX", "3.5")
+		.attr("refY", "10")
 		.attr("orient", "auto")
 		.append("path")
-		.attr("d", "M5 25 L25 15 L5 5 M25 15 L20 15")
+		.attr("d", "M1.5 15 L10 10 L1.5 5 M10 10 L3.5 10")
 		.attr("class","marker-std");
 
 	//Duplicate for bhbLinks
@@ -31972,6 +31975,11 @@ function textModeInteraction() {
 		.on("drag", tagDragged)
 		.on("end", tagDraggedEnded)
 	);
+	/*D3_UNIVERSE.selectAll(".dragxmlelement")
+	.on("click", function(d) {
+		event.stopPropagation();
+		setBhbPosition("T_" + this.dataset.identity);
+	});*/
 
 	// reinit icons
 	D3_UNIVERSE.selectAll(".icon-edit").remove();
@@ -31996,11 +32004,11 @@ function textModeInteraction() {
 		var point = this.parentElement.dataset;
 		var editBox = d3.select(this.parentElement).insert("nav",":nth-child(2)");
 		editBox.attr("class","navbar-text-node");
-		var editbox_btn_before = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("before");
-		var editbox_btn_after = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("after");
-		var editbox_btn_push = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("push");
-		var editbox_btn_append = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-primary").text("append");
-		var editbox_btn_select = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.on_id).attr("class","btn btn-secondary").text("select");
+		var editbox_btn_before = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary").text("before");
+		var editbox_btn_after = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary").text("after");
+		var editbox_btn_push = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary").text("push");
+		var editbox_btn_append = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary").text("append");
+		var editbox_btn_select = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-secondary").text("select");
 		// listeners to create interactions on each button
 		// before
 		editbox_btn_before.on("mouseover", function(){
@@ -32013,6 +32021,7 @@ function textModeInteraction() {
 			event.stopPropagation();
 			amendFromText(this.dataset.path,"before");
 			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
+			hideAmendPlaceholders();
 		});
 
 		// after
@@ -32026,6 +32035,7 @@ function textModeInteraction() {
 			event.stopPropagation();
 			amendFromText(this.dataset.path,"after");
 			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
+			hideAmendPlaceholders();
 		});
 
 		// append
@@ -32039,6 +32049,7 @@ function textModeInteraction() {
 			event.stopPropagation();
 			amendFromText(this.dataset.path,"append");
 			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
+			hideAmendPlaceholders();
 		});
 
 		// push
@@ -32052,13 +32063,15 @@ function textModeInteraction() {
 			event.stopPropagation();
 			amendFromText(this.dataset.path, "push");
 			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
+			hideAmendPlaceholders();
 		});
 
 		// select point
 		editbox_btn_select.on("click", function(d){
 			event.stopPropagation();
-			setBhbPosition("T_" + this.dataset.identity);
 			D3_UNIVERSE.selectAll(".navbar-text-node").remove();
+			hideAmendPlaceholders();
+			setBhbPosition("T_" + this.dataset.identity);
 		});
 	});
 }
@@ -32208,11 +32221,10 @@ function AddButtonsToPerspective(){
 		.attr("id","btn-color-picker")
 		.attr("value","#ff0000")
 		.attr("style","width:100%; border:none; borer-radius:5px; margin-top:5px")
-		.attr("onchange", "changeBkgColor(this.value)");
+		.on("change", function () {
+			document.body.style.backgroundColor = this.value;
+		});
 	}
-}
-function changeBkgColor(_color) {
-	document.body.style.backgroundColor = _color;
 }
 
 
