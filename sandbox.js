@@ -30700,7 +30700,8 @@ function init_timeRangeSlider() {
 	*/
 function updateDates(_from, _to){
 	var from= new Date(_from);
-	var to=new Date(_to);	 document.getElementById("explorer-bhb-from").value=FORMAT_DATE_BHB(from);
+	var to=new Date(_to);
+	document.getElementById("explorer-bhb-from").value=FORMAT_DATE_BHB(from);
 	document.getElementById("explorer-bhb-to").value=FORMAT_DATE_BHB(to);
 	var fromQuery = document.getElementById("explorer-bhb-from").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(from));
 	var toQuery = document.getElementById("explorer-bhb-to").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(to));
@@ -31325,11 +31326,11 @@ function render(_data, _diff){
 	.attr("id", function(d) {return "hyperbolic_" + d.point;})
 	.attr("d", function(d){return drawHyperbolic(pointsById.get(d.point), pointsById.get(d.peer)).path;})
 	.on("mouseover", function(d){
-			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", true);
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagraw}).classed("selected", true);
 			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", true);
 		})
 		.on("mouseout", function(d){
-			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagnet}).classed("selected", false);
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagraw}).classed("selected", false);
 			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", false);
 		})
 	;
