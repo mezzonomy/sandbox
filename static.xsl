@@ -224,7 +224,7 @@
 			<p><xsl:value-of select="$toolbox_LBL"/><i class="small">&#160;as&#160;<xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</i></p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
-			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0); initAmendment(cm_editor, true);">
+			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0); initAmendment(cm_editor, true); updateToDateIfSet();">
 				<on:submit create="bhb:block">
 					<on:attribute name="body" script="_get('{$toolbox_ID}-editzone').value.replace(/\u0022/g, String.fromCharCode(39))"/> <!--replaces " by ' :-)-->
 					<bhb:copy-of select="bhb:parse(@body)"/>

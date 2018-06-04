@@ -30694,22 +30694,43 @@ function init_timeRangeSlider() {
 
 /**
 	* Function to update the explorer toolbox from a time range slider
-	* @param _from {string}  from date format
-	* @param _to {string}  to date format
-	* @returns {nothing} updates bhb
+	* @param _from {string}  optional "from" valid date format or date object
+	* @param _to {string}  optional "to" valid date format or date object
+	* @returns {nothing} updates bhb view, only if 'from' or 'to' date as changed
 	*/
 function updateDates(_from, _to){
-	var from= new Date(_from);
-	var to=new Date(_to);
-	document.getElementById("explorer-bhb-from").value=FORMAT_DATE_BHB(from);
-	document.getElementById("explorer-bhb-to").value=FORMAT_DATE_BHB(to);
-	var fromQuery = document.getElementById("explorer-bhb-from").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(from));
-	var toQuery = document.getElementById("explorer-bhb-to").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(to));
-	console.log(fromQuery);
-	console.log(toQuery);
-	eval(fromQuery);
-	eval(toQuery);
+	_from = _from || "";
+	_to = _to || "";
+	var from, to;
+	(_from instanceof Date)? from = _from : from = new Date(_from);
+	(_to instanceof Date)? to= _to : to = new Date(_to);
+	if (from instanceof Date && !isNaN(from.valueOf())) {
+		if (document.getElementById("explorer-bhb-from").dataset.bhbdate != FORMAT_DATE_BHB(from)) {
+			var fromQuery = document.getElementById("explorer-bhb-from").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(from));
+			eval(fromQuery);
+			console.log ("From:", FORMAT_DATE_TIME(_from));
+		}
+	}
+	if (to instanceof Date && !isNaN(to.valueOf())) {
+		if (document.getElementById("explorer-bhb-to").dataset.bhbdate != FORMAT_DATE_BHB(to) || document.getElementById("explorer-bhb-to").dataset.bhbdate != "") {
+			var toQuery = document.getElementById("explorer-bhb-to").dataset.bhbquery.replace("$$DATE",FORMAT_DATE_BHB(to));
+			eval(toQuery);
+			console.log ("To:", FORMAT_DATE_TIME(_to));
+		}
+	}
 }
+
+/**
+	* Function to update the "To" date only in case it was previoulsy setted in the session
+	* for example in case of amendment when exploring time : so the amendment will be seen even if a "to" date as been setted
+	* @param - none (the new date is now + 1 min)
+	* @returns {nothing} updates bhb, only if from or to date as changed
+	*/
+function updateToDateIfSet() {
+	if (document.getElementById("explorer-bhb-to").dataset.bhbdate == "") return;
+	updateDates("", Date.now() + 5*60000);
+}
+
 
 /**
 	* Function to setup a dual range slider
@@ -30812,7 +30833,7 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
 	.enter()
 	.append("circle")
 	.attr("class", "evts")
-	.attr("r", 2)
+	.attr("r", 4)
 	.attr("cx", function(d){return x(d.date);})
 	.append("title").text(function(d){return FORMAT_DATE_TIME(d.date);});
 
@@ -31585,7 +31606,7 @@ function render(_data, _diff){
 	*/
 function vertexComputation(QApointsList){
 	// Logging QApointsList to console TODO: remove
-	console.log("Render ", QApointsList.length, " points. Details: ", QApointsList);
+	// console.log("Render ", QApointsList.length, " points. Details: ", QApointsList);
 	// Vertices computation from the entering QA points list
 	// sr stands for (S)egment (R)econstruction
 	var sr=[];
@@ -31670,7 +31691,7 @@ function vertexComputation(QApointsList){
 	}
 
 	// logs TODO: remove
-	console.log("Vertices reconstruction in ", (j + 1), " iterations: ", sr);
+	console.log("Render", QApointsList.length , "points. Vertices reconstruction in", (j + 1), "iterations");
 	return sr;
 }
 
