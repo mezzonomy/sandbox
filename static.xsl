@@ -317,11 +317,13 @@
 			<xsl:text>e unwraped </xsl:text>
 			<xsl:value-of select="$nodeName"/>
 		</xsl:attribute>
-		<NAV class="placeholder_amend_hidden before" data-path="{@on:id}" data-identity="{@bhb:identity}">
-			<xsl:call-template name="entity-ref">
-				<xsl:with-param name="name">#10565</xsl:with-param>
-			</xsl:call-template>
-		</NAV>
+		<xsl:if test="@on:id">
+			<NAV class="placeholder_amend_hidden before" data-path="{@on:id}" data-identity="{@bhb:identity}">
+				<xsl:call-template name="entity-ref">
+					<xsl:with-param name="name">#10565</xsl:with-param>
+				</xsl:call-template>
+			</NAV>
+		</xsl:if>
 		<DIV class="INDENT">
 			<SPAN class="m">
 				<xsl:call-template name="entity-ref">
@@ -339,11 +341,13 @@
 			<SPAN class="m">
 				<xsl:text>&gt;</xsl:text>
 			</SPAN>
-			<NAV class="placeholder_amend_hidden push append" data-path="{@on:id}" data-identity="{@bhb:identity}">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#10565</xsl:with-param>
-				</xsl:call-template>
-			</NAV>
+			<xsl:if test="@on:id">
+				<NAV class="placeholder_amend_hidden push append" data-path="{@on:id}" data-identity="{@bhb:identity}">
+					<xsl:call-template name="entity-ref">
+						<xsl:with-param name="name">#10565</xsl:with-param>
+					</xsl:call-template>
+				</NAV>
+			</xsl:if>
 			<SPAN class="m endtag">
 				<xsl:call-template name="entity-ref">
 					<xsl:with-param name="name">#60</xsl:with-param>
@@ -356,11 +360,13 @@
 				<xsl:text>></xsl:text>
 			</SPAN>
 		</DIV>
-		<NAV class="placeholder_amend_hidden after" data-path="{@on:id}" data-identity="{@bhb:identity}">
-			<xsl:call-template name="entity-ref">
-				<xsl:with-param name="name">#10565</xsl:with-param>
-			</xsl:call-template>
-		</NAV>
+		<xsl:if test="@on:id">
+			<NAV class="placeholder_amend_hidden after" data-path="{@on:id}" data-identity="{@bhb:identity}">
+				<xsl:call-template name="entity-ref">
+					<xsl:with-param name="name">#10565</xsl:with-param>
+				</xsl:call-template>
+			</NAV>
+		</xsl:if>
 	</DIV>
 </xsl:template>
 
@@ -408,11 +414,13 @@
 			<xsl:text>e unwraped </xsl:text>
 			<xsl:value-of select="$nodeName"/>
 		</xsl:attribute>
-		<NAV class="placeholder_amend_hidden before" data-path="{@on:id}" data-identity="{@bhb:identity}">
-			<xsl:call-template name="entity-ref">
-				<xsl:with-param name="name">#10565</xsl:with-param>
-			</xsl:call-template>
-		</NAV>
+		<xsl:if test="@on:id">
+			<NAV class="placeholder_amend_hidden before" data-path="{@on:id}" data-identity="{@bhb:identity}">
+				<xsl:call-template name="entity-ref">
+					<xsl:with-param name="name">#10565</xsl:with-param>
+				</xsl:call-template>
+			</NAV>
+		</xsl:if>
 		<DIV class="c">
 			<SPAN class="m">
 				<xsl:call-template name="entity-ref">
@@ -432,17 +440,21 @@
 			</SPAN>
 		</DIV>
 		<DIV>
-			<NAV class="placeholder_amend_hidden push" data-path="{@on:id}" data-identity="{@bhb:identity}">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#10565</xsl:with-param>
-				</xsl:call-template>
-			</NAV>
+			<xsl:if test="@on:id">
+				<NAV class="placeholder_amend_hidden push" data-path="{@on:id}" data-identity="{@bhb:identity}">
+					<xsl:call-template name="entity-ref">
+						<xsl:with-param name="name">#10565</xsl:with-param>
+					</xsl:call-template>
+				</NAV>
+			</xsl:if>
 			<xsl:apply-templates mode="xsl:default"/>
-			<NAV class="placeholder_amend_hidden append" data-path="{@on:id}" data-identity="{@bhb:identity}">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#10565</xsl:with-param>
-				</xsl:call-template>
-			</NAV>
+			<xsl:if test="@on:id">
+				<NAV class="placeholder_amend_hidden append" data-path="{@on:id}" data-identity="{@bhb:identity}">
+					<xsl:call-template name="entity-ref">
+						<xsl:with-param name="name">#10565</xsl:with-param>
+					</xsl:call-template>
+				</NAV>
+			</xsl:if>
 			<DIV class="endtag">
 				<SPAN class="m">
 					<xsl:call-template name="entity-ref">
@@ -456,11 +468,13 @@
 					<xsl:text>></xsl:text>
 				</SPAN>
 			</DIV>
-			<NAV class="placeholder_amend_hidden after" data-path="{@on:id}" data-identity="{@bhb:identity}">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#10565</xsl:with-param>
-				</xsl:call-template>
-			</NAV>
+			<xsl:if test="@on:id">
+				<NAV class="placeholder_amend_hidden after" data-path="{@on:id}" data-identity="{@bhb:identity}">
+					<xsl:call-template name="entity-ref">
+						<xsl:with-param name="name">#10565</xsl:with-param>
+					</xsl:call-template>
+				</NAV>
+			</xsl:if>
 		</DIV>
 	</DIV>
 </xsl:template>

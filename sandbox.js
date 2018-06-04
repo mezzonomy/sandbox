@@ -32001,7 +32001,8 @@ function textModeInteraction() {
 	D3_UNIVERSE.selectAll(".icon-edit").remove();
 	D3_UNIVERSE.selectAll(".endtag").classed("entagpadding",false);
 	// create edit icons
-	var xmlNode = D3_UNIVERSE.selectAll("div.e");
+
+	var xmlNode = D3_UNIVERSE.selectAll("div.e:not([data-path=''])");
 	var editIcons = xmlNode.insert("img", ":first-child")
 	.attr("src","/sandbox/edit.svg")
 	.attr("class", "icon-edit");
