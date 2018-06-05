@@ -1,17 +1,29 @@
 <?xml version='1.0' encoding='utf-8'?>
 <?NDA (c) 2014-2017, sarl mezzònomy
+
+	Only the following societies are granted by sarl mezzonomy
+	to read and modify this piece of code, engineer part of
+	the HYPER software :
+
+	 - SYNTYS
+
+	By detaining a copy of this file on their disks, these
+	societies accepts the following term : do not disclose
+	the content to this file to any third parties.
+
+	This agreement has no limit in time.
+
 	If you discover this file on a disk of a society not listed
 	in the above list, this detention could be prosecuted as
 	violation of the intellectuel property of sarl mezzonomy.
 
 	Please delete it.
 ?>
-<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	   P R E L U D E
-     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 
-<!--| xmlns:*       : namespace déclaration
-  -->
+
+<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+		P R E L U D E
+		= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 
 <xsl:stylesheet         version = "1.0"
 	xmlns:sandbox="bhb://the.sandbox"
@@ -20,18 +32,170 @@
     xmlns:on  = "bhb://sourced.events"
 >
 
-<!--| defaultss.xsl : dom default output for engineers
-  -->
+<xsl:import href="../hyper/defaultss.xsl"/>
+<xsl:import href="../hyper/structure-modal.xsl"/>
 
-<xsl:import href="bootstrap.xsl"/>
+<xsl:import href="sandbox-defaultss.xsl"/>
+
 <!--| situation     : url
     | perspective   : dom
   -->
 <xsl:variable name="perspective" select="bhb:perspective($situation)"/>
 
+
 <!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	   S T A T I C
-     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
+		S T A T U T S'
+		= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
+
+<xsl:template match="/bhb:structure">
+	<bhb:protocol>
+		<on:body  method="filter-body" select="." />
+		<on:block method="emit_paraph" filter="not(@bhb:sign)"
+			select="//bhb:display[ @user=bhb:signatures()]"/>
+		<on:block method="drop" filter="@bhb:sign and not(@bhb:hook)"
+			 update="break"/>
+		<on:block method="freeze" filter="@bhb:sign and @bhb:hook"/>
+		<on:promote method="emit_paraph" filter="not(@bhb:sign)"
+			select="//bhb:display[ @user=bhb:signatures()]"/>
+	</bhb:protocol>
+</xsl:template>
+
+<xsl:template match="/sandbox:map">
+	<xsl:variable name="position" select="//*[ @matricule = $perspective/@username]"/>
+	<xsl:variable name="default-position">
+		<xsl:apply-templates select="*[1]" mode="bottom-alpha"/>
+	</xsl:variable>
+	<xsl:variable name="mode" select="bhb:default($perspective/@bhb:mode, 'graph')"/>
+	<html>
+		<head>
+			<title>
+				<xsl:text>Sandbox&#160;[</xsl:text>
+				<xsl:value-of select="$perspective/@username"/>
+				<xsl:text>]</xsl:text>
+			</title>
+			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+			<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8"/>
+			<link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,700&amp;subset=latin-ext" rel="stylesheet"/>
+			<script src="sandbox/sandbox-misc.js" type="text/javascript"></script>
+			<script src="sandbox/sandbox.js" type="text/javascript" defer="defer"></script>
+		</head>
+		<body>
+			<div id="loader" style="z-index: 1072; overflow-x: hidden; overflow-y: auto; position: fixed;top: 0; right: 0; bottom: 0; left: 0; display: block; background-color: rgb(0,0,0); background-color: rgba(33,33,33,.6);"/>
+			<div id="universe" data-bhbmode="{$mode}" data-bhbposition="{bhb:default($perspective/@bhb:position, $default-position)}">
+				<nav id="toolboxes" class="{$mode}">
+					<xsl:call-template name="explorer"><xsl:with-param name="mode" select="$mode"/></xsl:call-template>
+					<xsl:call-template name="perspective"><xsl:with-param name="mode" select="$mode"/></xsl:call-template>
+					<xsl:call-template name="amendment"><xsl:with-param name="role" select="'admin'"/><xsl:with-param name="mode" select="$mode"/></xsl:call-template>
+					<xsl:call-template name="text"><xsl:with-param name="mode" select="$mode"/></xsl:call-template>
+				</nav>
+				<div id="workspace" class="{$mode}">
+					<xsl:call-template name="workspace">
+						<xsl:with-param name="mode" select="$mode"/>
+					</xsl:call-template>
+				</div>
+			</div>
+		</body>
+	</html>
+</xsl:template>
+
+<!-- Workspaces layout-->
+<xsl:template name="workspace">
+	<xsl:param name="mode"/>
+	<xsl:choose>
+		 <xsl:when test="$mode = 'graph'">
+			 <xsl:call-template name="bhbgraph"/>
+		 </xsl:when>
+		 <xsl:when test="$mode = 'text'">
+			 <xsl:call-template name="bhbtext"/>
+		 </xsl:when>
+	</xsl:choose>
+</xsl:template>
+
+<xsl:template name="mini_workspace">
+	<xsl:param name="mode"/>
+	<xsl:choose>
+		 <xsl:when test="$mode = 'text'">
+			 <xsl:call-template name="bhbgraph"/>
+		 </xsl:when>
+		 <xsl:when test="$mode = 'graph'">
+			 <xsl:call-template name="bhbtext"/>
+		 </xsl:when>
+	 </xsl:choose>
+</xsl:template>
+
+<!-- Text -->
+<xsl:template name="bhbtext">
+	<div id="bhb-text">
+			 <xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
+	</div>
+</xsl:template>
+
+<!-- Graph (point matrix) & fire render js UI (default render)-->
+<xsl:template name="bhbgraph">
+		<xsl:variable name="js">
+			<xsl:apply-templates mode="spheric"/>
+		</xsl:variable>
+		<xsl:processing-instruction name="js-diff-matrix">
+			<xsl:text>DATA=[</xsl:text>
+			<xsl:value-of select="normalize-space($js)"/>
+			<xsl:text>];</xsl:text>
+		</xsl:processing-instruction>
+		<xsl:processing-instruction name="js-draw-matrix">
+			<xsl:text>DATA=[</xsl:text>
+			<xsl:value-of select="normalize-space($js)"/>
+			<xsl:text>];</xsl:text>
+			<!-- this postlude should be embedded in global prelude -->
+			<xsl:text>
+				function wait4loader() {
+				    if (typeof initLoader != 'undefined') {
+				        initLoader();
+				    }
+				    else {
+				        setTimeout(wait4loader, 50);
+				    }
+				}
+				function wait4render() {
+				    if (typeof d3 != 'undefined' &amp;&amp; typeof CodeMirror != 'undefined' &amp;&amp; typeof render != 'undefined') {
+							closeLoader();
+							render(DATA, js_diff_matrix);
+				    }
+				    else {
+				        setTimeout(wait4render, 1000);
+				    }
+				}
+				wait4loader();
+				wait4render();
+			 </xsl:text>
+		</xsl:processing-instruction>
+</xsl:template>
+
+<xsl:template match="*" mode="info">
+	<xsl:param name="spheric">0</xsl:param>
+	<xsl:param name="point"/>
+	<xsl:param name="path"/>
+	<xsl:param name="order"/>
+	<xsl:param name="next"/>
+	<xsl:param name="peer"/>
+{"point":"<xsl:value-of select="$point"/>",
+"path":"<xsl:value-of select="$path"/>",
+"order":"<xsl:value-of select="$order"/>",
+"next":"<xsl:value-of select="$next"/>",
+"peer":"<xsl:value-of select="$peer"/>",
+"info":{"xsl_element": "<xsl:value-of select="name()"/>",
+	<xsl:if test="$spheric='1'">"bhb_spheric": "1",</xsl:if>
+	<xsl:apply-templates select="@*" mode="info"/>
+	},},
+</xsl:template>
+
+<xsl:template match="@*" mode="info">
+	"<xsl:value-of select="translate(name(),':','_')"/>": "<xsl:value-of select="."/>",
+</xsl:template>
+
+
+<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+		T O O L B O X E S
+		= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
 
 <xsl:template match="xsl:warning" mode="xsl:default">
 		<xsl:text>Please select a point</xsl:text>
@@ -185,7 +349,7 @@
 					data-bhbquery="{bhb:query(.,'$$DATE')}"
 					data-bhbdate="{$perspective/@*[ name()=$key]}"/>
 			</xsl:for-each>
-			<ol style="font-size:6pt"><!--style="display:none"-->
+			<ol style="font-size:6pt; display:none;">
 				<xsl:for-each select="bhb:key('{bhb://the.hypertext.blockchain}from')/@key">
 					<xsl:for-each select="$perspective/bhb:solid/bhb:signet">
 						<xsl:apply-templates select="bhb:block(@id)" mode="history-ol">
@@ -307,290 +471,4 @@
 	</div>
 </xsl:template>
 
-<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	   Rewrites defaultss.xsl templates for sandbox and add new ones
-     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
-<xsl:template match="*" mode="xsl:default">
-	<xsl:variable name="nodeName" select="local-name(.)"/>
-	<DIV data-elt="{$nodeName}" data-path="{@on:id}" data-identity="{@bhb:identity}">
-		<xsl:attribute name="class">
-			<xsl:text>e unwraped </xsl:text>
-			<xsl:value-of select="$nodeName"/>
-		</xsl:attribute>
-		<xsl:if test="@on:id">
-			<NAV class="placeholder_amend_hidden before" data-path="{@on:id}" data-identity="{@bhb:identity}">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#10565</xsl:with-param>
-				</xsl:call-template>
-			</NAV>
-		</xsl:if>
-		<DIV class="INDENT">
-			<SPAN class="m">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#60</xsl:with-param>
-				</xsl:call-template>
-			</SPAN>
-			<SPAN>
-				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
-				<xsl:apply-templates select="." mode="xsl:name"/>
-				<xsl:if test="@*">
-					<xsl:text> </xsl:text>
-				</xsl:if>
-			</SPAN>
-			<xsl:apply-templates select="@*" mode="xsl:default"/>
-			<SPAN class="m">
-				<xsl:text>&gt;</xsl:text>
-			</SPAN>
-			<xsl:if test="@on:id">
-				<NAV class="placeholder_amend_hidden push append" data-path="{@on:id}" data-identity="{@bhb:identity}">
-					<xsl:call-template name="entity-ref">
-						<xsl:with-param name="name">#10565</xsl:with-param>
-					</xsl:call-template>
-				</NAV>
-			</xsl:if>
-			<SPAN class="m endtag">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#60</xsl:with-param>
-				</xsl:call-template>/</SPAN>
-			<SPAN>
-				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
-				<xsl:apply-templates select="." mode="xsl:name"/>
-			</SPAN>
-			<SPAN class="m">
-				<xsl:text>></xsl:text>
-			</SPAN>
-		</DIV>
-		<xsl:if test="@on:id">
-			<NAV class="placeholder_amend_hidden after" data-path="{@on:id}" data-identity="{@bhb:identity}">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#10565</xsl:with-param>
-				</xsl:call-template>
-			</NAV>
-		</xsl:if>
-	</DIV>
-</xsl:template>
-
-<xsl:template match="*[text() and not (comment() or processing-instruction())]" mode="xsl:default">
-	<DIV class="e">
-		<DIV>
-			<SPAN class="m">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#60</xsl:with-param>
-				</xsl:call-template>
-			</SPAN>
-			<SPAN>
-				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
-				<xsl:apply-templates select="." mode="xsl:name"/>
-				<xsl:if test="@*">
-					<xsl:text> </xsl:text>
-				</xsl:if>
-			</SPAN>
-			<xsl:apply-templates select="@*" mode="xsl:default"/>
-			<SPAN class="m">
-				<xsl:text>></xsl:text>
-			</SPAN>
-			<SPAN class="tx">
-				<xsl:value-of select="."/>
-			</SPAN>
-			<SPAN class="m">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#60</xsl:with-param>
-				</xsl:call-template>/</SPAN>
-			<SPAN>
-				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
-				<xsl:apply-templates select="." mode="xsl:name"/>
-			</SPAN>
-			<SPAN class="m">
-				<xsl:text>></xsl:text>
-			</SPAN>
-		</DIV>
-	</DIV>
-</xsl:template>
-
-<xsl:template match="*[*]" priority="20" mode="xsl:default">
-	<xsl:variable name="nodeName" select="local-name(.)"/>
-	<DIV data-elt="{$nodeName}" data-path="{@on:id}" data-identity="{@bhb:identity}">
-		<xsl:attribute name="class">
-			<xsl:text>e unwraped </xsl:text>
-			<xsl:value-of select="$nodeName"/>
-		</xsl:attribute>
-		<xsl:if test="@on:id">
-			<NAV class="placeholder_amend_hidden before" data-path="{@on:id}" data-identity="{@bhb:identity}">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#10565</xsl:with-param>
-				</xsl:call-template>
-			</NAV>
-		</xsl:if>
-		<DIV class="c">
-			<SPAN class="m">
-				<xsl:call-template name="entity-ref">
-					<xsl:with-param name="name">#60</xsl:with-param>
-				</xsl:call-template>
-			</SPAN>
-			<SPAN onclick="ui_wrap_toggle(this.parentNode.parentNode);">
-				<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
-				<xsl:apply-templates select="." mode="xsl:name"/>
-				<xsl:if test="@*">
-					<xsl:text> </xsl:text>
-				</xsl:if>
-			</SPAN>
-			<xsl:apply-templates select="@*" mode="xsl:default"/>
-			<SPAN class="m">
-				<xsl:text>></xsl:text>
-			</SPAN>
-		</DIV>
-		<DIV>
-			<xsl:if test="@on:id">
-				<NAV class="placeholder_amend_hidden push" data-path="{@on:id}" data-identity="{@bhb:identity}">
-					<xsl:call-template name="entity-ref">
-						<xsl:with-param name="name">#10565</xsl:with-param>
-					</xsl:call-template>
-				</NAV>
-			</xsl:if>
-			<xsl:apply-templates mode="xsl:default"/>
-			<xsl:if test="@on:id">
-				<NAV class="placeholder_amend_hidden append" data-path="{@on:id}" data-identity="{@bhb:identity}">
-					<xsl:call-template name="entity-ref">
-						<xsl:with-param name="name">#10565</xsl:with-param>
-					</xsl:call-template>
-				</NAV>
-			</xsl:if>
-			<DIV class="endtag">
-				<SPAN class="m">
-					<xsl:call-template name="entity-ref">
-						<xsl:with-param name="name">#60</xsl:with-param>
-					</xsl:call-template>/</SPAN>
-				<SPAN>
-					<xsl:attribute name="class"><xsl:if test="xsl:*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
-					<xsl:apply-templates select="." mode="xsl:name"/>
-				</SPAN>
-				<SPAN class="m">
-					<xsl:text>></xsl:text>
-				</SPAN>
-			</DIV>
-			<xsl:if test="@on:id">
-				<NAV class="placeholder_amend_hidden after" data-path="{@on:id}" data-identity="{@bhb:identity}">
-					<xsl:call-template name="entity-ref">
-						<xsl:with-param name="name">#10565</xsl:with-param>
-					</xsl:call-template>
-				</NAV>
-			</xsl:if>
-		</DIV>
-	</DIV>
-</xsl:template>
-
-<xsl:template match="bhb:link" mode="xsl:name">
-	<span>
-		<xsl:attribute name="title">
-			<xsl:value-of select="namespace-uri(.)"/>
-			<xsl:text>:</xsl:text>
-			<xsl:value-of select="local-name(.)"/>
-		</xsl:attribute>
-		<xsl:attribute name="class">
-			<xsl:text>bhb dragxmlelement </xsl:text>
-			<xsl:value-of select="local-name(.)"/>
-		</xsl:attribute>
-		<xsl:attribute name="data-path">
-			<xsl:value-of select="@on:id"/>
-		</xsl:attribute>
-		<xsl:attribute name="data-identity">
-			<xsl:value-of select="@bhb:identity"/>
-		</xsl:attribute>
-		<xsl:text>amendment</xsl:text>
-	</span>
-</xsl:template>
-
-<xsl:template match="*" mode="xsl:name">
-	<span class="notbhb dragxmlelement">
-		<xsl:attribute name="data-path">
-			<xsl:value-of select="@on:id"/>
-		</xsl:attribute>
-		<xsl:attribute name="data-identity">
-			<xsl:value-of select="@bhb:identity"/>
-		</xsl:attribute>
-		<xsl:value-of select="name(.)"/>
-	</span>
-</xsl:template>
-
-<xsl:template match="@on:clock" mode="xsl:default">
-	<xsl:call-template name="entity-ref">
-		<xsl:with-param name="name">#32</xsl:with-param>
-	</xsl:call-template>
-		<span class="bhb on_clock">
-			<xsl:attribute name="title">
-				<xsl:value-of select="namespace-uri(.)"/>
-				<xsl:text>:</xsl:text>
-				<xsl:value-of select="local-name(.)"/>
-				<xsl:text>:</xsl:text>
-				<xsl:value-of select="."/>
-			</xsl:attribute>
-			<xsl:attribute name="data-on_clock">
-				<xsl:value-of select="."/>
-			</xsl:attribute>
-			<xsl:text>on:clock="</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text>
-		</span>
-</xsl:template>
-
-<xsl:template match="@bhb:lock" mode="xsl:default">
-	<xsl:call-template name="entity-ref">
-		<xsl:with-param name="name">#32</xsl:with-param>
-	</xsl:call-template>
-		<span class="bhb bhb_lock">
-			<xsl:attribute name="title">
-				<xsl:value-of select="namespace-uri(.)"/>
-				<xsl:text>:</xsl:text>
-				<xsl:value-of select="local-name(.)"/>
-				<xsl:text>:</xsl:text>
-				<xsl:value-of select="."/>
-			</xsl:attribute>
-			<xsl:attribute name="data-bhb_lock">
-				<xsl:value-of select="."/>
-			</xsl:attribute>
-			<xsl:text>bhb:lock="</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text>
-		</span>
-</xsl:template>
-
-<xsl:template match="@bhb:symbol" mode="xsl:default">
-	<xsl:call-template name="entity-ref">
-		<xsl:with-param name="name">#32</xsl:with-param>
-	</xsl:call-template>
-		<span class="bhb on_symbol">
-			<xsl:attribute name="title">
-				<xsl:value-of select="namespace-uri(.)"/>
-				<xsl:text>:</xsl:text>
-				<xsl:value-of select="local-name(.)"/>
-				<xsl:text>:</xsl:text>
-				<xsl:value-of select="."/>
-			</xsl:attribute>
-			<xsl:attribute name="data-on_symbol">
-				<xsl:value-of select="."/>
-			</xsl:attribute>
-			<xsl:text>bhb:symbol="</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text>
-		</span>
-</xsl:template>
-
-<!-- Do not display identity nor id, not to get too messy in the display-->
-<xsl:template match="@bhb:identity" mode="xsl:default"/>
-<xsl:template match="@on:id" mode="xsl:default"/>
-
-<xsl:template match="@*" mode="xsl:default">
-	<xsl:call-template name="entity-ref">
-		<xsl:with-param name="name">#32</xsl:with-param>
-	</xsl:call-template>
-	<SPAN>
-		<xsl:attribute name="class"><xsl:if test="xsl:*/@*"><xsl:text>x</xsl:text></xsl:if><xsl:text>t</xsl:text></xsl:attribute>
-		<xsl:value-of select="name(.)"/>
-	</SPAN>
-	<SPAN class="m">="</SPAN>
-	<SPAN class="av">
-		<xsl:apply-templates select="." mode="xsl:attribute"/>
-	</SPAN>
-	<SPAN class="m">"</SPAN>
-</xsl:template>
-
-<!-- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	   W A S T E B A S K E T
-     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = -->
-
 </xsl:stylesheet>
-<?bhb-document on:id='static' on:source='example'  bhb:sign='auto'?>

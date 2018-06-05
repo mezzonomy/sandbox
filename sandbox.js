@@ -31372,7 +31372,7 @@ function render(_data, _diff){
 				d3.select(this).select(".vertexGroupRotate").attr("data-storedRotation",storedVertex.oRt).attr("data-init", "true"); // reinitiated by force simulation, hence stored in local dataset replayed in ticks
 				pinVertex("gvertex_"+ d.hc);
 				//D3_SCENE.select("#gvertex_"+ d.hc).select(".vertexCircle").classed("pinned", true);
-				//D3_SCENE.select("#gvertex_"+ d.hc).append("image").attr("xlink:href", "/sandbox/pinned3.png").attr("x",-25).attr("y",-25).attr("height","50px").attr("width","50px");
+				//D3_SCENE.select("#gvertex_"+ d.hc).append("image").attr("xlink:href", "/sandbox/img-icon-pin.png").attr("x",-25).attr("y",-25).attr("height","50px").attr("width","50px");
 			}
 		})
 	}
@@ -32026,7 +32026,7 @@ function textModeInteraction() {
 
 	var xmlNode = D3_UNIVERSE.selectAll("div.e:not([data-path=''])");
 	var editIcons = xmlNode.insert("img", ":first-child")
-	.attr("src","/sandbox/edit.svg")
+	.attr("src","/sandbox/img-icon-edit.svg")
 	.attr("class", "icon-edit");
 	D3_UNIVERSE.selectAll(".endtag").classed("entagpadding",true);
 	// listener to create the menu for editing a node
@@ -32388,7 +32388,7 @@ function pinVertex(_vertex) {
 	D3_SCENE.select("#" + _vertex).select(".vertexCircle").classed("pinned", true);
 	if (D3_SCENE.select("#" + _vertex).select("image").empty()) {
 		D3_SCENE.select("#" + _vertex).append("image")
-		.attr("xlink:href", "/sandbox/pinned3.png")
+		.attr("xlink:href", "/sandbox/img-icon-pin.png")
 		.attr("x",-25).attr("y",-25)
 		.attr("height","50px").attr("width","50px")
 		.on("click", function(d){

@@ -11,7 +11,7 @@
 	* @returns Displays a loader image
 	*/
 function initLoader() {
-	var loader ='<img src="sandbox/loader1.gif" alt="loading..." width="42" height="42" style="position: absolute; left: 50%; top: 50%;"/>';
+	var loader ='<img src="sandbox/img-loader.gif" alt="loading..." width="42" height="42" style="position: absolute; left: 50%; top: 50%;"/>';
 	document.getElementById('loader').innerHTML = loader;
 }
 
