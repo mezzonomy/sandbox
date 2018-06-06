@@ -8,7 +8,7 @@
 .notbhb {color: #007bff;}
 div.link{
   border-style: solid;
-  border-color: #777;
+  border-color: #990000;
   border-width: thin;
 }
 span[data-elt="link"] {color: #777;}
@@ -750,7 +750,7 @@ button, input[type="submit"], .btn {
 
 	.evts {
 	  stroke: none;
-	  fill: black;
+	  fill: #990000;
 	  opacity:.5;
 	}
 
@@ -905,10 +905,10 @@ button, input[type="submit"], .btn {
 	.spheric{}
 
 	path.bhbLink {
-		stroke: #777;
+		stroke: #990000;
 	}
 	.marker-bhbLink {
-		stroke: #777;
+		stroke: #990000;
 	}
 
 	path.selected {
