@@ -6,10 +6,10 @@
 /*START rewrites/add some classes from default.css*/
 .bhb {font:small; color: #777;}
 .notbhb {color: #007bff;}
-div.link{
-  border-style: solid;
+div.link{ /* border of an amendment*/
+  /*border-style: solid;
   border-color: #990000;
-  border-width: thin;
+  border-width: thin;*/
 }
 span[data-elt="link"] {color: #777;}
 .av  {color:black; font-weight:medium;}
@@ -26,7 +26,10 @@ span[data-elt="link"] {color: #777;}
 	user-select: none;
 }
 div.entagpadding{ /*To match the indentation of the edit icon*/
-	margin-left: 15px
+	margin-left: 15px;
+}
+div.tagnopathpadding{ /*To match the indentation of the edit icon*/
+	text-indent: 15px;
 }
 .icon-edit:hover{
 	background-color: #007bff;
@@ -288,6 +291,23 @@ div#mini-workspace[data-bhbmode=text] {
 div#text-pointnavtool[data-bhbmode=text]{
 	bottom: -22em;
 	position: absolute;
+}
+
+div#bhb-text-perspective-icon[data-bhbmode=graph]{
+	content:url(img-eye-optim-start.svg);
+	height: 1rem;
+	float: left;
+	position: relative;
+	top: -1px;
+}
+
+div#bhb-text-perspective-icon[data-bhbmode=text]{
+	content:url(img-eye-optim-start.svg);
+	height: 2rem;
+	float: left;
+	position: relative;
+	left: -1rem;
+	top: -.2rem;
 }
 
 /*modal ------------------------------ */

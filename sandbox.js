@@ -32029,12 +32029,13 @@ function textModeInteraction() {
 	// reinit icons
 	D3_UNIVERSE.selectAll(".icon-edit").remove();
 	D3_UNIVERSE.selectAll(".endtag").classed("entagpadding",false);
-	// create edit icons
-
+	// create edit icons for tags with path
 	var xmlNode = D3_UNIVERSE.selectAll("div.e:not([data-path=''])");
 	var editIcons = xmlNode.insert("img", ":first-child")
 	.attr("src","/sandbox/img-icon-edit.svg")
 	.attr("class", "icon-edit");
+	// icon edit placeholder for endtags and tags without path
+	D3_UNIVERSE.selectAll("div.e").filter(function(){return !this.dataset.path}).classed("tagnopathpadding",true);
 	D3_UNIVERSE.selectAll(".endtag").classed("entagpadding",true);
 	// listener to create the menu for editing a node
 	editIcons.on("click", function(d){
@@ -32446,11 +32447,14 @@ function selectPoint(_ptId, _openToolbox) {
 		if (d.tagraw == "bhb:link") {
 			d3.select(this).attr("marker-start", "url(#marker-start-bhbLink)").classed("start",false);
 			d3.select(this).attr("marker-end", "url(#marker-end-bhbLink)").classed("end",false);
-
 		} else {
 			d3.select(this).attr("marker-start", "url(#marker-start)").classed("start",false);
 			d3.select(this).attr("marker-end", "url(#marker-end)").classed("end",false);
 		}
+
+
+
+
 	});
 
 	// open text toolbox and poupulates edit zone

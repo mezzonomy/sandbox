@@ -107,7 +107,9 @@
 			 <xsl:call-template name="bhbgraph"/>
 		 </xsl:when>
 		 <xsl:when test="$mode = 'text'">
-			 <xsl:call-template name="bhbtext"/>
+			 <xsl:call-template name="bhbtext">
+				 <xsl:with-param name="mode" select="$mode"/>
+			 </xsl:call-template>
 		 </xsl:when>
 	</xsl:choose>
 </xsl:template>
@@ -115,19 +117,23 @@
 <xsl:template name="mini_workspace">
 	<xsl:param name="mode"/>
 	<xsl:choose>
-		 <xsl:when test="$mode = 'text'">
-			 <xsl:call-template name="bhbgraph"/>
-		 </xsl:when>
-		 <xsl:when test="$mode = 'graph'">
-			 <xsl:call-template name="bhbtext"/>
-		 </xsl:when>
+		<xsl:when test="$mode = 'text'">
+			<xsl:call-template name="bhbgraph"/>
+		</xsl:when>
+		<xsl:when test="$mode = 'graph'">
+			<xsl:call-template name="bhbtext">
+				<xsl:with-param name="mode" select="$mode"/>
+			</xsl:call-template>
+		</xsl:when>
 	 </xsl:choose>
 </xsl:template>
 
 <!-- Text -->
 <xsl:template name="bhbtext">
-	<div id="bhb-text">
-			 <xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
+	<xsl:param name="mode"/>
+	<div id="bhb-text" data-bhbmode="{$mode}">
+			<div id="bhb-text-perspective-icon" data-bhbmode="{$mode}"/>
+			<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
 	</div>
 </xsl:template>
 
