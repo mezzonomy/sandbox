@@ -861,9 +861,9 @@ button, input[type="submit"], .btn {
 		stroke: darkred;
 	}
 	circle.viewed {
-		fill: black;
+		/*fill: black;
 		stroke-width: 4px;
-		stroke: black;
+		stroke: black;*/
 	}
 	.dragging {
 		fill: yellow;
@@ -915,7 +915,7 @@ button, input[type="submit"], .btn {
 		stroke-width: 3px;
 	}
 	path.viewed {
-		stroke-width: 3px;
+		/*stroke-width: 3px;*/
 	}
 	.arc{
 		stroke-width: 0px;
