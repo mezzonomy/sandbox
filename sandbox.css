@@ -900,7 +900,8 @@ button, input[type="submit"], .btn {
 	.edgeLbl  {
 		font-size: .6rem;
 		fill: black;
-		pointer-events: none;
+		pointer-events: visible;
+		cursor: help;
 		user-select: none;
 		text-anchor: middle;
 	}
@@ -923,8 +924,14 @@ button, input[type="submit"], .btn {
 		cursor: help;
 		fill:none; /*fill to see the selection zone*/
 	}
-	.planar {}
-	.spheric{}
+	.planar {
+		pointer-events: visible;
+		cursor: help;
+	}
+	.spheric{
+		pointer-events: visible;
+		cursor: help;
+	}
 
 	path.bhbLink {
 		stroke: #990000;
@@ -940,17 +947,12 @@ button, input[type="submit"], .btn {
 		stroke:#007bff;
 		/*stroke-width: 3px;*/
 	}
-	.arc{
-		stroke-width: 0px;
-		opacity: .5;
-		pointer-events: auto;
-	}
-	path.edited {
-		stroke-width: 2px;
-		opacity: 1;
+	.marker-viewed {
+		stroke: #007bff;
 	}
 
-	.arc:hover{
+	path.edited {
+		stroke-width: 2px;
 		opacity: 1;
 	}
 

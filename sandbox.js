@@ -31295,7 +31295,6 @@ function render(_data, _diff){
 	});
 	var pointsById = d3.map(points, function(d) { return d.point; });
 
-
 	// ******************************************************
 	// Rendering internal (hyperbolic) edges within the vertice
 	// ******************************************************
@@ -31323,6 +31322,7 @@ function render(_data, _diff){
 			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === d.tagnet}).classed("selected", false);
 		})
 	;
+
 
 	// ******************************************************
 	// Applying previous stored Positionning on vertices (translation & rotation)
@@ -31393,6 +31393,20 @@ function render(_data, _diff){
 
 	var edge =  container.selectAll(".edge");
 
+	edge
+	.on("click", function(d){
+		event.stopPropagation();
+		setBhbPosition(d.point);
+	})
+	.on("mouseover", function(d){
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname === d.tagraw}).classed("selected", true);
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === d.tagnet}).classed("selected", true);
+	})
+	.on("mouseout", function(d){
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname === d.tagraw}).classed("selected", false);
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === d.tagnet}).classed("selected", false);
+	});
+
 	// ******************************************************
 	// Rendering external edges labels
 	// ******************************************************
@@ -31418,6 +31432,21 @@ function render(_data, _diff){
 	});
 
 	var edgeLbl =  container.selectAll(".edgeLbl");
+
+	edgeLbl
+	.on("click", function(d){
+		event.stopPropagation();
+		setBhbPosition(d.point);
+	})
+	.on("mouseover", function(d){
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname === d.tagraw}).classed("selected", true);
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === d.tagnet}).classed("selected", true);
+	})
+	.on("mouseout", function(d){
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname === d.tagraw}).classed("selected", false);
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === d.tagnet}).classed("selected", false);
+	});
+
 
 	// ******************************************************
 	// Misc after drawing
@@ -31675,7 +31704,6 @@ function vertexComputation(QApointsList){
 		}
 	}
 
-
 	//oldest point (smallest number) of each vertex for managing positionning history of vertices
 	// + count points by type (for force computing)
 	for(let i=0, n=sr.length; i<n; i++){
@@ -31684,6 +31712,24 @@ function vertexComputation(QApointsList){
 		sr[i].pc_planars = sr[i].segments.filter(function(s) { return s.topology === "planar";}).length;
 		sr[i].pc_hyperbolics = sr[i].segments.filter(function(s) { return s.topology === "hyperbolic";}).length;
 		sr[i].pc_spherics = sr[i].segments.filter(function(s) { return s.topology === "spheric";}).length;
+	}
+
+	// Compute distance to peer point to reorder the segments within each vertex
+	for(let i=0, n=sr.length; i<n; i++){
+		for (let k=0, l=sr[i].segments.length;k<l;k++) {
+			if (sr[i].segments[k].point.startsWith("T_")) {
+				peerPt = sr[i].segments.find(function(s){return s.point === sr[i].segments[k].peer});
+				sr[i].segments[k].distToPeer = distTwoPts(sr[i].segments[k], peerPt);
+			} else {
+				sr[i].segments[k].distToPeer=0;
+			}
+		}
+	}
+
+	// Reorder segments by descending distance to draw the bigger first and the smaller last in each vertex
+	// to ease selection of hyperbolics
+	for(let i=0, n=sr.length; i<n; i++){
+		sr[i].segments.sort(function(a, b){return (b.distToPeer - a.distToPeer)});
 	}
 
 	// logs TODO: remove
@@ -31815,59 +31861,71 @@ function getAbsCoord(elt) {
 	}
 }
 
+/**
+	* Distance between 2 points A & B
+	*
+	* @param _A {object:point} - point object A
+	* @param _B {object:point} - point object B
+	* @returns {numeric} - distance in px between two points
+	*/
+function distTwoPts(_A, _B) {
+	if (!_A || !_B) return 0;
+	return Math.sqrt(Math.pow(_A.ptX - _B.ptX, 2)+ Math.pow(_A.ptY - _B.ptY, 2));
+}
+
 // ******************************************************
 // Functions to compute path for edges
 // ******************************************************
 /**
 	* function for computing the planar Edges
 	*
-	* @param s {string:point id} - point object from
-	* @param t {string:point id} - point object to
+	* @param _s {string:point id} - point object from
+	* @param _t {string:point id} - point object to
 	* @returns {string} - svg path for the edge
 	*/
-function drawPlanar(s, t){
-	var path="M" + getAbsCoord(s).pxy + "L" + getAbsCoord(t).pxy;
+function drawPlanar(_s, _t){
+	var path="M" + getAbsCoord(_s).pxy + "L" + getAbsCoord(_t).pxy;
 	return {path:path};
 }
 
 /**
 	* function for computing the spheric Edges
 	*
-	* @param s {string:point id} - point object from
-	* @param v {string:vertex id} - point object to
+	* @param _s {string:point id} - point object from
+	* @param _v {string:vertex id} - point object to
 	* @returns {string} - svg path for the edge
 	*/
-function drawSpheric(s, v){
-	var path="M" + getAbsCoord(s).pxy + "L" + ((getAbsCoord(s).x - getAbsCoord(v).x) * BEYOND) + " " + ((getAbsCoord(s).y - getAbsCoord(v).y) * BEYOND);
+function drawSpheric(_s, _v){
+	var path="M" + getAbsCoord(_s).pxy + "L" + ((getAbsCoord(_s).x - getAbsCoord(_v).x) * BEYOND) + " " + ((getAbsCoord(_s).y - getAbsCoord(_v).y) * BEYOND);
 	return {path:path};
 }
 
 /**
 	* function for computing the hyperbolics edges
 	*
-	* @param s {object:point} - point object from
-	* @param t {object:point} - point object to
+	* @param _s {object:point} - point object from
+	* @param _t {object:point} - point object to
 	* @returns {string} - svg path for the bezier curve
 	*/
-function drawHyperbolic(s, t) {
-		var radius = Math.sqrt(s.ptX*s.ptX + s.ptY*s.ptY)
+function drawHyperbolic(_s, _t) {
+		var radius = Math.sqrt(_s.ptX*_s.ptX + _s.ptY*_s.ptY)
 		// With the help of Mr. Poincare
-		var xm = (s.ptX + t.ptX)/2.
-		var ym = (s.ptY + t.ptY)/2.
+		var xm = (_s.ptX + _t.ptX)/2.
+		var ym = (_s.ptY + _t.ptY)/2.
 		var rm = Math.sqrt(xm*xm + ym*ym)
-		path =  "M" + s.ptX + "," + s.ptY
+		path =  "M" + _s.ptX + "," + _s.ptY
 		if (rm < 0.001) {
-			path += "L" + t.ptX + "," + t.ptY;
+			path += "L" + _t.ptX + "," + _t.ptY;
 			return {path:path};}
 		var tm = Math.atan2(ym, xm)
 				rm = radius * radius / rm
-		var xr = s.ptX - Math.cos(tm) * rm
-		var yr = s.ptY - Math.sin(tm) * rm
+		var xr = _s.ptX - Math.cos(tm) * rm
+		var yr = _s.ptY - Math.sin(tm) * rm
 		var rf = Math.sqrt(xr*xr + yr*yr)
-		kind   = (Math.sin(t.startAngle - s.startAngle) < 0) ?
+		kind   = (Math.sin(_t.startAngle - _s.startAngle) < 0) ?
 			" 0 0 1" : " 0 0 0"
 		path   += "A " + rf + " " + rf + kind;
-		path   += " " + t.ptX + "," + t.ptY;
+		path   += " " + _t.ptX + "," + _t.ptY;
 	return {path:path};
 }
 
@@ -31940,7 +31998,7 @@ function createMarkers(_defs) {
 		.attr("orient", "auto")
 		.append("image")
 		.attr("xlink:href", "/sandbox/img-eye-optim-start.svg")
-		.attr("transform", "scale(.1)")
+		.attr("transform", "scale(.1)");
 	_defs.append("marker")
 		.attr("id", "marker-end-position")
 		.attr("class", "marker-std")
@@ -31952,18 +32010,34 @@ function createMarkers(_defs) {
 		.append("image")
 		.attr("xlink:href", "/sandbox/img-eye-optim-end.svg")
 		.attr("x",0).attr("y",0)
-		.attr("transform", "scale(.1)")
-
-
-		/*.append("path")
-		.attr("d", "M1.5 15 L10 10 L1.5 5 M10 10 L3.5 10")
-		.attr("class","marker-std")*/
-		;
+		.attr("transform", "scale(.1)");
+		_defs.append("marker")
+			.attr("id", "marker-end-position-end")
+			.attr("class", "marker-std")
+			.attr("markerWidth", "10")
+			.attr("markerHeight", "10")
+			.attr("refX", "0")
+			.attr("refY", "5")
+			.attr("orient", "auto")
+			.append("path")
+			.attr("d", "M 0 5 L 10 5")
+			.attr("class","marker-viewed");
+		_defs.append("marker")
+			.attr("id", "marker-start-position-end")
+			.attr("class", "marker-std")
+			.attr("markerWidth", "10")
+			.attr("markerHeight", "10")
+			.attr("refX", "10")
+			.attr("refY", "5")
+			.attr("orient", "auto")
+			.append("path")
+			.attr("d", "M 0 5 L 10 5")
+			.attr("class","marker-viewed");
 
 	//Duplicate for bhbLinks
 	var defsBhbLink = _defs.selectAll("marker.marker-std").clone(true)
 		.attr("id", function(d) {return this.id + "-bhbLink";})
-		.attr("class", function(d) {return this.id.replace("-std", "bhbLink");});
+		.attr("class", function(d) {return this.id.replace("-std", "-bhbLink");});
 	defsBhbLink.selectAll("path")
 		.attr("class","marker-bhbLink");
 }
@@ -32309,7 +32383,7 @@ function addGraphAmendPlaceholder(_pt, _order) {
 	.attr("cy", 0)
 	.attr("class", "graphAmendPlaceholder")
 	.attr("r", 3)
-	.append("title").text(`Amend ${_order} ${_pt.datum().point}`);
+	.append("title").text(`${_order}`);
 
 	let path="M-1 0";
 	path += "L10 0";
@@ -32436,10 +32510,12 @@ function selectPoint(_ptId, _openToolbox) {
 	selectedEdge.classed("viewed",true);
 	if (selectedEdge.datum().point === pt.point) {
 		selectedEdge.classed("start", true);
-		selectedEdge.attr("marker-start",function(d){return "url(#marker-start-position)";})
+		selectedEdge.attr("marker-start",function(d){return "url(#marker-start-position)";});
+		selectedEdge.attr("marker-end",function(d){return "url(#marker-end-position-end)";});
 	} else {
 		selectedEdge.classed("end", true);
-		selectedEdge.attr("marker-end",function(d){return "url(#marker-end-position)";})
+		selectedEdge.attr("marker-end",function(d){return "url(#marker-end-position)";});
+		selectedEdge.attr("marker-start",function(d){return "url(#marker-start-position-end)";});
 	}
 
 	return Object.assign(pt, {topology:selectedEdge.datum().topology, displayed:true});
