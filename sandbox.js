@@ -32305,14 +32305,14 @@ function addGraphAmendPlaceholder(_pt, _order) {
 	.attr("data-path", _pt.datum().path);
 
 	g.append("circle")
-	.attr("cx", 50)
+	.attr("cx", 13)
 	.attr("cy", 0)
 	.attr("class", "graphAmendPlaceholder")
-	.attr("r", 5)
+	.attr("r", 3)
 	.append("title").text(`Amend ${_order} ${_pt.datum().point}`);
 
-	let path="M-5 0";
-	path += "L50 0";
+	let path="M-1 0";
+	path += "L10 0";
 
 	g.append("path")
 	.attr("d", path)

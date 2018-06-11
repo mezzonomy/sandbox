@@ -937,6 +937,7 @@ button, input[type="submit"], .btn {
 		stroke-width: 3px;
 	}
 	path.viewed {
+		stroke:#007bff;
 		/*stroke-width: 3px;*/
 	}
 	.arc{
