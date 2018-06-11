@@ -414,7 +414,7 @@
 				<textarea id="{$toolbox_ID}-editzone" placeholder= "Enter amendment or drag and drop an arc from the graph or an xml node from text... (F11/Esc for full screen editing)" name="{$toolbox_ID}-editzone" class="form-control" required="required" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
 				<div id="{$toolbox_ID}-editinfo" class="alert"/>
 				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">&#10003;</button>
-				<button type="button" title="Add drop placeholder here (current cursor position)" class="btn btn-secondary right" onclick="cmAddDropPlaceholder(cm_editor);">_</button>
+				<button type="button" title="Add drop placeholder here (current cursor position or replaces selection)" class="btn btn-secondary right" onclick="cmAddDropPlaceholder(cm_editor);">_</button>
 				<button type="button" title="Clear amendment" class="btn btn-secondary right" onclick="initAmendment(cm_editor, false);">&#x000D7;</button>
 			</form>
 		</div>

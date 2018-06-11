@@ -30644,7 +30644,8 @@ var D3_UNIVERSE,
 		LONGCLICK_TIMER,
 		NAVPOINT_STOP,
 		FORCES_STATUS_DEF={collide:{status:true},center:{status:true},charge:{status:true}},
-		FORCES_STATUS={};
+		FORCES_STATUS={},
+		DEGREES = function(_rad) {return _rad*(180/Math.PI)};
 
 // ******************************************************
 // Range slider
@@ -30727,7 +30728,7 @@ function updateDates(_from, _to){
 	* @returns {nothing} updates bhb, only if from or to date as changed
 	*/
 function updateToDateIfSet() {
-	if (document.getElementById("explorer-bhb-to").dataset.bhbdate == "") return;
+	if (document.getElementById("explorer-bhb-to").dataset.bhbdate === "") return;
 	updateDates("", Date.now() + 5*60000);
 }
 
@@ -30775,6 +30776,7 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
 	.attr("class", "ghandle")
 	.attr("transform", function(d) {return "translate(" + x(sliderVals[d])+ ",0)"})
 	.call(d3.drag()
+		.clickDistance(10)
 		.on("start", startDragHandle)
 		.on("drag", dragHandle)
 		.on("end", endDragHandle)
@@ -30860,7 +30862,7 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
 		selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part1")}).text(function(d) {return FORMAT_DATE_P1(x.invert(ptx));});
 		selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part2")}).text(function(d) {return FORMAT_DATE_P2(x.invert(ptx));});
 		selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part3")}).text(function(d) {return FORMAT_DATE_P3(x.invert(ptx));});
-		var ptx2=x(sliderVals[d==0?1:0]);
+		var ptx2=x(sliderVals[d===0?1:0]);
 		selRange.attr("x1", ptx).attr("x2", ptx2)
 	}
 
@@ -30889,7 +30891,7 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
 		if(dx2 > xMax){dx2 = xMax} else if (dx2 < xMin){dx2 = xMin}
 		d3.select(this).attr("x1", dx1);
 		d3.select(this).attr("x2", dx2);
-		ghandle.attr("transform", function(d,i){return "translate(" + (i==0?dx1:dx2) + ",0)";});
+		ghandle.attr("transform", function(d,i){return "translate(" + (i===0?dx1:dx2) + ",0)";});
 	}
 
 	function endDragRange(d){
@@ -30900,7 +30902,7 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
 		var elt=d3.select(this);
 		var v1=Math.min(vx1, vx2);
 		var v2=Math.max(vx1, vx2);
-		ghandle.attr("transform", function(d,i){return "translate(" + (i==0?ox1:ox2) + ",0)";});
+		ghandle.attr("transform", function(d,i){return "translate(" + (i===0?ox1:ox2) + ",0)";});
 		elt.classed("active", false);
 		sliderVals = [v1, v2];
 		_action(v1,v2);
@@ -30948,14 +30950,14 @@ function completeAfter(cm, pred) {
 function completeIfAfterLt(cm) {
 	 return completeAfter(cm, function() {
 		 var cur = cm.getCursor();
-		 return cm.getRange(CodeMirror.Pos(cur.line, cur.ch - 1), cur) == "<";
+		 return cm.getRange(CodeMirror.Pos(cur.line, cur.ch - 1), cur) === "<";
 	 });
 }
 
 function completeIfInTag(cm) {
 	 return completeAfter(cm, function() {
 		 var tok = cm.getTokenAt(cm.getCursor());
-		 if (tok.type == "string" && (!/['"]/.test(tok.string.charAt(tok.string.length - 1)) || tok.string.length == 1)) return false;
+		 if (tok.type === "string" && (!/['"]/.test(tok.string.charAt(tok.string.length - 1)) || tok.string.length === 1)) return false;
 		 var inner = CodeMirror.innerMode(cm.getMode(), tok.state).state;
 		 return inner.tagName;
 	 });
@@ -31026,9 +31028,9 @@ cm_editor.on("change", function(cm){
 })
 
 /**
-	* Reinit Amendment zone
+	* Select text
 	* @param -
-	* @returns reinit amendment zone and close the toolbox
+	* @returns - select text
 	*/
 function cmSetTextSelected(_cm, _text) {
 	var search_cursor = _cm.getSearchCursor(_text);
@@ -31038,9 +31040,14 @@ function cmSetTextSelected(_cm, _text) {
 	}
 }
 
+/**
+	* Insert amendment @ cursor position
+	* @param -
+	* @returns -
+	*/
 function cmAddDropPlaceholder(_cm) {
 	//if (!_cm.hasFocus()) return // only if the editor has focus
-	_cm.replaceRange(AMEND_INSERT_PLACEHOLDER, _cm.getCursor());
+	_cm.replaceSelection(AMEND_INSERT_PLACEHOLDER, _cm.getCursor());
 }
 
 /**
@@ -31089,7 +31096,7 @@ function render(_data, _diff){
 	}
 
 	// Alter text mode to allow user interaction
-	if (CURRENT_BHB_MODE == "text") {
+	if (CURRENT_BHB_MODE === "text") {
 		textModeInteraction();
 	}
 
@@ -31105,7 +31112,7 @@ function render(_data, _diff){
 	// Scene definition
 	// ******************************************************
 	if (D3_SCENE.empty()){
-		if (CURRENT_BHB_MODE=='graph') {
+		if (CURRENT_BHB_MODE==='graph') {
 			D3_SCENE = D3_UNIVERSE.select("#workspace").append("svg").attr("id", "scene");
 		} else {
 			D3_SCENE = D3_UNIVERSE.select("#mini-workspace").append("svg").attr("id", "scene");
@@ -31114,7 +31121,7 @@ function render(_data, _diff){
 	DOM_SCENE = document.getElementById("scene");
 
 	// if text mode, adds a listener to close menus if workspace is clicked
-	if (CURRENT_BHB_MODE=='text') {
+	if (CURRENT_BHB_MODE === 'text') {
 		D3_UNIVERSE.select("#workspace").on("click", function(d) {
 			D3_UNIVERSE.selectAll("#toolboxes").select("#explorer").classed("opened", false).classed("closed", true);
 			D3_UNIVERSE.selectAll("#toolboxes").select("#perspective").classed("opened", false).classed("closed", true);
@@ -31163,7 +31170,7 @@ function render(_data, _diff){
 	}
 
 	//change zoom level if mini-workspace
-	if (CURRENT_BHB_MODE=='text') D3_SCENE.call(ZOOM.transform, d3.zoomIdentity.scale(1/2));
+	if (CURRENT_BHB_MODE === 'text') D3_SCENE.call(ZOOM.transform, d3.zoomIdentity.scale(1/2));
 
 	// ******************************************************
 	// get forces settings from localstore
@@ -31192,7 +31199,7 @@ function render(_data, _diff){
 		tags.on("mouseover", function(d){
 			D3_SCENE.selectAll(".edges").classed("selected", false);
 			var currentTag =  this.dataset.tagname.replace(":","_");
-			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet == currentTag;}).classed("selected", true);}
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === currentTag;}).classed("selected", true);}
 		);
 		tags.on("mouseout", function(d){
 			D3_SCENE.selectAll(".edges").classed("selected", false);}
@@ -31233,13 +31240,6 @@ function render(_data, _diff){
 	.on("drag", dragged)
 	.on("end", dragended));
 
-	// Add Click to select on vertices
-	vertexGroup.on("click", function(){ //Add click for selecting vertices
-		d3.event.stopPropagation(); //otherwise clicks on background which unselect nodes
-		selectVertex(this);
-		//console.log("VertexClikEvent on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-	})
-
 	// ******************************************************
 	// Rendering vertices complements (circles, points)
 	// ******************************************************
@@ -31265,24 +31265,6 @@ function render(_data, _diff){
 	.attr("id", function(d) {return "grotate_" + d.hc;});
 
 	var vertexGroupRotate = container.selectAll(".vertexGroupRotate");
-
-	vertexGroupRotate
-	.on("wheel", function() {d3.event.stopPropagation();})
-	.on("wheel.rotate",function(){
-		//TODO: set a timer in an external function to trap fewer ticks (see Wheel in d3 code)
-		//console.log("Wheel rotate vertex Event on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this))
-		selectVertex(this.parentNode);
-		var curRt;
-		if (this.attributes.transform) {
-			curRt=Number(this.attributes.transform.value.replace("rotate(", "").replace(")",""));
-			if (isNaN(curRt)) {curRt=0;}
-		} else {
-			curRt=0;
-		}
-		d3.select(this).attr("transform", "rotate(" + (curRt + d3.event.wheelDelta) + ")");
-		d3.select(this).attr("data-storedRotation", "rotate(" + (curRt + d3.event.wheelDelta) + ")").attr("data-init", "true"); // store on vertex for simulation forces ticks
-		redrawEdgesforOneVertex(this.id);
-	});
 
 	// entering a dummy circle for rotation event handling
 	vertexGroupRotate.selectAll(".vertexCircleRotate")
@@ -31313,24 +31295,6 @@ function render(_data, _diff){
 	});
 	var pointsById = d3.map(points, function(d) { return d.point; });
 
-	// ******************************************************
-	// Rendering vertices arcs for point selection and amendments
-	// ******************************************************
-	// Entering arcs within vertex's group grotate
-	var arcs = d3.arc()
-	.outerRadius(function(d){return d.radius;})
-	.innerRadius(function(d){return d.radius * ARC_INNER_RADIUS;});
-
-	vertexGroupRotate
-	.selectAll(".arc")
-	.data(function(d){return d.segments;}, function(d) {return "arc_" + d.point;}) //pie calculation already in data (segment reconstruction), standard d3 pie() not used
-	.enter()
-	.filter(function(d) {return (!d.external);})
-	.append("path")
-	.attr("class", "arc notdisplayed") //arcs are hidden by default
-	.attr("id", function(d) {return "arc_" + d.point;})
-	.attr("d", arcs)
-	.style("fill",function(d) {return coloring_arcs(d.point);});
 
 	// ******************************************************
 	// Rendering internal (hyperbolic) edges within the vertice
@@ -31339,20 +31303,24 @@ function render(_data, _diff){
 	.selectAll(".hyperbolic")
 	.data(function(d){return d.segments;}, function(d){return d.point;})
 	.enter()
-	.filter(function(d) {return (d.point.startsWith("T") && (d.topology == "hyperbolic"))})
+	.filter(function(d) {return (d.point.startsWith("T") && (d.topology === "hyperbolic"))})
 	.append("path")
 	.attr("class", "edges hyperbolic")
 	.attr("marker-end", "url(#marker-end)")
 	.attr("marker-start", "url(#marker-start)")
 	.attr("id", function(d) {return "hyperbolic_" + d.point;})
 	.attr("d", function(d){return drawHyperbolic(pointsById.get(d.point), pointsById.get(d.peer)).path;})
+	.on("click", function(d){
+		event.stopPropagation();
+		setBhbPosition(d.point);
+	})
 	.on("mouseover", function(d){
-			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagraw}).classed("selected", true);
-			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", true);
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname === d.tagraw}).classed("selected", true);
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === d.tagnet}).classed("selected", true);
 		})
-		.on("mouseout", function(d){
-			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname==d.tagraw}).classed("selected", false);
-			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet==d.tagnet}).classed("selected", false);
+	.on("mouseout", function(d){
+			D3_UNIVERSE.select("#perspective").selectAll("span.badge").filter(function(e){return this.dataset.tagname === d.tagraw}).classed("selected", false);
+			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === d.tagnet}).classed("selected", false);
 		})
 	;
 
@@ -31385,7 +31353,7 @@ function render(_data, _diff){
 
 	 pointsById.each(function(d){
 		var id="", s, t;
-		if (d.topology == "spheric") { //spheric edge case
+		if (d.topology === "spheric") { //spheric edge case
 			// by design a spheric is alone or has a B_ conterpart
 			s = Object.assign({}, d);
 			t = Object.assign({}, d); // new fictionnal point alone in deep universe
@@ -31396,7 +31364,7 @@ function render(_data, _diff){
 			t.tagraw = d.tagraw;
 			id = d.topology + "_" + d.hc + "_" + d.point;
 		}
-		if (d.point.startsWith("T_") && (d.topology == "planar")) { // planar edge
+		if (d.point.startsWith("T_") && (d.topology === "planar")) { // planar edge
 			s = Object.assign({}, d);
 			t = Object.assign({}, pointsById.get(d.peer));
 			id = d.topology + "_" + d.hc + "_" + t.hc + "_" + d.point;
@@ -31436,13 +31404,13 @@ function render(_data, _diff){
 
 	newEdgeLbl
 	.enter()
-	.filter(function(d){return (d.topology == "planar" || d.topology == "spheric") }) //labels for planar & spherics
+	.filter(function(d){return (d.topology === "planar" || d.topology === "spheric") }) //labels for planar & spherics
 	.append("text")
 	.attr("class", function(d) {return "edgeLbl " + d.topology;})
 	.attr("id", function(d){return "lbl_" + d.id;})
 	.attr("text-anchor", "middle")
 	.text(function(d) {
-		if (d.tagraw=="bhb:link") {
+		if (d.tagraw === "bhb:link") {
 			return FORMAT_DATE_TIME(PARSE_DATE_BHB(d.source.info.on_clock));
 		} else {
 			return d.source.info.xsl_element;
@@ -31459,7 +31427,7 @@ function render(_data, _diff){
 	selectPoint();
 
 	// Color all bhb:link edges
-	var bhbLinks = D3_SCENE.selectAll(".edges").filter(function(d){return d.tagraw=="bhb:link"})
+	var bhbLinks = D3_SCENE.selectAll(".edges").filter(function(d){return d.tagraw === "bhb:link"})
 	bhbLinks.classed("bhbLink", true);
 	bhbLinks.attr("marker-start", function(d){
 		if (d3.select(this).classed("viewed")) {
@@ -31520,21 +31488,21 @@ function render(_data, _diff){
 				});
 
 				edge
-				.filter(function(d){return (d.topology == "planar");})
+				.filter(function(d){return (d.topology === "planar");})
 				.attr("d", function(d){return drawPlanar(d.source.point, d.target.point).path;})
 
 				edgeLbl
-				.filter(function(d){return (d.topology == "planar");})
+				.filter(function(d){return (d.topology === "planar");})
 				.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
 				.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
 				.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "lbl_"+d.id, d.topology)});
 
 				edge
-				.filter(function(d){return (d.topology == "spheric");})
+				.filter(function(d){return (d.topology === "spheric");})
 				.attr("d", function(d){return drawSpheric(d.source.point, "gvertex_" + d.source.hc).path;})
 
 				edgeLbl
-				.filter(function(d){return (d.topology == "spheric");})
+				.filter(function(d){return (d.topology === "spheric");})
 				.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
 				.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
 				.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y,
@@ -31566,10 +31534,10 @@ function render(_data, _diff){
 
 				// Log progess on freeze force button
 				if (!PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").empty()) {
-					if (percentCpt%5 ==0) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text("Freeze (running..." + percentCpt +"%)");
+					if (percentCpt%5 === 0) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text("Freeze (running..." + percentCpt +"%)");
 				}
 				//save positionning every 50 ticks
-				if (ticksDone%50 == 0) storeLocalVertexPositionning
+				if (ticksDone%50 === 0) storeLocalVertexPositionning
 			}
 			catch(error) {
 				//console.log("shadow tick !");
@@ -31611,8 +31579,8 @@ function vertexComputation(QApointsList){
 	// sr stands for (S)egment (R)econstruction
 	var sr=[];
 	var vertex={};
-	for(var i=0, n=QApointsList.length; i<n; i++){
-			var segments=[];
+	for(let i=0, n=QApointsList.length; i<n; i++){
+			let segments=[];
 			segments.push(Object.assign({}, QApointsList[i])); // byval
 			vertex = {bp:QApointsList[i].point, ep:QApointsList[i].next, pc:1, hc:"", segments:segments, spin:0};
 			vertex.hc = vertexToString(vertex, true);
@@ -31623,19 +31591,19 @@ function vertexComputation(QApointsList){
 	var j=0;
 	// Maximum of iteration for Vertices computation = VERTEX_COMPUTATION_MAX_ITERATION
 	while ((sr.find(function(s){return s.ep!=s.bp;})) && (j<VERTEX_COMPUTATION_MAX_ITERATION)){
-		for(var i=0, n=sr.length; i<n; i++){
+		for(let i=0, n=sr.length; i<n; i++){
 			if (!sr[i]){break;}
 			if (sr[i].bp != sr[i].ep){
-				var sfdIdx = sr.findIndex(function(s){return (s.bp == sr[i].ep)});
+				const sfdIdx = sr.findIndex(function(s){return (s.bp === sr[i].ep)});
 				if(sfdIdx != -1){
-					var segments=sr[i].segments.concat(sr[sfdIdx].segments);
+					const segments=sr[i].segments.concat(sr[sfdIdx].segments);
 					sr[sfdIdx].segments=segments;
 					sr[sfdIdx].bp=sr[i].bp;
 					sr[sfdIdx].pc=segments.length;
 					sr[sfdIdx].hc=vertexToString(sr[sfdIdx], true);
 					sr[sfdIdx].spin=0;
 					// add hc and nc to point for position calculation
-					for (var k=0, l=segments.length;k<l;k++) {
+					for (let k=0, l=segments.length;k<l;k++) {
 						sr[sfdIdx].segments[k].hc=sr[sfdIdx].hc;
 						sr[sfdIdx].segments[k].pc=sr[sfdIdx].pc;
 					}
@@ -31647,51 +31615,79 @@ function vertexComputation(QApointsList){
 	}
 	// Create a map of points across the vertices
 	var points=[];
-	for(var i=0, n=sr.length; i<n; i++){
-		for (var k=0, l=sr[i].segments.length;k<l;k++) {
+	for(let i=0, n=sr.length; i<n; i++){
+		for (let k=0, l=sr[i].segments.length;k<l;k++) {
 		points.push(Object.assign({}, sr[i].segments[k]));}
 	}
-	var pointsById = d3.map(points, function(d) { return d.point; });
+	const pointsById = d3.map(points, function(d) { return d.point; });
 
 	//Adding positionning calculation of points and arcs as data in post computation
 	//Setting topology
-	for(var i=0, n=sr.length; i<n; i++){
-		sr[i].radius = VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(sr[i].pc) // Node radius
-		for (var k=0, l=sr[i].segments.length;k<l;k++) {
-			var angle1 = k * (2*Math.PI / sr[i].pc);
-			var angle2 = (k == l-1)? 2*Math.PI:(k+1) * (2*Math.PI / sr[i].pc);
-			var ptX = sr[i].radius * Math.cos(angle1); // x coordinate of the point on the vertex's circle
-			var ptY = sr[i].radius * Math.sin(angle1); // y coordinates of the point on the vertex's circle
-			sr[i].segments[k].radius = sr[i].radius;
+	for(let i=0, n=sr.length; i<n; i++){
+		const angle = (2*Math.PI / sr[i].pc); // Angle for each point on the radius
+		const radius = VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(sr[i].pc) // Node radius
+		sr[i].radius = radius;
+		sr[i].angle = angle;
+		for (let k=0, l=sr[i].segments.length;k<l;k++) {
+			const angle1 = k * angle;
+			const angle2 = (k === l-1)? 2*Math.PI:(k+1) * angle;
+			const ptX = radius * Math.cos(angle1); // x coordinate of the point on the vertex's circle
+			const ptY = radius * Math.sin(angle1); // y coordinates of the point on the vertex's circle
+			sr[i].segments[k].radius = radius;
 			sr[i].segments[k].ptX = ptX; // points coordinates within the vertex
 			sr[i].segments[k].ptY = ptY;
+			sr[i].segments[k].angle1 = angle1;
 			sr[i].segments[k].startAngle = angle1 + Math.PI * .5; // angle in degrees of the point on the vertex circle. To draw arcs (D3 pie format)
 			sr[i].segments[k].endAngle = angle2 + Math.PI * .5; // angle in degrees of the next point on the vertex circle. To draw arcs (D3 pie format)
 			sr[i].segments[k].index = k; // index of the point in the vertex
-			sr[i].segments[k].padAngle = 0; //no pading between arcs
-			sr[i].segments[k].value = 1; //all arcs have the same weight
-			sr[i].segments[k].topology="hyperbolic"; //default topology
-			sr[i].segments[k].tagraw=sr[i].segments[k].info.xsl_element;
-			sr[i].segments[k].tagnet=sr[i].segments[k].info.xsl_element.replace(":","_");
+			sr[i].segments[k].topology = "hyperbolic"; //default topology
+			sr[i].segments[k].before = sr[i].segments.find(function(s){return s.next === sr[i].segments[k].point}).point;
+			sr[i].segments[k].tagraw = sr[i].segments[k].info.xsl_element;
+			sr[i].segments[k].tagnet = sr[i].segments[k].info.xsl_element.replace(":","_");
 			if (sr[i].segments[k].hc != pointsById.get(sr[i].segments[k].peer).hc) {sr[i].segments[k].topology="planar";}
-			if (sr[i].segments[k].point == sr[i].segments[k].peer) {sr[i].segments[k].topology="spheric";} // spheric by design, to be fixed because same as text node TODO: fix
+			if (sr[i].segments[k].point === sr[i].segments[k].peer) {sr[i].segments[k].topology="spheric";} // spheric by design, to be fixed because same as text node TODO: fix
 			// case of spheric by decision, the point T_ is considered external, and not drawn in a vertex
-			if (sr[i].segments[k].info.bhb_spheric == 1) {sr[i].segments[k].topology="spheric";}
+			if (sr[i].segments[k].info.bhb_spheric === 1) {sr[i].segments[k].topology = "spheric";}
 		}
 	}
 
+	//Adding positionning calculation of amendment position for each point. Must be done after the radius/angle calc
+	for(let i=0, n=sr.length; i<n; i++){
+		const angle = sr[i].angle;
+		const radius = sr[i].radius;
+		for (let k=0, l=sr[i].segments.length;k<l;k++) {
+			const angle1 = sr[i].segments[k].angle1
+			sr[i].segments[k].amend={"before":{}, "after":{}, "push":{}, "append":{},};
+			sr[i].segments[k].amend.before.ptX = radius * Math.cos(angle1 - (angle/2));
+			sr[i].segments[k].amend.before.ptY = radius * Math.sin(angle1 - (angle/2));
+			sr[i].segments[k].amend.before.angle = DEGREES(angle1 - (angle/2));
+			sr[i].segments[k].amend.push.ptX = radius * Math.cos(angle1 + (angle/2));
+			sr[i].segments[k].amend.push.ptY = radius * Math.sin(angle1 + (angle/2));
+			sr[i].segments[k].amend.push.angle = DEGREES(angle1 + (angle/2));
+			let ptPeerAngle1 = 0;
+			if (sr[i].segments[k].topology === "hyperbolic") ptPeerAngle1 = sr[i].segments.find(function(s){return s.point === sr[i].segments[k].peer}).angle1;
+			sr[i].segments[k].amend.after.ptX = radius * Math.cos(ptPeerAngle1 + (angle/2));
+			sr[i].segments[k].amend.after.ptY = radius * Math.sin(ptPeerAngle1 + (angle/2));
+			sr[i].segments[k].amend.after.angle = DEGREES(ptPeerAngle1 + (angle/2));
+			sr[i].segments[k].amend.append.ptX = radius * Math.cos(ptPeerAngle1 - (angle/2));
+			sr[i].segments[k].amend.append.ptY = radius * Math.sin(ptPeerAngle1 - (angle/2));
+			sr[i].segments[k].amend.append.angle = DEGREES(ptPeerAngle1 - (angle/2));
+		}
+	}
+
+
 	//oldest point (smallest number) of each vertex for managing positionning history of vertices
 	// + count points by type (for force computing)
-	for(var i=0, n=sr.length; i<n; i++){
-		var sortOldest=sr[i].segments.sort(function(a, b){return Number((a.point.match(/[0-9]/g)).join(''))-Number((b.point.match(/[0-9]/g)).join(''))});
+	for(let i=0, n=sr.length; i<n; i++){
+		const sortOldest = sr[i].segments.sort(function(a, b){return Number((a.point.match(/[0-9]/g)).join(''))-Number((b.point.match(/[0-9]/g)).join(''))});
 		sr[i].oldestPoint = sortOldest[0].point;
-		sr[i].pc_planars=sr[i].segments.filter(function(s) { return s.topology=="planar";}).length;
-		sr[i].pc_hyperbolics=sr[i].segments.filter(function(s) { return s.topology=="hyperbolic";}).length;
-		sr[i].pc_spherics=sr[i].segments.filter(function(s) { return s.topology=="spheric";}).length;
+		sr[i].pc_planars = sr[i].segments.filter(function(s) { return s.topology === "planar";}).length;
+		sr[i].pc_hyperbolics = sr[i].segments.filter(function(s) { return s.topology === "hyperbolic";}).length;
+		sr[i].pc_spherics = sr[i].segments.filter(function(s) { return s.topology === "spheric";}).length;
 	}
 
 	// logs TODO: remove
-	console.log("Render", QApointsList.length , "points. Vertices reconstruction in", (j + 1), "iterations");
+	console.log("Render", QApointsList.length , "points. Vertices reconstruction in", (j + 1), "iterations", sr);
 	return sr;
 }
 
@@ -31741,45 +31737,6 @@ function dragended(d) {
 }
 
 /**
-	* Drag and drop arcs (points)
-	*/
-function arcDragStarted(d) {
-	d3.event.sourceEvent.stopPropagation();
-	d3.select(this).classed("dragging",true)
-	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", true);
-	setBhbPosition(d.point);
-	// TODO: fix adding dataTransfert API to drag/drop outside the browser
-	//console.log("arcDragStarted started on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-}
-
-function arcDragged(d) {
-	d3.select(this).attr("transform", "translate("+  d3.event.x + "," + d3.event.y + ")");
-	if (d3.event.sourceEvent.path.find(function(s){return s.id == AMEND_CM_EDITZONE_ID;})) {
-		D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("zoom11", true);
-	} else {
-		D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("zoom11", false);
-	}
-	if (d3.event.sourceEvent.target.id == AMEND_TOOLBOX_ID) {
-		if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
-			D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
-		}
-	}
-	d3.select(this).classed("dragging", true);
-	//console.log("arcDragged dragged on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-}
-
-function arcDragEnded(d) {
-	d3.select(this).classed("dragging", false);
-	if (d3.event.sourceEvent.path.find(function(s){return s.id == AMEND_CM_EDITZONE_ID;})) {
-		amend(d3.event.subject.path, d3.event.subject.order, false);
-	}
-	// Return all artefacts to initial state
-	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", false).classed("zoom11", false);
-	d3.select(this).attr("transform", null); //return arc to initial position
-	//console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-}
-
-/**
 	* Drag and drop tags (text mode)
 	*/
 function tagDraggedStarted(d) {
@@ -31796,12 +31753,12 @@ function tagDragged(d) {
 	.style("display","block")
 	.style("left", event.clientX +"px")
 	.style("top", event.clientY +"px");
-	if (d3.event.sourceEvent.path.find(function(s){return s.id == AMEND_CM_EDITZONE_ID;})) {
+	if (d3.event.sourceEvent.path.find(function(s){return s.id === AMEND_CM_EDITZONE_ID;})) {
 		D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("zoom11", true);
 	} else {
 		D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("zoom11", false);
 	}
-	if (d3.event.sourceEvent.target.id == AMEND_TOOLBOX_ID) {
+	if (d3.event.sourceEvent.target.id === AMEND_TOOLBOX_ID) {
 		if (!D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened")) {
 			D3_UNIVERSE.select("#" + AMEND_TOOLBOX_ID).classed("opened", true).classed("closed", false);
 		}
@@ -31813,7 +31770,14 @@ function tagDragged(d) {
 function tagDraggedEnded(d) {
 	d3.select(this).style("position","unset").style("display","unset");
 	d3.select(this).classed("dragging", false);
-	amend(this.dataset.path, "before", false);
+	// TODO: IF is not working, the amendment zone id is not in the path
+	const amnendBox = document.getElementById(AMEND_CM_EDITZONE_ID).getBoundingClientRect();
+	const xRange = {from:amnendBox.x, to:(amnendBox.x + amnendBox.width)};
+	const yRange = {from:amnendBox.y, to:(amnendBox.y + amnendBox.height)};
+	const pos = {x:d3.event.sourceEvent.clientX, y:d3.event.sourceEvent.clientY};
+	const xOK = (pos.x > xRange.from && pos.x < xRange.to);
+	const yOK = (pos.y > yRange.from && pos.y < yRange.to);
+	if (xOK && yOK) amend(this.dataset.path, "append", false);
 	// Return all artefacts to initial state
 	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", false).classed("zoom11", false);
 	d3.select(this).attr("transform", null); //return arc to initial position
@@ -31919,14 +31883,14 @@ function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
 	lblId = lblId || "";
 	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
 	var labelBox;
-	if (topology == "planar") {
+	if (topology === "planar") {
 		if (Math.abs(rt) < 90) {
 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 + Math.abs((y2-y1)/2)) + "," + (-3) + ")";
 		} else {
 			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 - Math.abs((y2-y1)/2)) + "," + (-3) + ")";
 		}
 	}
-	if (topology == "spheric") {
+	if (topology === "spheric") {
  		labelBoxW = document.getElementById(lblId).getBBox().width;
 		if (Math.abs(rt) < 90) {
 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (labelBoxW) + "," + (-3) + ")";
@@ -31949,7 +31913,7 @@ function createMarkers(_defs) {
 		.attr("class", "marker-std")
 		.attr("markerWidth", "10")
 		.attr("markerHeight", "10")
-		.attr("refX", "1")
+		.attr("refX", "0")
 		.attr("refY", "5")
 		.attr("orient", "auto")
 		.append("path")
@@ -31960,7 +31924,7 @@ function createMarkers(_defs) {
 		.attr("class", "marker-std")
 		.attr("markerWidth", "10")
 		.attr("markerHeight", "10")
-		.attr("refX", "9")
+		.attr("refX", "10")
 		.attr("refY", "5")
 		.attr("orient", "auto")
 		.append("path")
@@ -32016,15 +31980,11 @@ function textModeInteraction() {
 	// Add dragdrop listeners on elements classed dragxmlelement
 	D3_UNIVERSE.selectAll(".dragxmlelement")
 	.call(d3.drag()
+		.clickDistance(10)
 		.on("start", tagDraggedStarted)
 		.on("drag", tagDragged)
 		.on("end", tagDraggedEnded)
 	);
-	/*D3_UNIVERSE.selectAll(".dragxmlelement")
-	.on("click", function(d) {
-		event.stopPropagation();
-		setBhbPosition("T_" + this.dataset.identity);
-	});*/
 
 	// reinit icons
 	D3_UNIVERSE.selectAll(".icon-edit").remove();
@@ -32204,7 +32164,7 @@ function AddButtonsToPerspective(){
 	if (btnResetZoom.empty()) {
 			btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-zoom").text("zoom");
 			btnResetZoom.on("click", function(){
-				if (CURRENT_BHB_MODE == 'graph') {
+				if (CURRENT_BHB_MODE === 'graph') {
 					D3_SCENE.transition()
 					.duration(750)
 					.call(ZOOM.transform, d3.zoomIdentity);
@@ -32248,7 +32208,7 @@ function AddButtonsToPerspective(){
 			btnToggleCollide.attr("value","start").text("set collide:on");
 		}
 		btnToggleCollide.on("click", function(){
-			if (btnToggleCollide.attr("value") == "stop") {
+			if (btnToggleCollide.attr("value") === "stop") {
 				VERTICES_POSITIONNING.force("collide", null);
 				btnToggleCollide.attr("value","start").text("set collide:on");
 				FORCES_STATUS.collide.status=false;
@@ -32286,15 +32246,15 @@ function redrawEdgesforOneVertex(_vertexhc) {
 	var trueVertexhc=Number(_vertexhc.replace("grotate_",""));
 
 	D3_SCENE.selectAll("path.planar")
-	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
+	.filter(function(d){return (d.source.hc === trueVertexhc || d.target.hc === trueVertexhc);})
 	.attr("d", function(d){return drawPlanar(d.source.point, d.target.point).path;});
 
 	D3_SCENE.selectAll("path.spheric")
-	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
+	.filter(function(d){return (d.source.hc === trueVertexhc || d.target.hc === trueVertexhc);})
 	.attr("d", function(d){return drawSpheric(d.source.point, "gvertex_" + d.target.hc).path;})
 
 	D3_SCENE.selectAll("text.edgeLbl")
-	.filter(function(d){return (d.source.hc==trueVertexhc || d.target.hc==trueVertexhc);})
+	.filter(function(d){return (d.source.hc === trueVertexhc || d.target.hc === trueVertexhc);})
 	.attr("x", function(d) {return getAbsCoord(d.source.point).x;})
 	.attr("y", function(d) {return getAbsCoord(d.source.point).y;})
 	.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoord(d.source.point).x, getAbsCoord(d.source.point).y, getAbsCoord(d.target.point).x, getAbsCoord(d.target.point).y, "lbl_" + d.id, d.topology)});
@@ -32310,39 +32270,57 @@ function redrawEdgesforOneVertex(_vertexhc) {
 	* Unselect all previously selected vertex and Select a vertex (if not already selected),
 	* and change the layout.
 	*
-	* @param {_vertex} - dom element object - must be a root group of a vertex
+	* @param {_pointId} - string, point Id
 	* @returns nothing (select the vertex)
 	*/
-function selectVertex(_vertex){
+function selectVertexOnePoint(_pointId){
 	// 1. unselect all vertices
 	unselectVertices();
+	d3.selectAll(".graphAmendPlaceholder").remove();
 	// 2. select current vertex
-	var vtx = d3.select(_vertex);
+	var pt = d3.select("#" + _pointId);
+	var vtx = d3.select("#gvertex_" + pt.datum().hc);
 	if (!vtx.classed("focused")) {
-		var arc = vtx.selectAll(".arc");
-		var externalEdges = D3_SCENE.selectAll(".edge").filter(function(d){return (d.source.hc == vtx.datum().hc || d.target.hc == vtx.datum().hc);}); // raise the proper external edges
+		var externalEdges = D3_SCENE.selectAll(".edge").filter(function(d){return (d.source.hc === vtx.datum().hc || d.target.hc === vtx.datum().hc);}); // raise the proper external edges
 		var internalEdges = vtx.selectAll(".edges");
-		var point = vtx.selectAll(".point");
 		vtx.raise();
 		externalEdges.raise();
-		//point.raise();
 		vtx.classed("focused", true);
-		arc.classed("notdisplayed", false).classed("draggable", true);
-		point.classed("point-displayed", true);
-		internalEdges.classed("notselectable", true);
-		arc.call(d3.drag() //add edit arc listener
-		.filter(function(d){return !this.classList.contains("notdisplayed");}) //not fired if arc is not displayed (removing the handler is buggy)
-		.clickDistance(10)
-		.on("start", arcDragStarted)
-		.on("drag", arcDragged)
-		.on("end", arcDragEnded));
-		point.on("click", function(d) {
-			d3.event.stopPropagation();
-			//console.log("click on point: ", d.point);
-			setBhbPosition(d.point);
-			return false;
-		});
+		if (pt.path !="") {
+			addGraphAmendPlaceholder(pt, "before");
+			addGraphAmendPlaceholder(pt, "after");
+			addGraphAmendPlaceholder(pt, "push");
+			addGraphAmendPlaceholder(pt, "append");
+		}
 	}
+}
+
+function addGraphAmendPlaceholder(_pt, _order) {
+	const vtx = d3.select("#gvertex_" + _pt.datum().hc);
+
+	let g = vtx.select(".vertexGroupRotate")
+	.append("g")
+	.attr("transform", "translate( " + _pt.datum().amend[_order].ptX + "," + _pt.datum().amend[_order].ptY + ") rotate(" + _pt.datum().amend[_order].angle + ")")
+	.attr("data-order", _order)
+	.attr("data-path", _pt.datum().path);
+
+	g.append("circle")
+	.attr("cx", 50)
+	.attr("cy", 0)
+	.attr("class", "graphAmendPlaceholder")
+	.attr("r", 5)
+	.append("title").text(`Amend ${_order} ${_pt.datum().point}`);
+
+	let path="M-5 0";
+	path += "L50 0";
+
+	g.append("path")
+	.attr("d", path)
+	.attr("class", "graphAmendPlaceholder");
+
+	g.on("click", function(d) {
+		amend(this.dataset.path, this.dataset.order, true);
+	});
 }
 
 /**
@@ -32353,8 +32331,6 @@ function selectVertex(_vertex){
 function unselectVertices(){
 	D3_SCENE.selectAll(".focused").classed("focused", false);
 	D3_SCENE.selectAll(".notselectable").classed("notselectable", false);
-	D3_SCENE.selectAll(".arc").classed("notdisplayed", true).classed("draggable", false);
-	D3_SCENE.selectAll(".point-displayed").classed("point-displayed", false).on("click", "");
 	D3_SCENE.selectAll(".gvertex").lower();
 	D3_SCENE.selectAll(".egde").raise(); // raise edges above vortices
 	D3_SCENE.selectAll(".edgeLbl").raise();
@@ -32368,8 +32344,6 @@ function unselectVertices(){
 function unselectVertex(_vertex){
 	D3_SCENE.select("#" + _vertex).selectAll(".focused").classed("focused", false);
 	D3_SCENE.select("#" + _vertex).selectAll(".notselectable").classed("notselectable", false);
-	D3_SCENE.select("#" + _vertex).selectAll(".arc").classed("notdisplayed", true).classed("draggable", false);
-	D3_SCENE.select("#" + _vertex).selectAll(".point-displayed").classed("point-displayed", false).on("click", "");
 	D3_SCENE.select("#" + _vertex).lower();
 	D3_SCENE.selectAll(".egde").raise(); // raise edges above vortices
 	D3_SCENE.selectAll(".edgeLbl").raise();
@@ -32437,35 +32411,30 @@ function selectPoint(_ptId, _openToolbox) {
 	document.getElementById(TEXT_TOOLBOX_ID + "-point").value = pt.point;
 	document.getElementById(TEXT_TOOLBOX_ID + "-next").value = pt.next;
 	document.getElementById(TEXT_TOOLBOX_ID + "-peer").value = pt.peer;
-	var ptbefore = D3_SCENE.selectAll(".point").filter(function(s){return s.next == pt.point;}).datum();
-	document.getElementById(TEXT_TOOLBOX_ID + "-before").value = ptbefore.point;
-	//console.log("Click on point: ", pt, "value: ", text_readInfo(pt))
-	text_nav(pt);
+	document.getElementById(TEXT_TOOLBOX_ID + "-before").value = pt.before;
+	selectVertexOnePoint(pt.point); // select the point
+	text_nav(pt); //display text
 	// reinit prevously selected point
 	var pointsViewed = D3_SCENE.selectAll(".viewed").classed("viewed",false);
 	pointsViewed.each(function(d) {
-		if (d.tagraw == "bhb:link") {
+		if (d.tagraw === "bhb:link") {
 			d3.select(this).attr("marker-start", "url(#marker-start-bhbLink)").classed("start",false);
 			d3.select(this).attr("marker-end", "url(#marker-end-bhbLink)").classed("end",false);
 		} else {
 			d3.select(this).attr("marker-start", "url(#marker-start)").classed("start",false);
 			d3.select(this).attr("marker-end", "url(#marker-end)").classed("end",false);
 		}
-
-
-
-
 	});
 
 	// open text toolbox and poupulates edit zone
 	if (_openToolbox && (!D3_UNIVERSE.select("#" + TEXT_TOOLBOX_ID).classed("opened"))) {
 		D3_UNIVERSE.select("#" + TEXT_TOOLBOX_ID).classed("opened", true).classed("closed", false);
 	}
-	var selectedEdge = D3_SCENE.selectAll("path.edges").filter(function(l){return (l.point == pt.point || l.peer == pt.point);});
+	var selectedEdge = D3_SCENE.selectAll("path.edges").filter(function(l){return (l.point === pt.point || l.peer === pt.point);});
 	// select Point, Edge and style them it with the wiev marker
 	D3_SCENE.select("#" + pt.point).classed("viewed",true);
 	selectedEdge.classed("viewed",true);
-	if (selectedEdge.datum().point == pt.point) {
+	if (selectedEdge.datum().point === pt.point) {
 		selectedEdge.classed("start", true);
 		selectedEdge.attr("marker-start",function(d){return "url(#marker-start-position)";})
 	} else {
@@ -32534,7 +32503,7 @@ function text_nav(_datum){
 					if (NAVPOINT_STOP) {clearInterval(autonav);}
 					ptn = document.getElementById(TEXT_TOOLBOX_ID + "-next").value;
 					setBhbPosition(ptn);
-					//if (ptn.topology=="planar") {clearInterval(autonav);} // TODO: fix to make it stop !
+					//if (ptn.topology === "planar") {clearInterval(autonav);} // TODO: fix to make it stop !
 				},AUTONAV_INTERVAL);
 		},LONGCLICK_LIMIT);
 	})
@@ -32550,9 +32519,7 @@ function text_nav(_datum){
 	.attr("accessKey", "p")
 	.on("click", function(d) {
 		var peerPtId = document.getElementById(TEXT_TOOLBOX_ID + "-peer").value;
-		var peerVtxId = "gvertex_" + D3_SCENE.select("#" + peerPtId).datum().hc;
-		simulateClick(document.getElementById(peerVtxId));
-		simulateClick(document.getElementById(peerPtId));
+		setBhbPosition(peerPtId);
 	});
 
 	// nav to before
@@ -32565,9 +32532,7 @@ function text_nav(_datum){
 	.attr("accessKey", "b")
 	.on("click", function(d) {
 		var beforePtId = document.getElementById(TEXT_TOOLBOX_ID + "-before").value;
-		var beforeVtxId = "gvertex_" + D3_SCENE.select("#" + beforePtId).datum().hc;
-		simulateClick(document.getElementById(beforeVtxId));
-		simulateClick(document.getElementById(beforePtId));
+		setBhbPosition(beforePtId);
 	});
 
 	// unselect
@@ -32607,19 +32572,6 @@ function text_nav(_datum){
 	.on("click", function(d) {
 		downloadCSV(DATA, true);
 	});
-
-	//TODO: REMOVE Done from text interaction
-	/* // amend from this position
-	navTool.append("button")
-	.attr("type","button")
-	.attr("class","btn btn-secondary")
-	.attr("id",TEXT_TOOLBOX_ID + "-amend")
-	.text(String.fromCharCode(43))
-	.attr("title", "Edit from this point")
-	.on("click", function(d) {
-		amendFromPoint(document.getElementById(TEXT_TOOLBOX_ID + "-point").value);
-	});
-	*/
 }
 
 /**
@@ -32640,8 +32592,8 @@ function amendFromPoint(_pt) {
 	* @returns {-} switch mode
 	*/
 function switchView(){
-	if (CURRENT_BHB_MODE == "graph") setBhbMode("text");
-	if (CURRENT_BHB_MODE == "text") setBhbMode("graph");
+	if (CURRENT_BHB_MODE === "graph") setBhbMode("text");
+	if (CURRENT_BHB_MODE === "text") setBhbMode("graph");
 }
 
 // ******************************************************
@@ -32731,7 +32683,7 @@ function storeLocalForcesStatus(){
 	*/
 function hashCode(_str){
 	var hash = 0;
-	if (_str.length == 0) return hash;
+	if (_str.length === 0) return hash;
 	for (var i=0; i < _str.length; i++) {
 		var char = _str.charCodeAt(i);
 		hash = ((hash<<5)-hash)+char;
@@ -32791,7 +32743,7 @@ function qa_vertices_forces(edges, vertices) {
 			forces.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));  // Nodes attracting or reppelling each others (negative = repelling)
 		}
 		//when all  vertices are pinned, faster decay
-		if (D3_SCENE.selectAll(".gvertex").select("circle.pinned").size() == VERTICES_BY_HC.size()) {
+		if (D3_SCENE.selectAll(".gvertex").select("circle.pinned").size() === VERTICES_BY_HC.size()) {
 			forces.alphaDecay(ALLPINNED_DECAY);
 		} else {
 			forces.alphaDecay(DEF_DECAY);
@@ -32819,7 +32771,7 @@ function qa_linkPoints(links) {
 		count,
 		bias,
 		iterations = 1;
-		if (links == null) links = [];
+		if (links === null) links = [];
 
 function qa_defaultStrength(link) {
 	return 1 / Math.min(count[link.source.index], count[link.target.index]);
@@ -32859,7 +32811,7 @@ function force(alpha) {
 	//console.log("(error - data) i:", i, "id: ", links[i].id);
 	continue;
 	}																				/* vertex d3 data */
-	if (link.topology=='spheric') continue;
+	if (link.topology === 'spheric') continue;
 		var src_rot = getAbsTheta(source),
 				tgt_rot = getAbsTheta(target);
 		var xy_src  = getAbsCoord(source.point),

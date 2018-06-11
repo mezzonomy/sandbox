@@ -656,17 +656,18 @@ button, input[type="submit"], .btn {
 	    background-color: #28a745;
 	}
 	.badge-spheric {
-	    color: darkgrey;
-	    background-color: lightgrey;
+		color: darkgrey;
+		background-color: lightgrey;
 	}
 	.badge-hyperbolic {
-			color: #fff;
-			background-color: #6c757d;
+		color: #fff;
+		/*background-color: #6c757d;*/
+		background-color: #007bff;
 	}
 	.badge-pill {
-	    padding-right: .6em;
-	    padding-left: .6em;
-	    border-radius: 10rem;
+		padding-right: .6em;
+		padding-left: .6em;
+		border-radius: 10rem;
 	}
 	.badge {
 	    margin: 1px;
@@ -920,6 +921,7 @@ button, input[type="submit"], .btn {
 	.hyperbolic {
 		pointer-events: visible;
 		cursor: help;
+		fill:none; /*fill to see the selection zone*/
 	}
 	.planar {}
 	.spheric{}
@@ -958,6 +960,13 @@ button, input[type="submit"], .btn {
 
 	.marker-std {
 		stroke: black;
+	}
+
+	.graphAmendPlaceholder {
+		stroke: #990000;
+		fill: #990000;
+		opacity: .8;
+		cursor: crosshair;
 	}
 
 	/*CODEMIRROR ------------------------------ */
