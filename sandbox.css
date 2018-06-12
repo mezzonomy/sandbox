@@ -5,31 +5,37 @@
 .CodeMirror-hints {z-index: 100};
 /*START rewrites/add some classes from default.css*/
 .bhb {font:small; color: #777;}
-.notbhb {color: #007bff;}
+.notbhb {color: #007bff; font-weight: 500}
 div.link{ /* border of an amendment*/
   /*border-style: solid;
   border-color: #990000;
   border-width: thin;*/
 }
 span[data-elt="link"] {color: #777;}
-.av  {color:black; font-weight:medium;}
-.m   {color:#777; font-weight:light;}
-.e   {margin-left:1em; text-indent:unset; margin-right:1em;}
+.av {color:darkslateblue; font-weight:500;}
+.m {color:#777; font-weight:200;}
+.t {color: mediumblue; font-weight:200;}
+.e   {
+	margin-left:1rem;
+	text-indent:unset;
+	margin-right:1rem;
+	flex-grow: 1;
+}
 /*rewrites some classes from default.css*/
 /*END rewrites some classes from default.css*/
 /* text mode SVG */
 .icon-edit{
 	float: left;
-	margin-top: .375rem;
-	width: 15px;
-	height: 15px;
+	margin-top: .3rem;
+	width: 1.5rem;
+	height: .75rem;
 	user-select: none;
 }
 div.entagpadding{ /*To match the indentation of the edit icon*/
-	margin-left: 15px;
+	margin-left: 1.5rem;
 }
 div.tagnopathpadding{ /*To match the indentation of the edit icon*/
-	text-indent: 15px;
+	text-indent: 1.5rem;
 }
 .icon-edit:hover{
 	background-color: #007bff;
@@ -59,7 +65,7 @@ div.unwraped{
 	border-bottom-style: solid;
 }*/
 .deployed {
- background-color: #007bff;
+	box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
 }
 .on_symbol {
 	color:magenta;
@@ -82,7 +88,7 @@ nav.placeholder_amend_hidden {
 }
 
 nav.placeholder_amend_display {
-	color: red;
+	color: #990000;
 }
 
 /* END text mode svg */
@@ -180,6 +186,10 @@ i, cite, em, var, address, dfn {
     flex-direction: column!important;
 }
 
+.shadow {
+	box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+}
+
 span.braille-sign {
 	    width: 8.4em;
 	    height: 5.5em;
@@ -270,6 +280,7 @@ div.nav-upper {
 }
 
 div#workspace > div#bhb-text {
+	display:flex;
 }
 
 div#mini-workspace > div#bhb-text {
