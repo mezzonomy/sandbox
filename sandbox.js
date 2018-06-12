@@ -31666,20 +31666,35 @@ function vertexComputation(QApointsList){
 		for (let k=0, l=sr[i].segments.length;k<l;k++) {
 			const angle1 = sr[i].segments[k].angle1
 			sr[i].segments[k].amend={"before":{}, "after":{}, "push":{}, "append":{},};
-			sr[i].segments[k].amend.before.ptX = radius * Math.cos(angle1 - (angle/2));
-			sr[i].segments[k].amend.before.ptY = radius * Math.sin(angle1 - (angle/2));
-			sr[i].segments[k].amend.before.angle = DEGREES(angle1 - (angle/2));
-			sr[i].segments[k].amend.push.ptX = radius * Math.cos(angle1 + (angle/2));
-			sr[i].segments[k].amend.push.ptY = radius * Math.sin(angle1 + (angle/2));
-			sr[i].segments[k].amend.push.angle = DEGREES(angle1 + (angle/2));
 			let ptPeerAngle1 = 0;
 			if (sr[i].segments[k].topology === "hyperbolic") ptPeerAngle1 = sr[i].segments.find(function(s){return s.point === sr[i].segments[k].peer}).angle1;
-			sr[i].segments[k].amend.after.ptX = radius * Math.cos(ptPeerAngle1 + (angle/2));
-			sr[i].segments[k].amend.after.ptY = radius * Math.sin(ptPeerAngle1 + (angle/2));
-			sr[i].segments[k].amend.after.angle = DEGREES(ptPeerAngle1 + (angle/2));
-			sr[i].segments[k].amend.append.ptX = radius * Math.cos(ptPeerAngle1 - (angle/2));
-			sr[i].segments[k].amend.append.ptY = radius * Math.sin(ptPeerAngle1 - (angle/2));
-			sr[i].segments[k].amend.append.angle = DEGREES(ptPeerAngle1 - (angle/2));
+			if (sr[i].segments[k].point.startsWith("T_")) {
+				sr[i].segments[k].amend.before.ptX = radius * Math.cos(angle1 - (angle/2));
+				sr[i].segments[k].amend.before.ptY = radius * Math.sin(angle1 - (angle/2));
+				sr[i].segments[k].amend.before.angle = DEGREES(angle1 - (angle/2));
+				sr[i].segments[k].amend.push.ptX = radius * Math.cos(angle1 + (angle/2));
+				sr[i].segments[k].amend.push.ptY = radius * Math.sin(angle1 + (angle/2));
+				sr[i].segments[k].amend.push.angle = DEGREES(angle1 + (angle/2));
+				sr[i].segments[k].amend.after.ptX = radius * Math.cos(ptPeerAngle1 + (angle/2));
+				sr[i].segments[k].amend.after.ptY = radius * Math.sin(ptPeerAngle1 + (angle/2));
+				sr[i].segments[k].amend.after.angle = DEGREES(ptPeerAngle1 + (angle/2));
+				sr[i].segments[k].amend.append.ptX = radius * Math.cos(ptPeerAngle1 - (angle/2));
+				sr[i].segments[k].amend.append.ptY = radius * Math.sin(ptPeerAngle1 - (angle/2));
+				sr[i].segments[k].amend.append.angle = DEGREES(ptPeerAngle1 - (angle/2));
+			} else if (sr[i].segments[k].point.startsWith("B_")) {
+				sr[i].segments[k].amend.append.ptX = radius * Math.cos(angle1 - (angle/2));
+				sr[i].segments[k].amend.append.ptY = radius * Math.sin(angle1 - (angle/2));
+				sr[i].segments[k].amend.append.angle = DEGREES(angle1 - (angle/2));
+				sr[i].segments[k].amend.after.ptX = radius * Math.cos(angle1 + (angle/2));
+				sr[i].segments[k].amend.after.ptY = radius * Math.sin(angle1 + (angle/2));
+				sr[i].segments[k].amend.after.angle = DEGREES(angle1 + (angle/2));
+				sr[i].segments[k].amend.push.ptX = radius * Math.cos(ptPeerAngle1 + (angle/2));
+				sr[i].segments[k].amend.push.ptY = radius * Math.sin(ptPeerAngle1 + (angle/2));
+				sr[i].segments[k].amend.push.angle = DEGREES(ptPeerAngle1 + (angle/2));
+				sr[i].segments[k].amend.before.ptX = radius * Math.cos(ptPeerAngle1 - (angle/2));
+				sr[i].segments[k].amend.before.ptY = radius * Math.sin(ptPeerAngle1 - (angle/2));
+				sr[i].segments[k].amend.before.angle = DEGREES(ptPeerAngle1 - (angle/2));
+			}
 		}
 	}
 
@@ -32258,6 +32273,24 @@ function AddButtonsToPerspective(){
 			})
 	}
 
+	// zoom on point
+	var btnZoomOnPoint = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnZoomOnPoint");
+	if (btnZoomOnPoint.empty()) {  //&& getPoint(CURRENT_BHB_POSITION) !== false) {
+			btnZoomOnPoint = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnZoomOnPoint").text("zoom on point");
+			btnZoomOnPoint.on("click", function(){
+				console.log("Zoom on ", CURRENT_BHB_POSITION)
+				if (CURRENT_BHB_MODE === 'graph') {
+					D3_SCENE.transition()
+					.duration(750)
+					.call(ZOOM.transform, d3.zoomIdentity.translate(getAbsCoordPoint(CURRENT_BHB_POSITION).x, getAbsCoordPoint(CURRENT_BHB_POSITION).y).scale(4));
+				} else {
+					D3_SCENE.transition()
+					.duration(750)
+					.call(ZOOM.transform, d3.zoomIdentity.scale(1/2));
+				}
+			})
+	}
+
 	// reset position
 	var btnResetPosHistory = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnReset-posHistory");
 	if (btnResetPosHistory.empty()) {
@@ -32452,6 +32485,7 @@ function unpinVertex(_vertex){
 	* @returns {pt.datum()} or false if not found
 	*/
 function getPoint(_ptId) {
+	if (POINTS_BY_ID === undefined) return false;
 	const pt = POINTS_BY_ID.get(_ptId);
 	if (pt === undefined) {
 		console.log("Point", _ptId, "not found!")
@@ -32802,7 +32836,7 @@ function qa_vertices_forces(edges, vertices) {
 		.force("link", qa_linkPoints().links(edges).distance(function(d){return (d.source.radius + d.target.radius) * 1.5;}).id(function(d) {return d.id;})) // customized force
 		;
 		if (FORCES_STATUS.collide.status) {
-			forces.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;})); // collision detection
+			forces.force("collide", d3.forceCollide().radius(function(d){return d.radius + 20;})); // collision detection
 		}
 		if (FORCES_STATUS.center.status) {
 			var xc= D3_SCENE.property("clientWidth") / 2;

@@ -19,7 +19,8 @@ span[data-elt="link"] {color: #777;}
 	margin-left:1rem;
 	text-indent:unset;
 	margin-right:1rem;
-	flex-grow: 1;
+	flex-grow: 2;
+	width: 100%;
 }
 /*rewrites some classes from default.css*/
 /*END rewrites some classes from default.css*/
