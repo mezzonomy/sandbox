@@ -31084,14 +31084,21 @@ function render(_data, _diff){
 	D3_SCENE = D3_UNIVERSE.select("svg#scene");
 	DOM_SCENE = document.getElementById("scene");
 	PERSPECTIVE_TOOLBOX_FOOTER = D3_UNIVERSE.select("#perspective-footer");
-	ZOOM = d3.zoom();
+	ZOOM = d3.zoom()
+		.scaleExtent([1/8, 8])
+		.on("zoom", containerZoomed)
+		.clickDistance(10);
 	init_timeRangeSlider();
+
 	CURRENT_BHB_POSITION = document.getElementById("universe").dataset.bhbposition;
-	var oldBhbMode = CURRENT_BHB_MODE; // save previous mode
-	CURRENT_BHB_MODE=document.getElementById("universe").dataset.bhbmode;
 
 	//check for mode change and switch existing scene
-	if (oldBhbMode !== CURRENT_BHB_MODE) {
+	var oldBhbMode = CURRENT_BHB_MODE; // save previous mode
+	CURRENT_BHB_MODE=document.getElementById("universe").dataset.bhbmode;
+	let modeHasChanged = false;
+	if (oldBhbMode !== CURRENT_BHB_MODE) modeHasChanged = true;
+
+	if (modeHasChanged) {
 		if (!D3_SCENE.empty()) D3_SCENE.remove(); //removes but does not empty the selection
 		D3_SCENE = D3_UNIVERSE.select("svg#scene"); // reinit scene selection
 	}
@@ -31101,7 +31108,13 @@ function render(_data, _diff){
 		textModeInteraction();
 	}
 
-	if (!_diff && !D3_SCENE.empty()) selectPoint();
+	// ******************************************************
+	// Select current point and zoom on it when mode is changed
+	// ******************************************************
+
+	if (!_diff && !D3_SCENE.empty()) {
+		selectPoint();
+	}
 
 	// ******************************************************
 	// Beyond this point executed only if diffs in matrix or scene is empty or reinited
@@ -31124,6 +31137,7 @@ function render(_data, _diff){
 	// if text mode, adds a listener to close menus if workspace is clicked
 	if (CURRENT_BHB_MODE === 'text') {
 		D3_UNIVERSE.select("#workspace").on("click", function(d) {
+			event.stopPropagation();
 			D3_UNIVERSE.selectAll("#toolboxes").select("#explorer").classed("opened", false).classed("closed", true);
 			D3_UNIVERSE.selectAll("#toolboxes").select("#perspective").classed("opened", false).classed("closed", true);
 			D3_UNIVERSE.selectAll("#toolboxes").select("#amendment").classed("opened", false).classed("closed", true);
@@ -31157,22 +31171,22 @@ function render(_data, _diff){
 	// ******************************************************
 	// zoom
 	// ******************************************************
-	ZOOM.scaleExtent([1/8, 8]).on("zoom", zoomed);
-
-	D3_SCENE.call(ZOOM)
-	.on("click", function(d) {
-		unselectVertices(); //unselect vertices
-		//setBhbPosition("null"); //TODO: define a non select point
-		//console.log("Click on background:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
-		})
+	D3_SCENE.call(ZOOM);
 	//.on("dblclick.zoom", null); //de-comment to prenvent dble click zooming (std in touch screen devices)
-
-	function zoomed() {
-		container.attr("transform", d3.event.transform);
-	}
 
 	//change zoom level if mini-workspace
 	if (CURRENT_BHB_MODE === 'text') D3_SCENE.call(ZOOM.transform, d3.zoomIdentity.scale(1/2));
+
+	// ******************************************************
+	// Behaviour when click on scene (dbl click is zoom)
+	// ******************************************************
+
+	/*D3_SCENE.on("click", function(d) {
+		event.stopPropagation();
+		unselectVertices(); //unselect vertices
+		//setBhbPosition("null"); //TODO: define a non select point
+		//console.log("Click on background:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
+	})*/
 
 	// ******************************************************
 	// get forces settings from localstore
@@ -31470,7 +31484,7 @@ function render(_data, _diff){
 	VERTICES_POSITIONNING.restart(); //reinit forces
 
 	// Positionning calculation at each tick
-	var semaphore = true;
+	let semaphore = true;
 	function ticked() {
 		if (semaphore){
 			try{
@@ -31503,7 +31517,10 @@ function render(_data, _diff){
 				.filter(function(d){return (d.topology === "planar");})
 				.attr("x", function(d) {return getAbsCoordPoint(d.source.point).x;})
 				.attr("y", function(d) {return getAbsCoordPoint(d.source.point).y;})
-				.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoordPoint(d.source.point).x, getAbsCoordPoint(d.source.point).y, getAbsCoordPoint(d.target.point).x, getAbsCoordPoint(d.target.point).y, "lbl_"+d.id, d.topology)});
+				.attr("transform", function(d) {
+					const sPt = getAbsCoordPoint(d.source.point), tPt = getAbsCoordPoint(d.target.point);
+					return EdgeLblOrientation(sPt.x, sPt.y, tPt.x, tPt.y, "lbl_" + d.id, d.topology)
+				});
 
 				edge
 				.filter(function(d){return (d.topology === "spheric");})
@@ -31513,10 +31530,9 @@ function render(_data, _diff){
 				.filter(function(d){return (d.topology === "spheric");})
 				.attr("x", function(d) {return getAbsCoordPoint(d.source.point).x;})
 				.attr("y", function(d) {return getAbsCoordPoint(d.source.point).y;})
-				.attr("transform", function(d) {return EdgeLblOrientation(getAbsCoordPoint(d.source.point).x, getAbsCoordPoint(d.source.point).y,
-					(getAbsCoordPoint(d.source.point).x - getAbsCoord("gvertex_" + d.target.hc).x) * BEYOND,
-					(getAbsCoordPoint(d.source.point).y - getAbsCoord("gvertex_" + d.target.hc).y) * BEYOND,
-					"lbl_"+d.id, d.topology)});
+				.attr("transform", function(d) {
+					const sPt = getAbsCoordPoint(d.source.point), vtx = getAbsCoord("gvertex_" + d.target.hc);
+					return EdgeLblOrientation(sPt.x, sPt.y, (sPt.x - vtx.x) * BEYOND, (sPt.y - vtx.y) * BEYOND, "lbl_" + d.id, d.topology)});
 
 				/* ticks control*/
 				var ticksDone = (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay())));
@@ -31559,6 +31575,8 @@ function render(_data, _diff){
 	function endTick() {
 		if (!PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").empty()) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text("No animation");
 		storeLocalVertexPositionning(VERTICES_BY_HC); //store last vertex position and rotation
+		// If mode has changed, recenter the selection on the point
+		if (modeHasChanged) zoomOnPoint(CURRENT_BHB_POSITION, -1, 750);
 	}
 }
 /** End of main render function ***************************************
@@ -31649,7 +31667,13 @@ function vertexComputation(QApointsList){
 			sr[i].segments[k].endAngle = angle2 + Math.PI * .5; // angle in degrees of the next point on the vertex circle. To draw arcs (D3 pie format)
 			sr[i].segments[k].index = k; // index of the point in the vertex
 			sr[i].segments[k].topology = "hyperbolic"; //default topology
-			sr[i].segments[k].before = sr[i].segments.find(function(s){return s.next === sr[i].segments[k].point}).point;
+			try {
+				// in some cases the before point can't be found
+				sr[i].segments[k].before = sr[i].segments.find(function(s){return s.next === sr[i].segments[k].point}).point;
+			} catch {
+				sr[i].segments[k].before = "";
+				console.log("Before point from point", sr[i].segments[k].point, "can't be found");
+			}
 			sr[i].segments[k].tagraw = sr[i].segments[k].info.xsl_element;
 			sr[i].segments[k].tagnet = sr[i].segments[k].info.xsl_element.replace(":","_");
 			if (sr[i].segments[k].hc != pointsById1.get(sr[i].segments[k].peer).hc) {sr[i].segments[k].topology="planar";}
@@ -31739,6 +31763,23 @@ function vertexComputation(QApointsList){
 	// logs TODO: remove
 	console.log("Render", QApointsList.length , "points. Vertices reconstruction in", (j + 1), "iterations", sr);
 	return sr;
+}
+
+// ******************************************************
+// Zoom listeners
+// ******************************************************
+
+function containerZoomed() {
+	//console.log('zoomed() - applying transform ' + d3.event.transform.toString());
+
+	d3.select("#container").attr("transform", d3.event.transform);
+}
+function containerZoomStarted() {
+	/*console.log("Current transform on scene:",D3_SCENE.node().__zoom)
+	console.log('zoomStarted() - transform ' + d3.event.transform.toString());*/
+}
+function containerZoomEnded() {
+	/*console.log('zoomEnded() - transform ' + d3.event.transform.toString());*/
 }
 
 // ******************************************************
@@ -31869,7 +31910,7 @@ function getAbsCoord(elt) {
 function getAbsCoordPoint(_elt) {
 	if (!getPoint(_elt)) return {x:0, y:0}; //No error if elt not found// to filter phantom s : TODO: improve by suppressing these fantom Edges
 	const elt = getPoint(_elt);
-	const matrixPt = document.getElementById("grotate_" + elt.hc).getCTM(); //get current elt transformation on svg (in fact grotate's)
+	const matrixPt = DOM_SCENE.getElementById("grotate_" + elt.hc).getCTM(); //get current elt transformation on svg (in fact grotate's)
 	let pt = DOM_SCENE.createSVGPoint(); //create new point on the svg
 	pt.x = +elt.ptX;
 	pt.y = +elt.ptY;
@@ -31919,7 +31960,8 @@ function drawPlanar(_s, _t){
 	* @returns {string} - svg path for the edge
 	*/
 function drawSpheric(_s, _v){
-	var path="M" + getAbsCoordPoint(_s).pxy + "L" + ((getAbsCoordPoint(_s).x - getAbsCoord(_v).x) * BEYOND) + " " + ((getAbsCoordPoint(_s).y - getAbsCoord(_v).y) * BEYOND);
+	const sPt = getAbsCoordPoint(_s), vtx = getAbsCoord(_v);
+	var path="M" + sPt.pxy + "L" + ((sPt.x - vtx.x) * BEYOND) + " " + ((sPt.y - vtx.y) * BEYOND);
 	return {path:path};
 }
 
@@ -32277,18 +32319,7 @@ function AddButtonsToPerspective(){
 	var btnZoomOnPoint = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnZoomOnPoint");
 	if (btnZoomOnPoint.empty()) {  //&& getPoint(CURRENT_BHB_POSITION) !== false) {
 			btnZoomOnPoint = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnZoomOnPoint").text("zoom on point");
-			btnZoomOnPoint.on("click", function(){
-				console.log("Zoom on ", CURRENT_BHB_POSITION)
-				if (CURRENT_BHB_MODE === 'graph') {
-					D3_SCENE.transition()
-					.duration(750)
-					.call(ZOOM.transform, d3.zoomIdentity.translate(getAbsCoordPoint(CURRENT_BHB_POSITION).x, getAbsCoordPoint(CURRENT_BHB_POSITION).y).scale(4));
-				} else {
-					D3_SCENE.transition()
-					.duration(750)
-					.call(ZOOM.transform, d3.zoomIdentity.scale(1/2));
-				}
-			})
+			btnZoomOnPoint.on("click", function(){zoomOnPoint();})
 	}
 
 	// reset position
@@ -32405,6 +32436,7 @@ function addGraphAmendPlaceholder(_pt, _order) {
 	.attr("class", "graphAmendPlaceholder");
 
 	g.on("click", function(d) {
+		event.stopPropagation();
 		amend(this.dataset.path, this.dataset.order, true);
 	});
 }
@@ -32526,6 +32558,7 @@ function selectPoint(_ptId, _openToolbox) {
 			d3.select(this).attr("marker-start", "url(#marker-start)").classed("start",false);
 			d3.select(this).attr("marker-end", "url(#marker-end)").classed("end",false);
 		}
+		//zoomOnPoint(pt.point, 2, 100);
 	});
 
 	// open text toolbox and poupulates edit zone
@@ -32548,6 +32581,34 @@ function selectPoint(_ptId, _openToolbox) {
 
 	return Object.assign(pt, {topology:selectedEdge.datum().topology, displayed:true});
 }
+
+/**
+	* Function to zoom on a given point
+	* @param {_pt} - String, id of the point. Optional, if none will be CURRENT_BHB_POSITION
+	* @param {_zl} - numeric, Zoomlevel. Optional, if none will be 2
+	* @returns - Sets the selected point at the center of the viewport with a default *4 zoom (or*2 in text mode). False if point not found
+	*/
+function zoomOnPoint(_pt = CURRENT_BHB_POSITION, _zl = -1, duration = 2000) {
+	if (_zl === -1) (CURRENT_BHB_MODE==='graph')?_zl = 1.2 : _zl = .7;
+	const coord = getAbsCoordPoint(CURRENT_BHB_POSITION);
+	if (coord.x === 0 && coord.y === 0) return false;
+	const xc= D3_SCENE.property("clientWidth") / 2;
+	let yc= D3_SCENE.property("clientHeight") / 2;
+	if (CURRENT_BHB_MODE) yc -= 30; // take in account buttons on the bottom of the viewport
+
+	function trf() {
+		return d3.zoomIdentity
+		.scale(.5)
+		.translate(xc*2, yc*2)
+		.scale(_zl*2)
+		.translate(-coord.x, -coord.y);
+	}
+
+	D3_SCENE.transition()
+	.duration(duration)
+	.call(ZOOM.transform, trf);
+}
+
 
 /**
 	* print out info on point (deprecated, not really used except for information)
@@ -32622,6 +32683,7 @@ function text_nav(_datum){
 	.attr("title", "Peer")
 	.attr("accessKey", "p")
 	.on("click", function(d) {
+		event.stopPropagation();
 		var peerPtId = document.getElementById(TEXT_TOOLBOX_ID + "-peer").value;
 		setBhbPosition(peerPtId);
 	});
@@ -32635,6 +32697,7 @@ function text_nav(_datum){
 	.attr("title", "Before")
 	.attr("accessKey", "b")
 	.on("click", function(d) {
+		event.stopPropagation();
 		var beforePtId = document.getElementById(TEXT_TOOLBOX_ID + "-before").value;
 		setBhbPosition(beforePtId);
 	});
@@ -32647,6 +32710,7 @@ function text_nav(_datum){
 	.text(String.fromCharCode(215))
 	.attr("title", "unselect")
 	.on("click", function(d) {
+		event.stopPropagation();
 		D3_UNIVERSE.select("#" + TEXT_TOOLBOX_ID).classed("opened", false).classed("closed", true);
 		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = null;
 		D3_SCENE.selectAll(".viewed").classed("viewed",false);
@@ -32663,6 +32727,7 @@ function text_nav(_datum){
 	.text(String.fromCharCode(8862))
 	.attr("title", "export modal matrix points to csv")
 	.on("click", function(d) {
+		event.stopPropagation();
 		downloadCSV(DATA);
 	});
 
@@ -32674,6 +32739,7 @@ function text_nav(_datum){
 	.text(String.fromCharCode(8862))
 	.attr("title", "export modal matrix points sorted & anonymised to csv")
 	.on("click", function(d) {
+		event.stopPropagation();
 		downloadCSV(DATA, true);
 	});
 }
@@ -32839,8 +32905,8 @@ function qa_vertices_forces(edges, vertices) {
 			forces.force("collide", d3.forceCollide().radius(function(d){return d.radius + 20;})); // collision detection
 		}
 		if (FORCES_STATUS.center.status) {
-			var xc= D3_SCENE.property("clientWidth") / 2;
-			var yc= D3_SCENE.property("clientHeight") / 2;
+			let xc= D3_SCENE.property("clientWidth") / 2;
+			let yc= D3_SCENE.property("clientHeight") / 2;
 			forces.force("center", d3.forceCenter(xc,yc)) // force towards the center
 		}
 		if (FORCES_STATUS.charge.status) {
@@ -32916,15 +32982,15 @@ function force(alpha) {
 	continue;
 	}																				/* vertex d3 data */
 	if (link.topology === 'spheric') continue;
-		var src_rot = getAbsTheta(source),
-				tgt_rot = getAbsTheta(target);
-		var xy_src  = getAbsCoordPoint(source.point),
-				xy_tgt  = getAbsCoordPoint(target.point);
-		var x = xy_tgt.x + d_tgt.vx - xy_src.x - d_src.vx|| qa_jiggle(),
+		const src_rot = getAbsTheta(source),
+					tgt_rot = getAbsTheta(target);
+		const xy_src  = getAbsCoordPoint(source.point),
+					xy_tgt  = getAbsCoordPoint(target.point);
+		let x = xy_tgt.x + d_tgt.vx - xy_src.x - d_src.vx|| qa_jiggle(),
 				y = xy_tgt.y + d_tgt.vy - xy_src.y - d_src.vy|| qa_jiggle();
 		// -------------------------------------------------------------
-		var angle = Math.atan2(y, x);
-		var vtt   = tgt_rot - angle + Math.PI,
+		const angle = Math.atan2(y, x);
+		let vtt   = tgt_rot - angle + Math.PI,
 				vst   = src_rot - angle;
 		vtt %= 2 * Math.PI; if (vtt > Math.PI) vtt -= 2 * Math.PI;
 		vst %= 2 * Math.PI; if (vst > Math.PI) vst -= 2 * Math.PI;
@@ -32933,8 +32999,8 @@ function force(alpha) {
 		// -------------------------------------------------------------
 		x -= distances[i] * Math.cos(src_rot);
 		y -= distances[i] * Math.sin(src_rot);
-		var l = Math.sqrt(x * x + y * y); x /= l;y /= l; /*unit vector*/
-		var int = f * l, flx = x * int, fly = y * int;  /*force vector*/
+		const l = Math.sqrt(x * x + y * y); x /= l;y /= l; /*unit vector*/
+		const int = f * l, flx = x * int, fly = y * int;  /*force vector*/
 		// link force
 		d_tgt.vx -= flx * b; d_src.vx += flx * (1 - b);
 		d_tgt.vy -= fly * b; d_src.vy += fly * (1 - b);
@@ -32944,7 +33010,7 @@ function force(alpha) {
 
 function initialize() {
 	if (!vertices) return;
-	var i,
+	let i,
 	n = vertices.length,
 	m = links.length,
 	vertexById = d3.map(vertices, id),

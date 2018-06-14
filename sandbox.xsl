@@ -405,7 +405,7 @@
 				<input id="{$toolbox_ID}-role" name="{$toolbox_ID}-role" type="hidden" required="required">
 					<xsl:attribute name="value"><xsl:value-of select="$role"/></xsl:attribute>
 				</input>
-				<label for="{$toolbox_ID}-editzone">
+				<label for="{$toolbox_ID}-editzone" style="user-select: none;">
 					Edit Amendment
 					<xsl:text>    </xsl:text>
 					<button type="button" style="padding: 0; margin: 0; background: none; vertical-align: unset;" onclick="cm_editor.setOption('fullScreen', true); cm_editor.setOption('theme', 'material')">
