@@ -30627,7 +30627,8 @@ const POINT_RADIUS = +0,
 			DEF_DECAY = 1 - Math.pow(0.001, 1 / 300), // Default decay value for 300 ticks
 			ALLPINNED_DECAY = 1 - Math.pow(0.001, 1 / 50), // Decay when all vertices are pinned (ie. reloading)
 			REHEAT_ALPHATARGET = .3, // Non 0 to maintain heated
-			DEF_ALPHATARGET = 0;
+			DEF_ALPHATARGET = 0,
+			EDGE_TYPES = [{kind:"hyperbolic"},{kind:"planar"},{kind:"spheric"},{kind:"link"}];
 
 // Global variables
 var D3_UNIVERSE,
@@ -31300,8 +31301,8 @@ function render(_data, _diff){
 	.filter(function(d) {return (d.point.startsWith("T") && (d.topology === "hyperbolic"))})
 	.append("path")
 	.attr("class", "edges hyperbolic")
-	.attr("marker-end", "url(#marker-end)")
-	.attr("marker-start", "url(#marker-start)")
+	.attr("marker-end", function(d) {return "url(#marker-end-" + d.topology + ")";})
+	.attr("marker-start", function(d) {return "url(#marker-start-" + d.topology + ")";})
 	.attr("id", function(d) {return "hyperbolic_" + d.point;})
 	.attr("d", function(d){return drawHyperbolic(getPoint(d.point), getPoint(d.peer)).path;})
 	.on("click", function(d){
@@ -31379,8 +31380,8 @@ function render(_data, _diff){
 	.append("path")
 	.attr("class", function(d){return "edges edge " + d.topology;})
 	.attr("id", function(d){return d.id;})
-	.attr("marker-end","url(#marker-end)")
-	.attr("marker-start","url(#marker-start)")
+	.attr("marker-end", function(d){return "url(#marker-end-" + d.topology + ")";})
+	.attr("marker-start",function(d){return "url(#marker-start-" + d.topology + ")";})
 	.append("title")
 	.text(function(d){return d.source.info.xsl_element;});
 
@@ -31450,16 +31451,16 @@ function render(_data, _diff){
 
 	// Color all bhb:link edges
 	var bhbLinks = D3_SCENE.selectAll(".edges").filter(function(d){return d.tagraw === "bhb:link"})
-	bhbLinks.classed("bhbLink", true);
+	bhbLinks.classed("link", true);
 	bhbLinks.attr("marker-start", function(d){
 		if (d3.select(this).classed("viewed")) {
 			if (d3.select(this).classed("start")) {
 				return "url(#marker-start-position)";
 			} else {
-				return "url(#marker-start-bhbLink)";
+				return "url(#marker-start-link)";
 			}
 		} else {
-			return "url(#marker-start-bhbLink)";
+			return "url(#marker-start-link)";
 		}
 	});
 	bhbLinks.attr("marker-end", function(d){
@@ -31467,10 +31468,10 @@ function render(_data, _diff){
 			if (d3.select(this).classed("end")) {
 				return "url(#marker-end-position)";
 			} else {
-				return "url(#marker-end-bhbLink)";
+				return "url(#marker-end-link)";
 			}
 		} else {
-			return "url(#marker-end-bhbLink)";
+			return "url(#marker-end-link)";
 		}
 	});
 
@@ -32033,7 +32034,7 @@ function createMarkers(_defs) {
 	//Normal design
 	_defs.append("marker")
 		.attr("id", "marker-end")
-		.attr("class", "marker-std")
+		.attr("class", "marker")
 		.attr("markerWidth", "10")
 		.attr("markerHeight", "10")
 		.attr("refX", "0")
@@ -32044,7 +32045,7 @@ function createMarkers(_defs) {
 		.attr("class","marker-std");
 	_defs.append("marker")
 		.attr("id", "marker-start")
-		.attr("class", "marker-std")
+		.attr("class", "marker")
 		.attr("markerWidth", "10")
 		.attr("markerHeight", "10")
 		.attr("refX", "10")
@@ -32055,7 +32056,7 @@ function createMarkers(_defs) {
 		.attr("class","marker-std");
 	_defs.append("marker")
 		.attr("id", "marker-start-position")
-		.attr("class", "marker-std")
+		.attr("class", "marker-position")
 		.attr("markerWidth", "500")
 		.attr("markerHeight", "250")
 		.attr("refX", "50")
@@ -32066,7 +32067,7 @@ function createMarkers(_defs) {
 		.attr("transform", "scale(.1)");
 	_defs.append("marker")
 		.attr("id", "marker-end-position")
-		.attr("class", "marker-std")
+		.attr("class", "marker-position")
 		.attr("markerWidth", "500")
 		.attr("markerHeight", "250")
 		.attr("refX", "0")
@@ -32078,7 +32079,7 @@ function createMarkers(_defs) {
 		.attr("transform", "scale(.1)");
 	_defs.append("marker")
 		.attr("id", "marker-end-position-end")
-		.attr("class", "marker-std")
+		.attr("class", "marker-position")
 		.attr("markerWidth", "10")
 		.attr("markerHeight", "10")
 		.attr("refX", "0")
@@ -32089,7 +32090,7 @@ function createMarkers(_defs) {
 		.attr("class","marker-viewed");
 	_defs.append("marker")
 		.attr("id", "marker-start-position-end")
-		.attr("class", "marker-std")
+		.attr("class", "marker-position")
 		.attr("markerWidth", "10")
 		.attr("markerHeight", "10")
 		.attr("refX", "10")
@@ -32099,12 +32100,14 @@ function createMarkers(_defs) {
 		.attr("d", "M 0 5 L 10 5")
 		.attr("class","marker-viewed");
 
-	//Duplicate for bhbLinks
-	var defsBhbLink = _defs.selectAll("marker.marker-std").clone(true)
-		.attr("id", function(d) {return this.id + "-bhbLink";})
-		.attr("class", function(d) {return this.id.replace("-std", "-bhbLink");});
-	defsBhbLink.selectAll("path")
-		.attr("class","marker-bhbLink");
+	//Duplicate for links
+	const defsMarkerStd = _defs.selectAll("marker.marker")
+	for (let t of EDGE_TYPES) {
+		let defsBhbLink = defsMarkerStd.clone(true)
+		.attr("id", function(d) {return this.id + "-" + t.kind;})
+		.classed("marker-" + t.kind, true);
+		defsBhbLink.selectAll("path").attr("class","marker-" + t.kind);
+	}
 }
 
 /**
@@ -32405,9 +32408,8 @@ function AddButtonsToPerspective(){
 		btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.append("input")
 		.attr("type","color")
 		.attr("id","btn-color-picker")
-		.attr("value","#ff0000")
+		.attr("value","rgb(223, 217, 218)")
 		.attr("style","width: 35px; height: 34px; position: relative; top: 8px;")
-		.attr("value", "#cddc39")
 		.on("change", function () {
 			document.body.style.backgroundColor = this.value;
 		});
@@ -32584,11 +32586,11 @@ function selectPoint(_ptId, _openToolbox) {
 	var pointsViewed = D3_SCENE.selectAll(".viewed").classed("viewed",false);
 	pointsViewed.each(function(d) {
 		if (d.tagraw === "bhb:link") {
-			d3.select(this).attr("marker-start", "url(#marker-start-bhbLink)").classed("start",false);
-			d3.select(this).attr("marker-end", "url(#marker-end-bhbLink)").classed("end",false);
+			d3.select(this).attr("marker-start", "url(#marker-start-link)").classed("start",false);
+			d3.select(this).attr("marker-end", "url(#marker-end-link)").classed("end",false);
 		} else {
-			d3.select(this).attr("marker-start", "url(#marker-start)").classed("start",false);
-			d3.select(this).attr("marker-end", "url(#marker-end)").classed("end",false);
+			d3.select(this).attr("marker-start", "url(#marker-start-" + d.topology + ")").classed("start",false);
+			d3.select(this).attr("marker-end", "url(#marker-end-" + d.topology + ")").classed("end",false);
 		}
 		//zoomOnPoint(pt.point, 2, 100);
 	});
@@ -32746,8 +32748,8 @@ function text_nav(_datum){
 		D3_UNIVERSE.select("#" + TEXT_TOOLBOX_ID).classed("opened", false).classed("closed", true);
 		document.getElementById(TEXT_TOOLBOX_ID + "-point").value = null;
 		D3_SCENE.selectAll(".viewed").classed("viewed",false);
-		D3_SCENE.selectAll("path.start").attr("marker-start", "url(#marker-start)").classed("start",false);
-		D3_SCENE.selectAll("path.end").attr("marker-end", "url(#marker-end)").classed("end",false);
+		D3_SCENE.selectAll("path.start").attr("marker-start", "url(#marker-start-" + d.topology + ")").classed("start",false);
+		D3_SCENE.selectAll("path.end").attr("marker-end", "url(#marker-end-" + d.topology + ")").classed("end",false);
 		unselectVertices()
 	});
 

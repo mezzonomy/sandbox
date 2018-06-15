@@ -1,13 +1,33 @@
 /* css variables */
 :root{
-	--sdb-edge-lbl-size: .8rem;
-	--sdb-amendment-color: #990000;
+	/*scene color*/
+	/*--sbx-workspace-color: #cddc39;*/
+	--sbx-workspace-color: rgb(223, 217, 218);
+	--sbx-toolbox-color: white;
+
+	/*misc*/
+	--sbx-edge-lbl-size: .8rem;
+	--sbx-amendment-color: #990000;
+
 	/*vertex*/
-	--sdb-vertex-color: silver;
-	--sdb-vertex-opacity:.2;
-	--sdb-vertex-border-color:silver;
-	--sdb-vertex-border-opacity:.4;
-	--sdb-vertex-border-width: 2;
+	--sbx-vertex-color: silver;
+	--sbx-vertex-opacity: .3;
+	--sbx-vertex-border-color: black;
+	--sbx-vertex-border-opacity: .8;
+	--sbx-vertex-border-width: .5;
+
+	/*topology*/
+	--sbx-hyperbolic-color: darkblue;
+	--sbx-hyperbolic-width: 1;
+	--sbx-hyperbolic-opacity: 1;
+
+	--sbx-planar-color: darkcyan;
+	--sbx-planar-width: 1;
+	--sbx-planar-opacity: 1;
+
+	--sbx-spheric-color: darkgreen;
+	--sbx-spheric-width: 1;
+	--sbx-spheric-opacity: 1;
 }
 
 
@@ -18,16 +38,19 @@
 .CodeMirror-hints {z-index: 100};
 /*START rewrites/add some classes from default.css*/
 .bhb {font:small; color: #777;}
-.notbhb {color: #007bff; font-weight: 500}
+.notbhb {
+	color: var(--sbx-hyperbolic-color);
+	font-weight: 500
+}
 /* border of an amendment
 	div.link{
   border-style: solid;
-  border-color:var(--sdb-amendment-color);
+  border-color:var(--sbx-amendment-color);
   border-width: thin;
 }
 */
 span.link{
-	color: var(--sdb-amendment-color);
+	color: var(--sbx-amendment-color);
 	font-weight: 100;
 }
 span[data-elt="link"] {color: #777;}
@@ -88,7 +111,7 @@ div.unwraped{
 	box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
 }
 .on_symbol {
-	color:magenta;
+	color: var(--sbx-planar-color);
 	font-style: italic;
 }
 .on_clock {
@@ -108,7 +131,7 @@ nav.placeholder_amend_hidden {
 }
 
 nav.placeholder_amend_display {
-	color: var(--sdb-amendment-color);
+	color: var(--sbx-amendment-color);
 }
 
 /* END text mode svg */
@@ -132,7 +155,7 @@ body {
 	height: 100%;
 	line-height: 1.5;
   text-align: left;
-	background-color: #cddc39; /*#9e9e9e*/
+	background-color: var(--sbx-workspace-color) /*#9e9e9e*/
 	/*background: linear-gradient(to bottom, #000000 0%,#cddc39 .5%,#cddc39 100%);*/
 }
 
@@ -474,7 +497,7 @@ svg#scene {
 	padding: 5px;
 	z-index:50;
 	opacity:.8;
-	background-color: white;
+	background-color: var(--sbx-toolbox-color);
 	box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
 }
 
@@ -685,16 +708,15 @@ button, input[type="submit"], .btn {
 	/*badges ------------------------------ */
 	.badge-planar {
 	    color: #fff;
-	    background-color: #28a745;
+	    background-color: var(--sbx-planar-color);
 	}
 	.badge-spheric {
-		color: darkgrey;
-		background-color: lightgrey;
+		color: #fff;
+		background-color: var(--sbx-spheric-color);
 	}
 	.badge-hyperbolic {
 		color: #fff;
-		/*background-color: #6c757d;*/
-		background-color: #007bff;
+		background-color: var(--sbx-hyperbolic-color);
 	}
 	.badge-pill {
 		padding-right: .6em;
@@ -803,7 +825,7 @@ button, input[type="submit"], .btn {
 
 	.evts {
 	  stroke: none;
-	  fill: var(--sdb-amendment-color);;
+	  fill: var(--sbx-amendment-color);;
 	  opacity:.5;
 	}
 
@@ -885,55 +907,15 @@ button, input[type="submit"], .btn {
 	}
 
 	.vertexCircle {
-		fill: var(--sdb-vertex-color);
-		fill-opacity: var(--sdb-vertex-opacity);
-		stroke:var(--sdb-vertex-border-color);
-		stroke-width: var(--sdb-vertex-border-width);
-		stroke-opacity: var(--sdb-vertex-border-opacity);
+		fill: var(--sbx-vertex-color);
+		fill-opacity: var(--sbx-vertex-opacity);
+		stroke:var(--sbx-vertex-border-color);
+		stroke-width: var(--sbx-vertex-border-width);
+		stroke-opacity: var(--sbx-vertex-border-opacity);
 	}
 
-	.pinned {
-	  /*stroke-width: 2px;
-	  stroke: black;*/
-	}
-
-	.point {
-		fill: none;
-		stroke-width: 0px;
-		stroke: none;
-		pointer-events: none;
-	}
-	.point-displayed {
-		fill: none;
-		stroke-width: 0px;
-		stroke: none;
-		/*cursor: pointer;
-		pointer-events: auto;*/
-	}
-	.point-displayed:hover {
-		fill: darkred;
-		stroke-width: 4px;
-		stroke: darkred;
-	}
-	circle.viewed {
-		/*fill: black;
-		stroke-width: 4px;
-		stroke: black;*/
-	}
-	.dragging {
-		fill: yellow;
-		stroke-width: 1px;
-		stroke: black;
-	}
-
-	.focused {
-	  fill: steelblue;
-	  stroke: black;
-	}
-
-	.edgeLbl  {
-		font-size: var(--sdb-edge-lbl-size);
-		fill: black;
+	text.edgeLbl  {
+		font-size: var(--sbx-edge-lbl-size);
 		pointer-events: visible;
 		cursor: help;
 		user-select: none;
@@ -942,9 +924,6 @@ button, input[type="submit"], .btn {
 
 	path {
 		fill:none;
-		stroke-width: 1px;
-		stroke: black;
-		pointer-events: none;
 	}
 
 	path.notselectable {
@@ -953,34 +932,71 @@ button, input[type="submit"], .btn {
 		user-select: none;
 		cursor: none;
 	}
-	.hyperbolic {
-		pointer-events: visible;
-		cursor: help;
-		fill:none; /*fill to see the selection zone*/
-	}
-	.planar {
-		pointer-events: visible;
-		cursor: help;
-	}
-	.spheric{
+
+	path.edges {
 		pointer-events: visible;
 		cursor: help;
 	}
 
-	path.bhbLink {
-		stroke: var(--sdb-amendment-color);
-	}
-	.marker-bhbLink {
-		stroke:var(--sdb-amendment-color);
+	path.edges.hyperbolic {
+		stroke: var(--sbx-hyperbolic-color);
+		stroke-width: var(--sbx-hyperbolic-width);
+		stroke-opacity: var(--sbx-hyperbolic-opacity);
 	}
 
-	path.selected {
+	marker.marker-hyperbolic {
+		stroke: var(--sbx-hyperbolic-color);
+		stroke-width: var(--sbx-hyperbolic-width);
+		stroke-opacity: var(--sbx-hyperbolic-opacity);
+	}
+
+	path.edges.planar {
+		stroke: var(--sbx-planar-color);
+		stroke-width: var(--sbx-planar-width);
+		stroke-opacity: var(--sbx-planar-opacity);
+	}
+
+	marker.marker-planar {
+		stroke: var(--sbx-planar-color);
+		stroke-width: var(--sbx-planar-width);
+		stroke-opacity: var(--sbx-planar-opacity);
+	}
+
+	text.edgeLbl.planar {
+		fill: var(--sbx-planar-color)
+	}
+
+	path.edges.spheric {
+		stroke: var(--sbx-spheric-color);
+		stroke-width: var(--sbx-spheric-width);
+		stroke-opacity: var(--sbx-spheric-opacity);
+	}
+
+	marker.marker-spheric {
+		stroke: var(--sbx-spheric-color);
+		stroke-width: var(--sbx-spheric-width);
+		stroke-opacity: var(--sbx-spheric-opacity);
+	}
+
+	text.edgeLbl.spheric {
+		fill: var(--sbx-spheric-color)
+	}
+
+	path.edges.link {
+		stroke: var(--sbx-amendment-color);
+	}
+	marker.marker-link {
+		stroke:var(--sbx-amendment-color);
+	}
+
+	path.edges.selected {
 		stroke-width: 3px;
 	}
-	path.viewed {
+	path.edges.viewed {
 		stroke:#007bff;
 		/*stroke-width: 3px;*/
 	}
+
 	.marker-viewed {
 		stroke: #007bff;
 	}
@@ -995,13 +1011,9 @@ button, input[type="submit"], .btn {
 		pointer-events: none;
 	}
 
-	.marker-std {
-		stroke: black;
-	}
-
 	.graphAmendPlaceholder {
-		stroke: var(--sdb-amendment-color);
-		fill: var(--sdb-amendment-color);
+		stroke: var(--sbx-amendment-color);
+		fill: var(--sbx-amendment-color);
 		opacity: .8;
 		cursor: crosshair;
 	}
