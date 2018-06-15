@@ -31558,7 +31558,7 @@ function render(_data, _diff){
 
 				// Log progess on freeze force button
 				if (!PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").empty()) {
-					if (percentCpt%5 === 0) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text("Freeze (running..." + percentCpt +"%)");
+					if (percentCpt%5 === 0) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text(percentCpt +"%");
 				}
 				//save positionning every 50 ticks
 				if (ticksDone%50 === 0) storeLocalVertexPositionning
@@ -31573,7 +31573,7 @@ function render(_data, _diff){
 
 	// After the last Tick
 	function endTick() {
-		if (!PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").empty()) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").text("No animation");
+		if (!PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").empty()) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").attr("title","Position computation, click to pause").text("100%");
 		storeLocalVertexPositionning(VERTICES_BY_HC); //store last vertex position and rotation
 		// If mode has changed, recenter the selection on the point
 		if (modeHasChanged) zoomOnPoint(CURRENT_BHB_POSITION, -1, 750);
@@ -32299,9 +32299,13 @@ function amend(_path, _order, _openTooblox) {
 	*/
 function AddButtonsToPerspective(){
 	// reset zoom
-	var btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnReset-zoom");
+	let btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnReset-zoom");
 	if (btnResetZoom.empty()) {
-			btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-zoom").text("zoom");
+			btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-zoom")
+			.attr("title","Reset zoom level")
+			.append("img")
+			.attr("src","/sandbox/img-icon-reset-zoom.svg")
+			.attr("style", "width: 15px; position: relative; top: 2px;");
 			btnResetZoom.on("click", function(){
 				if (CURRENT_BHB_MODE === 'graph') {
 					D3_SCENE.transition()
@@ -32316,16 +32320,24 @@ function AddButtonsToPerspective(){
 	}
 
 	// zoom on point
-	var btnZoomOnPoint = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnZoomOnPoint");
+	let btnZoomOnPoint = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnZoomOnPoint");
 	if (btnZoomOnPoint.empty()) {  //&& getPoint(CURRENT_BHB_POSITION) !== false) {
-			btnZoomOnPoint = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnZoomOnPoint").text("zoom on point");
+			btnZoomOnPoint = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnZoomOnPoint")
+			.attr("title","Zoom on point")
+			.append("img")
+			.attr("src","/sandbox/img-icon-eye-zoom.svg")
+			.attr("style", "width: 15px; position: relative; top: 2px;");
 			btnZoomOnPoint.on("click", function(){zoomOnPoint();})
 	}
 
 	// reset position
-	var btnResetPosHistory = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnReset-posHistory");
+	let btnResetPosHistory = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnReset-posHistory");
 	if (btnResetPosHistory.empty()) {
-			btnResetPosHistory = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-posHistory").text("reset");
+			btnResetPosHistory = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btnReset-posHistory")
+			.attr("title","Reset vertex positionning")
+			.append("img")
+			.attr("src","/sandbox/img-icon-reset.svg")
+			.attr("style", "width: 15px; position: relative; top: 2px;");
 			btnResetPosHistory.on("click", function(){
 				VERTICES_POSITIONNING.stop();
 				localStorage.removeItem("vertexLastPosition_json");
@@ -32336,31 +32348,50 @@ function AddButtonsToPerspective(){
 	}
 
 	// Stop animation (and log animation status)
-	var btnstopAnimation = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation");
+	let btnstopAnimation = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation");
 	if (btnstopAnimation.empty()) {
-		btnstopAnimation = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-stop-animation").attr("value","stop").text("freeze");
+		btnstopAnimation = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-stop-animation").attr("value","stop").text(".");
 		btnstopAnimation.on("click", function(){
 			VERTICES_POSITIONNING.stop();
 		});
 	}
 
 	// Start/Stop Collide force manually
-	var btnToggleCollide = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-toggle-collide");
+	let btnToggleCollide = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-toggle-collide");
 	if (btnToggleCollide.empty()) {
-		btnToggleCollide = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-collide")
+		btnToggleCollide = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-toggle-collide");
 		if (FORCES_STATUS.collide.status) {
-			btnToggleCollide.attr("value","stop").text("set collide:off");
+			btnToggleCollide.attr("value","stop")
+			.attr("title","Collide is on, set collide off")
+			.append("img")
+			.attr("src","/sandbox/img-icon-collide-on.svg")
+			.attr("style", "width: 15px; position: relative; top: 2px;");
 		} else {
-			btnToggleCollide.attr("value","start").text("set collide:on");
+			btnToggleCollide.attr("value","start")
+			.attr("title","Collide is off, set collide on")
+			.append("img")
+			.attr("src","/sandbox/img-icon-collide-off.svg")
+			.attr("style", "width: 15px; position: relative; top: 2px;");
 		}
 		btnToggleCollide.on("click", function(){
+			btnToggleCollide.selectAll("img").remove();
 			if (btnToggleCollide.attr("value") === "stop") {
 				VERTICES_POSITIONNING.force("collide", null);
-				btnToggleCollide.attr("value","start").text("set collide:on");
+				btnToggleCollide
+				.attr("value","start")
+				.attr("title","Collide is off, set collide on")
+				.append("img")
+				.attr("src","/sandbox/img-icon-collide-off.svg")
+				.attr("style", "width: 15px; position: relative; top: 2px;");
 				FORCES_STATUS.collide.status=false;
 			} else {
-				VERTICES_POSITIONNING.force("collide", d3.forceCollide().radius(function(d){return d.radius + 10;}));
-				btnToggleCollide.attr("value","stop").text("set collide:off");
+				VERTICES_POSITIONNING.force("collide", d3.forceCollide().radius(function(d){return d.radius + 20;}));
+				btnToggleCollide
+				.attr("value","stop")
+				.attr("title","Collide is on, set collide off")
+				.append("img")
+				.attr("src","/sandbox/img-icon-collide-on.svg")
+				.attr("style", "width: 15px; position: relative; top: 2px;");
 				FORCES_STATUS.collide.status=true;
 			}
 			storeLocalForcesStatus();
@@ -32369,13 +32400,14 @@ function AddButtonsToPerspective(){
 		});
 	}
 
-	var btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-color-picker");
+	let btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-color-picker");
 	if (btnColorPicker.empty()) {
 		btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.append("input")
 		.attr("type","color")
 		.attr("id","btn-color-picker")
 		.attr("value","#ff0000")
-		.attr("style","width:100%; border:none; borer-radius:5px; margin-top:5px")
+		.attr("style","width: 35px; height: 34px; position: relative; top: 8px;")
+		.attr("value", "#cddc39")
 		.on("change", function () {
 			document.body.style.backgroundColor = this.value;
 		});
