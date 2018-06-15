@@ -1,3 +1,16 @@
+/* css variables */
+:root{
+	--sdb-edge-lbl-size: .8rem;
+	--sdb-amendment-color: #990000;
+	/*vertex*/
+	--sdb-vertex-color: silver;
+	--sdb-vertex-opacity:.2;
+	--sdb-vertex-border-color:silver;
+	--sdb-vertex-border-opacity:.4;
+	--sdb-vertex-border-width: 2;
+}
+
+
 /* CodeMirror specific to sandbox*/
 .sb-cm-drop { background-color: #ff7; }
 .sb-cm-insert { background-color: #7bff77;     color: black;}
@@ -6,10 +19,16 @@
 /*START rewrites/add some classes from default.css*/
 .bhb {font:small; color: #777;}
 .notbhb {color: #007bff; font-weight: 500}
-div.link{ /* border of an amendment*/
-  /*border-style: solid;
-  border-color: #990000;
-  border-width: thin;*/
+/* border of an amendment
+	div.link{
+  border-style: solid;
+  border-color:var(--sdb-amendment-color);
+  border-width: thin;
+}
+*/
+span.link{
+	color: var(--sdb-amendment-color);
+	font-weight: 100;
 }
 span[data-elt="link"] {color: #777;}
 .av {color:darkslateblue; font-weight:500;}
@@ -89,7 +108,7 @@ nav.placeholder_amend_hidden {
 }
 
 nav.placeholder_amend_display {
-	color: #990000;
+	color: var(--sdb-amendment-color);
 }
 
 /* END text mode svg */
@@ -784,7 +803,7 @@ button, input[type="submit"], .btn {
 
 	.evts {
 	  stroke: none;
-	  fill: #990000;
+	  fill: var(--sdb-amendment-color);;
 	  opacity:.5;
 	}
 
@@ -862,13 +881,15 @@ button, input[type="submit"], .btn {
 
 	.vertexCircleRotate {
 		opacity: 0;
-		fill: white; // fill is mandatory to event trigger
+		fill: white; /* fill is mandatory to event trigger */
 	}
 
 	.vertexCircle {
-		fill-opacity: 1;
-		stroke-width: 1px;
-		stroke: black;
+		fill: var(--sdb-vertex-color);
+		fill-opacity: var(--sdb-vertex-opacity);
+		stroke:var(--sdb-vertex-border-color);
+		stroke-width: var(--sdb-vertex-border-width);
+		stroke-opacity: var(--sdb-vertex-border-opacity);
 	}
 
 	.pinned {
@@ -911,7 +932,7 @@ button, input[type="submit"], .btn {
 	}
 
 	.edgeLbl  {
-		font-size: .6rem;
+		font-size: var(--sdb-edge-lbl-size);
 		fill: black;
 		pointer-events: visible;
 		cursor: help;
@@ -947,10 +968,10 @@ button, input[type="submit"], .btn {
 	}
 
 	path.bhbLink {
-		stroke: #990000;
+		stroke: var(--sdb-amendment-color);
 	}
 	.marker-bhbLink {
-		stroke: #990000;
+		stroke:var(--sdb-amendment-color);
 	}
 
 	path.selected {
@@ -979,8 +1000,8 @@ button, input[type="submit"], .btn {
 	}
 
 	.graphAmendPlaceholder {
-		stroke: #990000;
-		fill: #990000;
+		stroke: var(--sdb-amendment-color);
+		fill: var(--sdb-amendment-color);
 		opacity: .8;
 		cursor: crosshair;
 	}

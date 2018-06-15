@@ -30758,7 +30758,7 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
 
 	// Add svg & main slider group
 	svg = d3.select("#" + _divId).append("svg")
-	.attr('width', width + 30)
+	.attr('width', width + 60)
 	.attr('height', 80);
 
 	var slider = svg.append("g", ".track-overlay")
