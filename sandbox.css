@@ -114,6 +114,10 @@ div.unwraped{
 	color: var(--sbx-planar-color);
 	font-style: italic;
 }
+.on_spheric {
+	color: var(--sbx-spheric-color);
+	font-style: italic;
+}
 .on_clock {
 	color:green;
 	font-style: italic;

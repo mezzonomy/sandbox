@@ -274,6 +274,25 @@
 		</span>
 </xsl:template>
 
+<xsl:template match="@bhb:spheric" mode="xsl:default">
+	<xsl:call-template name="entity-ref">
+		<xsl:with-param name="name">#32</xsl:with-param>
+	</xsl:call-template>
+		<span class="bhb on_spheric">
+			<xsl:attribute name="title">
+				<xsl:value-of select="namespace-uri(.)"/>
+				<xsl:text>:</xsl:text>
+				<xsl:value-of select="local-name(.)"/>
+				<xsl:text>:</xsl:text>
+				<xsl:value-of select="."/>
+			</xsl:attribute>
+			<xsl:attribute name="data-on_spheric">
+				<xsl:value-of select="."/>
+			</xsl:attribute>
+			<xsl:text>bhb:spheric="</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text>
+		</span>
+</xsl:template>
+
 <!-- Do not display identity nor id, not to get too messy in the display-->
 <xsl:template match="@bhb:identity" mode="xsl:default"/>
 <xsl:template match="@on:id" mode="xsl:default"/>
