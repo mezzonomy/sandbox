@@ -298,6 +298,9 @@
 			</div>
 		</div>
 		<div id="{$toolbox_ID}-footer" class="toolbox-body">
+			<form>
+				<nav id="{$toolbox_ID}-pointnavtool" data-bhbmode="{$mode}"/>
+			</form>
 		</div>
 	</div>
 </xsl:template>
@@ -466,12 +469,12 @@
 						<xsl:with-param name="mode" select="$mode"/>
 					</xsl:call-template>
 				</div>
-				<div id="{$toolbox_ID}-pointnavtool" data-bhbmode="{$mode}">
+				<nav id="{$toolbox_ID}-pointnavtool" data-bhbmode="{$mode}">
 					<input id="{$toolbox_ID}-point" name="{$toolbox_ID}-point" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-next" name="{$toolbox_ID}-next" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-peer" name="{$toolbox_ID}-peer" type="hidden" value=""/>
 					<input id="{$toolbox_ID}-before" name="{$toolbox_ID}-before" type="hidden" value=""/>
-				</div>
+				</nav>
 			</form>
 		</div>
 	</div>

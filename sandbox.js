@@ -31084,7 +31084,7 @@ function render(_data, _diff){
 	D3_UNIVERSE = d3.select("#universe");
 	D3_SCENE = D3_UNIVERSE.select("svg#scene");
 	DOM_SCENE = document.getElementById("scene");
-	PERSPECTIVE_TOOLBOX_FOOTER = D3_UNIVERSE.select("#perspective-footer");
+	PERSPECTIVE_TOOLBOX_FOOTER = D3_UNIVERSE.select("#perspective-pointnavtool");
 	ZOOM = d3.zoom()
 		.scaleExtent([1/8, 8])
 		.on("zoom", containerZoomed)
@@ -31606,10 +31606,10 @@ function vertexComputation(QApointsList){
 	// sr stands for (S)egment (R)econstruction
 	let sr=[];
 	let vertex={};
-	for(let i=0, n=QApointsList.length; i<n; i++){
+	for(let pt of QApointsList){
 			let segments=[];
-			segments.push(Object.assign({}, QApointsList[i])); // byval
-			vertex = {bp:QApointsList[i].point, ep:QApointsList[i].next, pc:1, hc:"", segments:segments, spin:0};
+			segments.push(Object.assign({}, pt)); // byval
+			vertex = {bp:pt.point, ep:pt.next, pc:1, hc:"", segments:segments, spin:0};
 			vertex.hc = vertexToString(vertex, true);
 			vertex.segments[0].hc=vertex.hc;
 			vertex.segments[0].pc=vertex.pc;
@@ -31642,105 +31642,126 @@ function vertexComputation(QApointsList){
 	}
 	// Create a map of points across the vertices
 	let points1=[];
-	for(let i=0, n=sr.length; i<n; i++){
-		for (let k=0, l=sr[i].segments.length;k<l;k++) {
-		points1.push(Object.assign({}, sr[i].segments[k]));}
+	for(let vtx of sr){
+		for (let seg of vtx.segments) {
+		points1.push(Object.assign({}, seg));}
 	}
 	const pointsById1 = d3.map(points1, function(d) { return d.point; });
 
 	//Adding positionning calculation of points and arcs as data in post computation
 	//Setting topology
-	for(let i=0, n=sr.length; i<n; i++){
-		const angle = (2*Math.PI / sr[i].pc); // Angle for each point on the radius
-		const radius = VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(sr[i].pc) // Node radius
-		sr[i].radius = radius;
-		sr[i].angle = angle;
-		for (let k=0, l=sr[i].segments.length;k<l;k++) {
+	for(let vtx of sr){
+		const angle = (2*Math.PI / vtx.pc); // Angle for each point on the radius
+		const radius = VERTEX_RADIUS + VERTEX_RADIUS_M * Math.sqrt(vtx.pc) // Node radius
+		vtx.radius = radius;
+		vtx.angle = angle;
+		for (let k=0, l=vtx.segments.length;k<l;k++) {
 			const angle1 = k * angle;
 			const angle2 = (k === l-1)? 2*Math.PI:(k+1) * angle;
 			const ptX = radius * Math.cos(angle1); // x coordinate of the point on the vertex's circle
 			const ptY = radius * Math.sin(angle1); // y coordinates of the point on the vertex's circle
-			sr[i].segments[k].radius = radius;
-			sr[i].segments[k].ptX = ptX; // points coordinates within the vertex
-			sr[i].segments[k].ptY = ptY;
-			sr[i].segments[k].angle1 = angle1;
-			sr[i].segments[k].startAngle = angle1 + Math.PI * .5; // angle in degrees of the point on the vertex circle. To draw arcs (D3 pie format)
-			sr[i].segments[k].endAngle = angle2 + Math.PI * .5; // angle in degrees of the next point on the vertex circle. To draw arcs (D3 pie format)
-			sr[i].segments[k].index = k; // index of the point in the vertex
-			sr[i].segments[k].topology = "hyperbolic"; //default topology
+			vtx.segments[k].radius = radius;
+			vtx.segments[k].ptX = ptX; // points coordinates within the vertex
+			vtx.segments[k].ptY = ptY;
+			vtx.segments[k].angle1 = angle1;
+			vtx.segments[k].startAngle = angle1 + Math.PI * .5; // angle in degrees of the point on the vertex circle. To draw arcs (D3 pie format)
+			vtx.segments[k].endAngle = angle2 + Math.PI * .5; // angle in degrees of the next point on the vertex circle. To draw arcs (D3 pie format)
+			vtx.segments[k].index = k; // index of the point in the vertex
+			vtx.segments[k].topology = "hyperbolic"; //default topology
 			try {
 				// in some cases the before point can't be found
-				sr[i].segments[k].before = sr[i].segments.find(function(s){return s.next === sr[i].segments[k].point}).point;
+				vtx.segments[k].before = vtx.segments.find(function(s){return s.next === vtx.segments[k].point}).point;
 			} catch {
-				sr[i].segments[k].before = "";
-				console.log("Before point from point", sr[i].segments[k].point, "can't be found");
+				vtx.segments[k].before = "";
+				console.log("Before point from point", vtx.segments[k].point, "can't be found");
 			}
-			sr[i].segments[k].tagraw = sr[i].segments[k].info.xsl_element;
-			sr[i].segments[k].tagnet = sr[i].segments[k].info.xsl_element.replace(":","_");
-			if (sr[i].segments[k].hc != pointsById1.get(sr[i].segments[k].peer).hc) {sr[i].segments[k].topology="planar";}
-			if (sr[i].segments[k].point === sr[i].segments[k].peer) {sr[i].segments[k].topology="spheric";} // spheric by design, to be fixed because same as text node TODO: fix
+			vtx.segments[k].tagraw = vtx.segments[k].info.xsl_element;
+			vtx.segments[k].tagnet = vtx.segments[k].info.xsl_element.replace(":","_");
+			if (vtx.segments[k].hc != pointsById1.get(vtx.segments[k].peer).hc) {vtx.segments[k].topology="planar";}
+			if (vtx.segments[k].point === vtx.segments[k].peer) {vtx.segments[k].topology="spheric";} // spheric by design, to be fixed because same as text node TODO: fix
 			// case of spheric by decision, the point T_ is considered external, and not drawn in a vertex
-			if (sr[i].segments[k].info.bhb_spheric === 1) {sr[i].segments[k].topology = "spheric";}
+			if (vtx.segments[k].info.bhb_spheric === 1) {vtx.segments[k].topology = "spheric";}
 		}
 	}
 
+	// Update map of points across the vertices
+	points1=[];
+	for(let vtx of sr){
+		for (let seg of vtx.segments) {
+		points1.push(Object.assign({}, seg));}
+	}
+	const pointsById2 = d3.map(points1, function(d) { return d.point; });
+
 	//Adding positionning calculation of amendment position for each point. Must be done after the radius/angle calc
-	for(let i=0, n=sr.length; i<n; i++){
-		const angle = sr[i].angle;
-		const radius = sr[i].radius;
-		for (let k=0, l=sr[i].segments.length;k<l;k++) {
-			const angle1 = sr[i].segments[k].angle1
-			sr[i].segments[k].amend={"before":{}, "after":{}, "push":{}, "append":{},};
-			let ptPeerAngle1 = 0;
-			if (sr[i].segments[k].topology === "hyperbolic") ptPeerAngle1 = sr[i].segments.find(function(s){return s.point === sr[i].segments[k].peer}).angle1;
-			if (sr[i].segments[k].point.startsWith("T_")) {
-				sr[i].segments[k].amend.before.ptX = radius * Math.cos(angle1 - (angle/2));
-				sr[i].segments[k].amend.before.ptY = radius * Math.sin(angle1 - (angle/2));
-				sr[i].segments[k].amend.before.angle = DEGREES(angle1 - (angle/2));
-				sr[i].segments[k].amend.push.ptX = radius * Math.cos(angle1 + (angle/2));
-				sr[i].segments[k].amend.push.ptY = radius * Math.sin(angle1 + (angle/2));
-				sr[i].segments[k].amend.push.angle = DEGREES(angle1 + (angle/2));
-				sr[i].segments[k].amend.after.ptX = radius * Math.cos(ptPeerAngle1 + (angle/2));
-				sr[i].segments[k].amend.after.ptY = radius * Math.sin(ptPeerAngle1 + (angle/2));
-				sr[i].segments[k].amend.after.angle = DEGREES(ptPeerAngle1 + (angle/2));
-				sr[i].segments[k].amend.append.ptX = radius * Math.cos(ptPeerAngle1 - (angle/2));
-				sr[i].segments[k].amend.append.ptY = radius * Math.sin(ptPeerAngle1 - (angle/2));
-				sr[i].segments[k].amend.append.angle = DEGREES(ptPeerAngle1 - (angle/2));
-			} else if (sr[i].segments[k].point.startsWith("B_")) {
-				sr[i].segments[k].amend.append.ptX = radius * Math.cos(angle1 - (angle/2));
-				sr[i].segments[k].amend.append.ptY = radius * Math.sin(angle1 - (angle/2));
-				sr[i].segments[k].amend.append.angle = DEGREES(angle1 - (angle/2));
-				sr[i].segments[k].amend.after.ptX = radius * Math.cos(angle1 + (angle/2));
-				sr[i].segments[k].amend.after.ptY = radius * Math.sin(angle1 + (angle/2));
-				sr[i].segments[k].amend.after.angle = DEGREES(angle1 + (angle/2));
-				sr[i].segments[k].amend.push.ptX = radius * Math.cos(ptPeerAngle1 + (angle/2));
-				sr[i].segments[k].amend.push.ptY = radius * Math.sin(ptPeerAngle1 + (angle/2));
-				sr[i].segments[k].amend.push.angle = DEGREES(ptPeerAngle1 + (angle/2));
-				sr[i].segments[k].amend.before.ptX = radius * Math.cos(ptPeerAngle1 - (angle/2));
-				sr[i].segments[k].amend.before.ptY = radius * Math.sin(ptPeerAngle1 - (angle/2));
-				sr[i].segments[k].amend.before.angle = DEGREES(ptPeerAngle1 - (angle/2));
+	for(let vtx of sr){
+		const angle = vtx.angle;
+		const radius = vtx.radius;
+		for (let seg of vtx.segments) {
+			const peerPt = pointsById2.get(seg.peer);
+			const peerVtx = sr.find(function(s){return s.hc === peerPt.hc})
+			const angle1 = seg.angle1
+			seg.amend={"before":{}, "after":{}, "push":{}, "append":{},};
+			let ptPeerAngle1 = peerPt.angle1;
+			let ptPeerRadius = peerPt.radius;
+			if (seg.point.startsWith("T_")) {
+				seg.amend.before.ptX = radius * Math.cos(angle1 - (angle/2));
+				seg.amend.before.ptY = radius * Math.sin(angle1 - (angle/2));
+				seg.amend.before.angle = DEGREES(angle1 - (angle/2));
+				seg.amend.before.hc = seg.hc;
+				seg.amend.push.ptX = radius * Math.cos(angle1 + (angle/2));
+				seg.amend.push.ptY = radius * Math.sin(angle1 + (angle/2));
+				seg.amend.push.angle = DEGREES(angle1 + (angle/2));
+				seg.amend.push.hc = seg.hc;
+				seg.amend.after.ptX = ptPeerRadius * Math.cos(ptPeerAngle1 + (peerVtx.angle/2));
+				seg.amend.after.ptY = ptPeerRadius * Math.sin(ptPeerAngle1 + (peerVtx.angle/2));
+				seg.amend.after.angle = DEGREES(ptPeerAngle1 + (peerVtx.angle/2));
+				seg.amend.after.hc = peerPt.hc;
+				seg.amend.append.ptX = ptPeerRadius * Math.cos(ptPeerAngle1 - (peerVtx.angle/2));
+				seg.amend.append.ptY = ptPeerRadius * Math.sin(ptPeerAngle1 - (peerVtx.angle/2));
+				seg.amend.append.angle = DEGREES(ptPeerAngle1 - (peerVtx.angle/2));
+				seg.amend.append.hc = peerPt.hc;
+			} else if (seg.point.startsWith("B_")) {
+				seg.amend.append.ptX = radius * Math.cos(angle1 - (angle/2));
+				seg.amend.append.ptY = radius * Math.sin(angle1 - (angle/2));
+				seg.amend.append.angle = DEGREES(angle1 - (angle/2));
+				seg.amend.append.hc = seg.hc;
+				seg.amend.after.ptX = radius * Math.cos(angle1 + (angle/2));
+				seg.amend.after.ptY = radius * Math.sin(angle1 + (angle/2));
+				seg.amend.after.angle = DEGREES(angle1 + (angle/2));
+				seg.amend.after.hc = seg.hc;
+				seg.amend.push.ptX = ptPeerRadius * Math.cos(ptPeerAngle1 + (peerVtx.angle/2));
+				seg.amend.push.ptY = ptPeerRadius * Math.sin(ptPeerAngle1 + (peerVtx.angle/2));
+				seg.amend.push.angle = DEGREES(ptPeerAngle1 + (angle/2));
+				seg.amend.push.hc = peerPt.hc;
+				seg.amend.before.ptX = ptPeerRadius * Math.cos(ptPeerAngle1 - (peerVtx.angle/2));
+				seg.amend.before.ptY = ptPeerRadius * Math.sin(ptPeerAngle1 - (peerVtx.angle/2));
+				seg.amend.before.angle = DEGREES(ptPeerAngle1 - (peerVtx.angle/2));
+				seg.amend.before.hc = peerPt.hc;
 			}
+			// deactivate amendment insertion point if points are identical
+			if (JSON.stringify(seg.amend.push) === JSON.stringify(seg.amend.append)) seg.amend.push.hc = -1;
+			if (JSON.stringify(seg.amend.before) === JSON.stringify(seg.amend.after)) seg.amend.after.hc = -1;
 		}
 	}
 
 	//oldest point (smallest number) of each vertex for managing positionning history of vertices
 	// + count points by type (for force computing)
-	for(let i=0, n=sr.length; i<n; i++){
-		const sortOldest = sr[i].segments.sort(function(a, b){return Number((a.point.match(/[0-9]/g)).join(''))-Number((b.point.match(/[0-9]/g)).join(''))});
-		sr[i].oldestPoint = sortOldest[0].point;
-		sr[i].pc_planars = sr[i].segments.filter(function(s) { return s.topology === "planar";}).length;
-		sr[i].pc_hyperbolics = sr[i].segments.filter(function(s) { return s.topology === "hyperbolic";}).length;
-		sr[i].pc_spherics = sr[i].segments.filter(function(s) { return s.topology === "spheric";}).length;
+	for(let vtx of sr){
+		const sortOldest = vtx.segments.sort(function(a, b){return Number((a.point.match(/[0-9]/g)).join(''))-Number((b.point.match(/[0-9]/g)).join(''))});
+		vtx.oldestPoint = sortOldest[0].point;
+		vtx.pc_planars = vtx.segments.filter(function(s) { return s.topology === "planar";}).length;
+		vtx.pc_hyperbolics = vtx.segments.filter(function(s) { return s.topology === "hyperbolic";}).length;
+		vtx.pc_spherics = vtx.segments.filter(function(s) { return s.topology === "spheric";}).length;
 	}
 
 	// Compute distance to peer point to reorder the segments within each vertex
-	for(let i=0, n=sr.length; i<n; i++){
-		for (let k=0, l=sr[i].segments.length;k<l;k++) {
-			if (sr[i].segments[k].point.startsWith("T_")) {
-				peerPt = sr[i].segments.find(function(s){return s.point === sr[i].segments[k].peer});
-				sr[i].segments[k].distToPeer = distTwoPts(sr[i].segments[k], peerPt);
+	for(let vtx of sr){
+		for (let seg of vtx.segments) {
+			if (seg.point.startsWith("T_") && seg.topology === "hyperbolic") {
+				peerPt = vtx.segments.find(function(s){return s.point === seg.peer});
+				seg.distToPeer = distTwoPts(seg, peerPt);
 			} else {
-				sr[i].segments[k].distToPeer=0;
+				seg.distToPeer=0;
 			}
 		}
 	}
@@ -31748,16 +31769,17 @@ function vertexComputation(QApointsList){
 	// Reorder segments by descending distance to draw the bigger first and the smaller last in each vertex
 	// to ease selection of hyperbolics
 	let points=[];
-	for(let i=0, n=sr.length; i<n; i++){
-		for (let k=0, l=sr[i].segments.length;k<l;k++) {
-			points.push(Object.assign({}, sr[i].segments[k]));
+	for(const vtx of sr){
+		for (const seg of vtx.segments) {
+			points.push(Object.assign({}, seg));
 		}
 	}
 	POINTS_BY_ID = d3.map(points, function(d) { return d.point; });
 
-	// Creates a map of all points accros vertices. Points are not drawn, a proxy "getpoint()" is used to get point information
-	for(let i=0, n=sr.length; i<n; i++){
-		sr[i].segments.sort(function(a, b){return (b.distToPeer - a.distToPeer)});
+	// Sorts the segments in points distance order within each vertex, for drawing the longer first,
+	// so that shorter edges will be drawn last an easier to select manually
+	for(let vtx of sr){
+		vtx.segments.sort(function(a, b){return (b.distToPeer - a.distToPeer)});
 	}
 
 
@@ -31812,8 +31834,8 @@ function dragged(d) {
 function dragended(d) {
 	if (!d3.event.active) {
 		//restore & relaunch forces
-		var xc= D3_SCENE.property("clientWidth") / 2;
-		var yc= D3_SCENE.property("clientHeight") / 2;
+		//const xc= D3_SCENE.property("clientWidth") / 2;
+		//const yc= D3_SCENE.property("clientHeight") / 2;
 		//VERTICES_POSITIONNING.force("center", d3.forceCenter(xc,yc))
 		//VERTICES_POSITIONNING.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));
 		VERTICES_POSITIONNING.alphaTarget(DEF_ALPHATARGET).alphaDecay(DEF_DECAY);
@@ -31949,7 +31971,7 @@ function distTwoPts(_A, _B) {
 	* @returns {string} - svg path for the edge
 	*/
 function drawPlanar(_s, _t){
-	var path="M" + getAbsCoordPoint(_s).pxy + "L" + getAbsCoordPoint(_t).pxy;
+	const path="M" + getAbsCoordPoint(_s).pxy + "L" + getAbsCoordPoint(_t).pxy;
 	return {path:path};
 }
 
@@ -31962,7 +31984,7 @@ function drawPlanar(_s, _t){
 	*/
 function drawSpheric(_s, _v){
 	const sPt = getAbsCoordPoint(_s), vtx = getAbsCoord(_v);
-	var path="M" + sPt.pxy + "L" + ((sPt.x - vtx.x) * BEYOND) + " " + ((sPt.y - vtx.y) * BEYOND);
+	const path="M" + sPt.pxy + "L" + ((sPt.x - vtx.x) * BEYOND) + " " + ((sPt.y - vtx.y) * BEYOND);
 	return {path:path};
 }
 
@@ -31974,22 +31996,21 @@ function drawSpheric(_s, _v){
 	* @returns {string} - svg path for the bezier curve
 	*/
 function drawHyperbolic(_s, _t) {
-		var radius = Math.sqrt(_s.ptX*_s.ptX + _s.ptY*_s.ptY)
+		const radius = Math.sqrt(_s.ptX*_s.ptX + _s.ptY*_s.ptY)
 		// With the help of Mr. Poincare
-		var xm = (_s.ptX + _t.ptX)/2.
-		var ym = (_s.ptY + _t.ptY)/2.
-		var rm = Math.sqrt(xm*xm + ym*ym)
-		path =  "M" + _s.ptX + "," + _s.ptY
+		const xm = (_s.ptX + _t.ptX)/2.
+		const ym = (_s.ptY + _t.ptY)/2.
+		let rm = Math.sqrt(xm*xm + ym*ym)
+		let path =  "M" + _s.ptX + "," + _s.ptY
 		if (rm < 0.001) {
 			path += "L" + _t.ptX + "," + _t.ptY;
 			return {path:path};}
-		var tm = Math.atan2(ym, xm)
-				rm = radius * radius / rm
-		var xr = _s.ptX - Math.cos(tm) * rm
-		var yr = _s.ptY - Math.sin(tm) * rm
-		var rf = Math.sqrt(xr*xr + yr*yr)
-		kind   = (Math.sin(_t.startAngle - _s.startAngle) < 0) ?
-			" 0 0 1" : " 0 0 0"
+		const tm = Math.atan2(ym, xm);
+		rm = radius * radius / rm;
+		const xr = _s.ptX - Math.cos(tm) * rm
+		const yr = _s.ptY - Math.sin(tm) * rm
+		const rf = Math.sqrt(xr*xr + yr*yr)
+		const kind = (Math.sin(_t.startAngle - _s.startAngle) < 0) ? " 0 0 1" : " 0 0 0"
 		path   += "A " + rf + " " + rf + kind;
 		path   += " " + _t.ptX + "," + _t.ptY;
 	return {path:path};
@@ -32003,10 +32024,8 @@ function drawHyperbolic(_s, _t) {
 	* @param topology {string} - Topology
 	* @returns {string} - A SVG rotate transformation string
 	*/
-function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
-	lblId = lblId || "";
-	var rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
-	var labelBox;
+function EdgeLblOrientation(x1, y1, x2, y2, lblId = "", topology) {
+	const rt = Math.atan2(-y2+y1, x2-x1) * -180/Math.PI;
 	if (topology === "planar") {
 		if (Math.abs(rt) < 90) {
 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + ((x2-x1)/2 + Math.abs((y2-y1)/2)) + "," + (-3) + ")";
@@ -32015,7 +32034,7 @@ function EdgeLblOrientation(x1, y1, x2, y2, lblId, topology) {
 		}
 	}
 	if (topology === "spheric") {
- 		labelBoxW = document.getElementById(lblId).getBBox().width;
+ 		const labelBoxW = document.getElementById(lblId).getBBox().width;
 		if (Math.abs(rt) < 90) {
 			return "rotate(" + rt + " , " + x1 + " , " + y1 + ") translate (" + (labelBoxW) + "," + (-3) + ")";
 		} else {
@@ -32132,8 +32151,8 @@ function textModeInteraction() {
 	D3_UNIVERSE.selectAll(".icon-edit").remove();
 	D3_UNIVERSE.selectAll(".endtag").classed("entagpadding",false);
 	// create edit icons for tags with path
-	var xmlNode = D3_UNIVERSE.selectAll("div.e:not([data-path=''])");
-	var editIcons = xmlNode.insert("img", ":first-child")
+	let xmlNode = D3_UNIVERSE.selectAll("div.e:not([data-path=''])");
+	let editIcons = xmlNode.insert("img", ":first-child")
 	.attr("src","/sandbox/img-icon-edit.svg")
 	.attr("class", "icon-edit");
 	// icon edit placeholder for endtags and tags without path
@@ -32150,14 +32169,14 @@ function textModeInteraction() {
 		}
 		D3_UNIVERSE.selectAll(".navbar-text-node").remove();
 		d3.select(this).classed("deployed", true);
-		var point = this.parentElement.dataset;
-		var editBox = d3.select(this.parentElement).insert("nav",":nth-child(2)");
+		const point = this.parentElement.dataset;
+		let editBox = d3.select(this.parentElement).insert("nav",":nth-child(2)");
 		editBox.attr("class","navbar-text-node");
-		var editbox_btn_before = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary shadow").text("before");
-		var editbox_btn_after = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary shadow").text("after");
-		var editbox_btn_push = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary shadow").text("push");
-		var editbox_btn_append = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary shadow").text("append");
-		var editbox_btn_select = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-secondary shadow").text("select");
+		let editbox_btn_before = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary shadow").text("before");
+		let editbox_btn_after = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary shadow").text("after");
+		let editbox_btn_push = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary shadow").text("push");
+		let editbox_btn_append = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-primary shadow").text("append");
+		let editbox_btn_select = editBox.append("div").attr("class","navbar-text-node-elt").append("button").attr("data-identity",point.identity).attr("data-path",point.path).attr("class","btn btn-secondary shadow").text("select");
 		// listeners to create interactions on each button
 		// before
 		editbox_btn_before.on("mouseover", function(){
@@ -32301,6 +32320,7 @@ function amend(_path, _order, _openTooblox) {
 	* @returns {-} - Adds buttons
 	*/
 function AddButtonsToPerspective(){
+	const styleIcons = "width: .7rem; position: relative; top: 1px;"
 	// reset zoom
 	let btnResetZoom = PERSPECTIVE_TOOLBOX_FOOTER.select("#btnReset-zoom");
 	if (btnResetZoom.empty()) {
@@ -32308,7 +32328,7 @@ function AddButtonsToPerspective(){
 			.attr("title","Reset zoom level")
 			.append("img")
 			.attr("src","/sandbox/img-icon-reset-zoom.svg")
-			.attr("style", "width: 15px; position: relative; top: 2px;");
+			.attr("style", styleIcons);
 			btnResetZoom.on("click", function(){
 				if (CURRENT_BHB_MODE === 'graph') {
 					D3_SCENE.transition()
@@ -32329,7 +32349,7 @@ function AddButtonsToPerspective(){
 			.attr("title","Zoom on point")
 			.append("img")
 			.attr("src","/sandbox/img-icon-eye-zoom.svg")
-			.attr("style", "width: 15px; position: relative; top: 2px;");
+			.attr("style", styleIcons);
 			btnZoomOnPoint.on("click", function(){zoomOnPoint();})
 	}
 
@@ -32340,7 +32360,7 @@ function AddButtonsToPerspective(){
 			.attr("title","Reset vertex positionning")
 			.append("img")
 			.attr("src","/sandbox/img-icon-reset.svg")
-			.attr("style", "width: 15px; position: relative; top: 2px;");
+			.attr("style", styleIcons);
 			btnResetPosHistory.on("click", function(){
 				VERTICES_POSITIONNING.stop();
 				localStorage.removeItem("vertexLastPosition_json");
@@ -32353,7 +32373,10 @@ function AddButtonsToPerspective(){
 	// Stop animation (and log animation status)
 	let btnstopAnimation = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation");
 	if (btnstopAnimation.empty()) {
-		btnstopAnimation = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-stop-animation").attr("value","stop").text(".");
+		btnstopAnimation = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark")
+		.attr("id","btn-stop-animation")
+		.attr("style","font-weight: 100; padding-right: 0px; padding-left: 0px; text-align: center; width: 2.1rem;")
+		.attr("value","stop").text(".");
 		btnstopAnimation.on("click", function(){
 			VERTICES_POSITIONNING.stop();
 		});
@@ -32368,13 +32391,13 @@ function AddButtonsToPerspective(){
 			.attr("title","Collide is on, set collide off")
 			.append("img")
 			.attr("src","/sandbox/img-icon-collide-on.svg")
-			.attr("style", "width: 15px; position: relative; top: 2px;");
+			.attr("style", styleIcons);
 		} else {
 			btnToggleCollide.attr("value","start")
 			.attr("title","Collide is off, set collide on")
 			.append("img")
 			.attr("src","/sandbox/img-icon-collide-off.svg")
-			.attr("style", "width: 15px; position: relative; top: 2px;");
+			.attr("style", styleIcons);
 		}
 		btnToggleCollide.on("click", function(){
 			btnToggleCollide.selectAll("img").remove();
@@ -32385,7 +32408,7 @@ function AddButtonsToPerspective(){
 				.attr("title","Collide is off, set collide on")
 				.append("img")
 				.attr("src","/sandbox/img-icon-collide-off.svg")
-				.attr("style", "width: 15px; position: relative; top: 2px;");
+				.attr("style", styleIcons);
 				FORCES_STATUS.collide.status=false;
 			} else {
 				VERTICES_POSITIONNING.force("collide", d3.forceCollide().radius(function(d){return d.radius + 20;}));
@@ -32394,7 +32417,7 @@ function AddButtonsToPerspective(){
 				.attr("title","Collide is on, set collide off")
 				.append("img")
 				.attr("src","/sandbox/img-icon-collide-on.svg")
-				.attr("style", "width: 15px; position: relative; top: 2px;");
+				.attr("style", styleIcons);
 				FORCES_STATUS.collide.status=true;
 			}
 			storeLocalForcesStatus();
@@ -32409,7 +32432,7 @@ function AddButtonsToPerspective(){
 		.attr("type","color")
 		.attr("id","btn-color-picker")
 		.attr("value","rgb(223, 217, 218)")
-		.attr("style","width: 35px; height: 34px; position: relative; top: 8px;")
+		.attr("style","width: 2.1rem; height: 2.1rem; position: relative; top: 11px; border: none;")
 		.on("change", function () {
 			document.body.style.backgroundColor = this.value;
 		});
@@ -32440,15 +32463,15 @@ function selectVertexOnePoint(_ptId){
 		if (pt.path !="") {
 			addGraphAmendPlaceholder(pt, "before");
 			addGraphAmendPlaceholder(pt, "after");
-			addGraphAmendPlaceholder(pt, "push");
-			addGraphAmendPlaceholder(pt, "append");
+			if (pt.topology !== "spheric") addGraphAmendPlaceholder(pt, "push");
+			if (pt.topology !== "spheric") addGraphAmendPlaceholder(pt, "append");
 		}
 	}
 }
 
 function addGraphAmendPlaceholder(_pt, _order) {
-	const vtx = d3.select("#gvertex_" + _pt.hc);
-
+	if (_pt.amend[_order].hc === -1) return; // case of similar insert points
+	const vtx = d3.select("#gvertex_" + _pt.amend[_order].hc);
 	let g = vtx.select(".vertexGroupRotate")
 	.append("g")
 	.attr("transform", "translate( " + _pt.amend[_order].ptX + "," + _pt.amend[_order].ptY + ") rotate(" + _pt.amend[_order].angle + ")")
