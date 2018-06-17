@@ -2,7 +2,7 @@
  * @file d3_wlibrairies.js
  * @copyright Copyright 2018 Mike Bostock
  * @author mezzònomy
- * Simple straight Cat of D3 with microlibrairies (d3js.org Version 5.4.0. + d3-scale-chromatic/ Version 1.3.0. Copyright 2018 Mike Bostock.)
+ * Simple straight Cat of D3 with microlibrairies (d3js.org Version 5.4.0. + d3-scale-chromatic/ Version 1.3.0. + d3-selection-multi Version 1.0.1) Copyright 2018 Mike Bostock.)
  */
 
 
@@ -18319,6 +18319,101 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
+// https://github.com/d3/d3-selection-multi Version 1.0.1. Copyright 2017 Mike Bostock.
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('d3-selection'), require('d3-transition')) :
+	typeof define === 'function' && define.amd ? define(['d3-selection', 'd3-transition'], factory) :
+	(factory(global.d3,global.d3));
+}(this, (function (d3Selection,d3Transition) { 'use strict';
+
+function attrsFunction(selection$$1, map) {
+  return selection$$1.each(function() {
+    var x = map.apply(this, arguments), s = d3Selection.select(this);
+    for (var name in x) s.attr(name, x[name]);
+  });
+}
+
+function attrsObject(selection$$1, map) {
+  for (var name in map) selection$$1.attr(name, map[name]);
+  return selection$$1;
+}
+
+var selection_attrs = function(map) {
+  return (typeof map === "function" ? attrsFunction : attrsObject)(this, map);
+};
+
+function stylesFunction(selection$$1, map, priority) {
+  return selection$$1.each(function() {
+    var x = map.apply(this, arguments), s = d3Selection.select(this);
+    for (var name in x) s.style(name, x[name], priority);
+  });
+}
+
+function stylesObject(selection$$1, map, priority) {
+  for (var name in map) selection$$1.style(name, map[name], priority);
+  return selection$$1;
+}
+
+var selection_styles = function(map, priority) {
+  return (typeof map === "function" ? stylesFunction : stylesObject)(this, map, priority == null ? "" : priority);
+};
+
+function propertiesFunction(selection$$1, map) {
+  return selection$$1.each(function() {
+    var x = map.apply(this, arguments), s = d3Selection.select(this);
+    for (var name in x) s.property(name, x[name]);
+  });
+}
+
+function propertiesObject(selection$$1, map) {
+  for (var name in map) selection$$1.property(name, map[name]);
+  return selection$$1;
+}
+
+var selection_properties = function(map) {
+  return (typeof map === "function" ? propertiesFunction : propertiesObject)(this, map);
+};
+
+function attrsFunction$1(transition$$1, map) {
+  return transition$$1.each(function() {
+    var x = map.apply(this, arguments), t = d3Selection.select(this).transition(transition$$1);
+    for (var name in x) t.attr(name, x[name]);
+  });
+}
+
+function attrsObject$1(transition$$1, map) {
+  for (var name in map) transition$$1.attr(name, map[name]);
+  return transition$$1;
+}
+
+var transition_attrs = function(map) {
+  return (typeof map === "function" ? attrsFunction$1 : attrsObject$1)(this, map);
+};
+
+function stylesFunction$1(transition$$1, map, priority) {
+  return transition$$1.each(function() {
+    var x = map.apply(this, arguments), t = d3Selection.select(this).transition(transition$$1);
+    for (var name in x) t.style(name, x[name], priority);
+  });
+}
+
+function stylesObject$1(transition$$1, map, priority) {
+  for (var name in map) transition$$1.style(name, map[name], priority);
+  return transition$$1;
+}
+
+var transition_styles = function(map, priority) {
+  return (typeof map === "function" ? stylesFunction$1 : stylesObject$1)(this, map, priority == null ? "" : priority);
+};
+
+d3Selection.selection.prototype.attrs = selection_attrs;
+d3Selection.selection.prototype.styles = selection_styles;
+d3Selection.selection.prototype.properties = selection_properties;
+d3Transition.transition.prototype.attrs = transition_attrs;
+d3Transition.transition.prototype.styles = transition_styles;
+
+})));
+
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
@@ -31516,11 +31611,10 @@ function render(_data, _diff){
 
 				edgeLbl
 				.filter(function(d){return (d.topology === "planar");})
-				.attr("x", function(d) {return getAbsCoordPoint(d.source.point).x;})
-				.attr("y", function(d) {return getAbsCoordPoint(d.source.point).y;})
-				.attr("transform", function(d) {
-					const sPt = getAbsCoordPoint(d.source.point), tPt = getAbsCoordPoint(d.target.point);
-					return EdgeLblOrientation(sPt.x, sPt.y, tPt.x, tPt.y, "lbl_" + d.id, d.topology)
+				.attrs(function(d) {
+					const sPt = getAbsCoordPoint(d.source.point);
+					const tPt = getAbsCoordPoint(d.target.point)
+					return {x: sPt.x, y: sPt.y, transform: EdgeLblOrientation(sPt.x, sPt.y, tPt.x, tPt.y, "lbl_" + d.id, d.topology)};
 				});
 
 				edge
@@ -31529,11 +31623,11 @@ function render(_data, _diff){
 
 				edgeLbl
 				.filter(function(d){return (d.topology === "spheric");})
-				.attr("x", function(d) {return getAbsCoordPoint(d.source.point).x;})
-				.attr("y", function(d) {return getAbsCoordPoint(d.source.point).y;})
-				.attr("transform", function(d) {
-					const sPt = getAbsCoordPoint(d.source.point), vtx = getAbsCoord("gvertex_" + d.target.hc);
-					return EdgeLblOrientation(sPt.x, sPt.y, (sPt.x - vtx.x) * BEYOND, (sPt.y - vtx.y) * BEYOND, "lbl_" + d.id, d.topology)});
+				.attrs(function(d) {
+					const sPt = getAbsCoordPoint(d.source.point);
+					const vtx = getAbsCoord("gvertex_" + d.target.hc);
+					return {x: sPt.x, y: sPt.y, transform: EdgeLblOrientation(sPt.x, sPt.y, (sPt.x - vtx.x) * BEYOND, (sPt.y - vtx.y) * BEYOND, "lbl_" + d.id, d.topology)};
+				});
 
 				/* ticks control*/
 				var ticksDone = (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay())));
@@ -31610,7 +31704,6 @@ function vertexComputation(QApointsList){
 			let segments=[];
 			segments.push(Object.assign({}, pt)); // byval
 			vertex = {bp:pt.point, ep:pt.next, pc:1, hc:"", segments:segments, spin:0};
-			vertex.hc = vertexToString(vertex, true);
 			vertex.segments[0].hc=vertex.hc;
 			vertex.segments[0].pc=vertex.pc;
 			sr.push(vertex);
@@ -31626,12 +31719,8 @@ function vertexComputation(QApointsList){
 					const segments=sr[i].segments.concat(sr[sfdIdx].segments);
 					sr[sfdIdx].segments=segments;
 					sr[sfdIdx].bp=sr[i].bp;
-					sr[sfdIdx].pc=segments.length;
-					sr[sfdIdx].hc=vertexToString(sr[sfdIdx], true);
-					sr[sfdIdx].spin=0;
 					// add hc and nc to point for position calculation
 					for (let k=0, l=segments.length;k<l;k++) {
-						sr[sfdIdx].segments[k].hc=sr[sfdIdx].hc;
 						sr[sfdIdx].segments[k].pc=sr[sfdIdx].pc;
 					}
 					sr.splice(i,1);
@@ -31640,11 +31729,17 @@ function vertexComputation(QApointsList){
 		}
 		j++;
 	}
-	// Create a map of points across the vertices
+	// Add vertex id ("hc") and vertex point count,
+	// and create a map of points across the vertices
 	let points1=[];
 	for(let vtx of sr){
+		vtx.hc = vertexToString(vtx, true)
+		vtx.pc = vtx.segments.length
 		for (let seg of vtx.segments) {
-		points1.push(Object.assign({}, seg));}
+			seg.pc = vtx.pc;
+			seg.hc = vtx.hc;
+			points1.push(Object.assign({}, seg));
+		}
 	}
 	const pointsById1 = d3.map(points1, function(d) { return d.point; });
 
@@ -31927,6 +32022,7 @@ function getAbsCoord(elt) {
 
 /**
 	* Utility to find absolute x,y coordinates of a point not drawn
+	* Most costly operation in terms of comutation, calls must be optimized
 	* @param elt {string}  elt - point id string
 	* @returns {object} svg point - point coordinates {x,y}
 	*/
@@ -31934,7 +32030,7 @@ function getAbsCoordPoint(_elt) {
 	if (!getPoint(_elt)) return {x:0, y:0}; //No error if elt not found// to filter phantom s : TODO: improve by suppressing these fantom Edges
 	const elt = getPoint(_elt);
 	const matrixPt = DOM_SCENE.getElementById("grotate_" + elt.hc).getCTM(); //get current elt transformation on svg (in fact grotate's)
-	let pt = DOM_SCENE.createSVGPoint(); //create new point on the svg
+	let pt = DOM_SCENE.createSVGPoint(); //create new point on the svg (MOST COSTLY)
 	pt.x = +elt.ptX;
 	pt.y = +elt.ptY;
 	let ptt = pt.matrixTransform(matrixPt); // apply coord translation on the new point
