@@ -730,8 +730,6 @@ button, input[type="submit"], .btn {
 		color: #fff;
 		background-color: var(--sbx-amendment-color);
 	}
-
-
 	.badge-pill {
 		padding-right: .6em;
 		padding-left: .6em;
@@ -979,6 +977,10 @@ button, input[type="submit"], .btn {
 
 	text.edgeLbl.planar {
 		fill: var(--sbx-planar-color)
+	}
+
+	text.edgeLbl.planar.bhb_link {
+		fill: var(--sbx-amendment-color)
 	}
 
 	path.edges.spheric {

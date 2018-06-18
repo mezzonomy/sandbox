@@ -31509,7 +31509,7 @@ function render(_data, _diff){
 	.enter()
 	.filter(function(d){return (d.topology === "planar" || d.topology === "spheric") }) //labels for planar & spherics
 	.append("text")
-	.attr("class", function(d) {return "edgeLbl " + d.topology;})
+	.attr("class", function(d) {return "edgeLbl " + d.topology + " " + d.tagnet;})
 	.attr("id", function(d){return "lbl_" + d.id;})
 	.attr("text-anchor", "middle")
 	.text(function(d) {
