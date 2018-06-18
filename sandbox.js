@@ -31879,7 +31879,7 @@ function vertexComputation(QApointsList){
 
 
 	// logs TODO: remove
-	console.log("Render", QApointsList.length , "points. Vertices reconstruction in", (j + 1), "iterations", sr);
+	console.log("Render", QApointsList.length , "points. Vertices reconstruction in", (j + 1), "iterations.", sr.length, "vertices");
 	return sr;
 }
 
@@ -33065,7 +33065,7 @@ function qa_vertices_forces(edges, vertices) {
 		if (FORCES_STATUS.charge.status) {
 			forces.force("charge", d3.forceManyBody().strength(function(d){return (d.pc_planars) * 10;}));  // Nodes attracting or reppelling each others (negative = repelling)
 		}
-		//when all  vertices are pinned, faster decay
+		//when all vertices are pinned, faster decay
 		if (D3_SCENE.selectAll(".gvertex").select("circle.pinned").size() === VERTICES_BY_HC.size()) {
 			forces.alphaDecay(ALLPINNED_DECAY);
 		} else {

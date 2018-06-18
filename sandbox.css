@@ -710,18 +710,28 @@ button, input[type="submit"], .btn {
 }
 
 	/*badges ------------------------------ */
-	.badge-planar {
-	    color: #fff;
-	    background-color: var(--sbx-planar-color);
-	}
 	.badge-spheric {
 		color: #fff;
 		background-color: var(--sbx-spheric-color);
+	}
+	.badge-planar {
+	    color: #fff;
+	    background-color: var(--sbx-planar-color);
 	}
 	.badge-hyperbolic {
 		color: #fff;
 		background-color: var(--sbx-hyperbolic-color);
 	}
+	.badge-link-planar {
+		color: #fff;
+		background-color: var(--sbx-amendment-color);
+	}
+	.badge-link-hyperbolic {
+		color: #fff;
+		background-color: var(--sbx-amendment-color);
+	}
+
+
 	.badge-pill {
 		padding-right: .6em;
 		padding-left: .6em;
@@ -884,6 +894,7 @@ button, input[type="submit"], .btn {
 	  font-size: .6rem;
 	  font-weight: normal;
 	  fill:white;
+		user-select: none;
 	}
 
 	/*svg elements for graphical mode ------------------------------ */
