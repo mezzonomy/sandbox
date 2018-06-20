@@ -1,0 +1,31 @@
+:root{
+	/*scene color*/
+	/*--sbx-workspace-color: #cddc39;*/
+	--sbx-workspace-color: silver;
+	--sbx-toolbox-color: darkblue;
+	--sbx-toolbox-text-color: white;
+
+	/*misc*/
+	--sbx-edge-lbl-size: .8rem;
+	--sbx-amendment-color: #990000;
+
+	/*vertex*/
+	--sbx-vertex-color: silver;
+	--sbx-vertex-opacity: .3;
+	--sbx-vertex-border-color: dimgrey;
+	--sbx-vertex-border-opacity: .6;
+	--sbx-vertex-border-width: 3;
+
+	/*topology*/
+	--sbx-hyperbolic-color: black;
+	--sbx-hyperbolic-width: 1;
+	--sbx-hyperbolic-opacity: 1;
+
+	--sbx-planar-color: black;
+	--sbx-planar-width: 1;
+	--sbx-planar-opacity: 1;
+
+	--sbx-spheric-color: black;
+	--sbx-spheric-width: 1;
+	--sbx-spheric-opacity: 1;
+}

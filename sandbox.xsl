@@ -76,6 +76,9 @@
 			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 			<link type="text/css" rel="stylesheet" href="hyper/defaultss.css" charset="utf-8"/>
 			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.css" charset="utf-8"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.one.theme.css" charset="utf-8" role="theme" title="one" disabled="disabled"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.two.theme.css" charset="utf-8" role="theme" title="two" disabled="disabled"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.three.theme.css" charset="utf-8" role="theme" title="three" disabled="disabled"/>
 			<link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,700&amp;subset=latin-ext" rel="stylesheet"/>
 			<script src="sandbox/sandbox-misc.js" type="text/javascript"></script>
 			<script src="sandbox/sandbox.js" type="text/javascript" defer="defer"></script>

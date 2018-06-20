@@ -31251,6 +31251,7 @@ function render(_data, _diff){
 	if (defs.empty()){
 		defs = D3_SCENE.append("defs");
 		createMarkers(defs); 	// add markers for graph edges
+		createFilters(defs);
 		}
 
 	// ******************************************************
@@ -32226,6 +32227,25 @@ function createMarkers(_defs) {
 }
 
 /**
+	* creating filters definitions for the svg
+	*
+	* @param _defs {d3 selection} - d3 selection of the svg def tag where to create filters
+	* @returns {-} - Adds def definition of filters
+	*/
+function createFilters(_defs) {
+	_defs.append("filter")
+		.attr("id", "gauss1")
+		.attr("x", "-0.044379312")
+		.attr("y", "-0.030282352")
+		.attr("width", "1.0887586")
+		.attr("height", "1.0605647")
+		.attr("style", "color-interpolation-filters:sRGB")
+		.append("feGaussianBlur")
+		.attr("stdDeviation", "1.6");
+}
+
+
+/**
 	* Text mode interactions
 	*
 	* @param
@@ -32522,6 +32542,18 @@ function AddButtonsToPerspective(){
 		});
 	}
 
+	let btnThemePicker = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-theme-picker");
+	if (btnThemePicker.empty()) {
+		btnThemePicker = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark").attr("id","btn-theme-picker")
+		.attr("title","Choose theme")
+		.on("click", function () {
+			displayCssThemes();
+		})
+		.append("img")
+		.attr("src","/sandbox/img-icon-theme.svg")
+		.attr("style", styleIcons);
+	}
+
 	let btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-color-picker");
 	if (btnColorPicker.empty()) {
 		btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.append("input")
@@ -32533,6 +32565,7 @@ function AddButtonsToPerspective(){
 			document.body.style.backgroundColor = this.value;
 		});
 	}
+
 }
 
 /**
@@ -32801,7 +32834,7 @@ function text_nav(_datum){
 	.attr("class","btn btn-primary")
 	.attr("id",TEXT_TOOLBOX_ID + "-btnNextPt")
 	.text(String.fromCharCode(8635)) // 8594
-	.attr("title", "Next")
+	.attr("title", "-> next point (alt+n)")
 	.attr("accessKey", "n")
 	.on("click", function(d) {
 		d3.event.stopPropagation();
@@ -32833,7 +32866,7 @@ function text_nav(_datum){
 	.attr("class","btn btn-primary")
 	.attr("id",TEXT_TOOLBOX_ID + "-btnPeerPt")
 	.text(String.fromCharCode(8645)) //8645 8597
-	.attr("title", "Peer")
+	.attr("title", "-> peer point (alt+p)")
 	.attr("accessKey", "p")
 	.on("click", function(d) {
 		event.stopPropagation();
@@ -32847,7 +32880,7 @@ function text_nav(_datum){
 	.attr("class","btn btn-secondary")
 	.attr("id",TEXT_TOOLBOX_ID + "-btnBeforePt")
 	.text(String.fromCharCode(8634)) //8592
-	.attr("title", "Before")
+	.attr("title", "-> before point (alt+b)")
 	.attr("accessKey", "b")
 	.on("click", function(d) {
 		event.stopPropagation();

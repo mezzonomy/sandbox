@@ -1,9 +1,9 @@
 /* css variables */
 :root{
 	/*scene color*/
-	/*--sbx-workspace-color: #cddc39;*/
 	--sbx-workspace-color: rgb(223, 217, 218);
 	--sbx-toolbox-color: white;
+	--sbx-toolbox-text-color: black;
 
 	/*misc*/
 	--sbx-edge-lbl-size: .8rem;
@@ -502,6 +502,7 @@ svg#scene {
 	z-index:50;
 	opacity:.8;
 	background-color: var(--sbx-toolbox-color);
+	color: var(--sbx-toolbox-text-color);
 	box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
 }
 

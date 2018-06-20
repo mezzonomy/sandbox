@@ -11,7 +11,7 @@
 	* @returns Displays a loader image
 	*/
 function initLoader() {
-	var loader ='<img src="sandbox/img-loader.gif" alt="loading..." width="42" height="42" style="position: absolute; left: 50%; top: 50%;"/>';
+	let loader ='<img src="sandbox/img-loader.gif" alt="loading..." width="42" height="42" style="position: absolute; left: 50%; top: 50%;"/>';
 	document.getElementById('loader').innerHTML = loader;
 }
 
@@ -92,8 +92,8 @@ var simulateOnchange = function(_elem) {
 	* @param {string} _style  The style on dialog div, to give dimensions ie : 'max-width: 90%; margin-top: 10px;'
 	*/
 function openModal(_text, _title, _style) {
-var universe = document.getElementById('universe');
-var modal =
+	let universe = document.getElementById('universe');
+	const modal =
 	'<div id="modal-js-generated" class="modal show" tabindex="-1" role="dialog"> \
 		<div class="modal-dialog" tabindex="-1" role="document" style="'+ _style +'"> \
 			<div class="modal-content"> \
@@ -420,4 +420,31 @@ function checkXML(n) {
 	for (i=0;i<l;i++) {
 		checkXML(n.childNodes[i])
 	}
+}
+
+function displayCssThemes() {
+	let text = "<p style=\'color:green;\'><a onclick=\"swithCssTheme(\'none');\">default</a></p>";
+	for (let link of document.getElementsByTagName("link")){
+    if (link.attributes.role && link.attributes.role.value === "theme") {
+			if (link.disabled) {
+				text += "<p style='color:green;'><a onclick='swithCssTheme(\"" + link.title + "\");'>" + link.title + "</a>" + "</p>";
+			} else {
+				text += "<p>" + link.title + "</p>";
+			}
+		}
+	}
+	if (text) openModal(text, "Themes", "");
+}
+
+function swithCssTheme(_theme) {
+	for (let link of document.getElementsByTagName("link")){
+		if (link.attributes.role && link.attributes.role.value === "theme") {
+			link.disabled = true;
+			if (link.title === _theme) {
+				link.disabled = false;
+			}
+		}
+	}
+	removeModal();
+	displayCssThemes();
 }
