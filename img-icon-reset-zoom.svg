@@ -1,113 +1,47 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   version="1.1"
-   id="Capa_1"
    x="0px"
    y="0px"
-   width="612.056px"
-   height="612.057px"
-   viewBox="0 0 612.056 612.057"
-   style="enable-background:new 0 0 612.056 612.057;"
-   xml:space="preserve"
-   sodipodi:docname="img-icon-reset-zoom.svg"
-   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"><metadata
-     id="metadata44"><rdf:RDF><cc:Work
-         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
-     id="defs42"><filter
-       inkscape:collect="always"
+   width="612px"
+   height="612px"
+   viewBox="0 0 612 612">
+	 <defs>
+		 <filter
        style="color-interpolation-filters:sRGB"
-       id="filter875"
+       id="blur1"
        x="-0.011989082"
        width="1.0239782"
        y="-0.012010938"
-       height="1.0240219"><feGaussianBlur
-         inkscape:collect="always"
+       height="1.0240219">
+			 <feGaussianBlur
          stdDeviation="2.5263246"
-         id="feGaussianBlur877" /></filter><filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
-       id="filter875-5"
-       x="-0.011989082"
-       width="1.0239782"
-       y="-0.012010938"
-       height="1.0240219"><feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="2.5263246"
-         id="feGaussianBlur877-1" /></filter><filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
-       id="filter4582"
-       x="-0.024000804"
-       width="1.0480016"
-       y="-0.023999196"
-       height="1.0479984"><feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="6.1203525"
-         id="feGaussianBlur4584" /></filter></defs><sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1311"
-     inkscape:window-height="775"
-     id="namedview40"
-     showgrid="false"
-     inkscape:zoom="0.385585"
-     inkscape:cx="-251.56629"
-     inkscape:cy="306.0285"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="Capa_1" /><g
-     id="g7"
-     style="fill:#808080;filter:url(#filter4582)"
-     transform="matrix(-1,0,0,1,612.05675,0)"><g
-       id="Search"
-       style="fill:#808080"><g
-         id="g4"
-         style="fill:#808080"><path
+         id="feGaussianBlur877" />
+			 </filter>
+		 </defs>
+		 <g
+     style="fill:#808080;filter:url(#blur1)"
+     transform="matrix(-1,0,0,1,612.05675,0)">
+		 <g
+       style="fill:#808080">
+			 <g
+         style="fill:#808080">
+				 <path
            d="M 595.2,513.908 493.775,412.482 C 520.482,370.755 536.46,321.441 536.46,268.219 536.459,120.085 416.375,0 268.24,0 120.106,0 0.021,120.085 0.021,268.219 c 0,148.134 120.085,268.22 268.219,268.22 53.222,0 102.537,-15.979 144.225,-42.686 l 101.426,101.463 c 22.454,22.453 58.854,22.453 81.271,0 22.492,-22.491 22.492,-58.855 0.038,-81.308 z M 268.24,459.805 c -105.793,0 -191.585,-85.793 -191.585,-191.585 0,-105.793 85.792,-191.585 191.585,-191.585 105.793,0 191.585,85.792 191.585,191.585 0.001,105.792 -85.791,191.585 -191.585,191.585 z"
-           id="path2"
-           style="fill:#808080"
-           inkscape:connector-curvature="0" /></g></g></g><g
-     id="g9" /><g
-     id="g11" /><g
-     id="g13" /><g
-     id="g15" /><g
-     id="g17" /><g
-     id="g19" /><g
-     id="g21" /><g
-     id="g23" /><g
-     id="g25" /><g
-     id="g27" /><g
-     id="g29" /><g
-     id="g31" /><g
-     id="g33" /><g
-     id="g35" /><g
-     id="g37" /><g
+           style="fill:#808080"/>
+				 </g>
+			 </g>
+		 </g>
+		 <g
      id="g4528"
-     style="opacity:0.99999999;paint-order:stroke markers fill;fill:#000000;stroke:#000000;stroke-opacity:0.98913044;"><path
+     style="opacity:0.99999999;paint-order:stroke markers fill;fill:#000000;stroke:#000000;stroke-opacity:0.98913044;">
+		 <path
        transform="matrix(0.94985214,0,0,0.95491443,23.320201,19.13526)"
-       inkscape:connector-curvature="0"
-       id="path869"
        d="M 44.088852,51.869238 C 578.342,588.71585 548.51719,556.29758 548.51719,556.29758 l 1.29673,-1.29673 v 0"
-       style="fill:#000000;stroke:#000000;stroke-width:29.99958247;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.98913044;filter:url(#filter875);paint-order:stroke markers fill" /><path
+       style="fill:#000000;stroke:#000000;stroke-width:29.99958247;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.98913044;paint-order:stroke markers fill" />
+		<path
        transform="matrix(-0.94985214,0,0,0.95491443,587.44005,19.135259)"
-       inkscape:connector-curvature="0"
-       id="path869-6"
        d="M 44.088852,51.869238 C 578.342,588.71585 548.51719,556.29758 548.51719,556.29758 l 1.29673,-1.29673 v 0"
-       style="fill:#000000;stroke:#000000;stroke-width:29.99958247;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.98913044;filter:url(#filter875-5);paint-order:stroke markers fill" /></g></svg>
+       style="fill:#000000;stroke:#000000;stroke-width:29.99958247;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.98913044;paint-order:stroke markers fill" />
+		 </g>
+</svg>
