@@ -81,7 +81,9 @@
 			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.three.theme.css" charset="utf-8" role="theme" title="three" disabled="disabled"/>
 			<link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,700&amp;subset=latin-ext" rel="stylesheet"/>
 			<script src="sandbox/sandbox-misc.js" type="text/javascript"></script>
+			<script src="sandbox/helpers.min.js" type="text/javascript"></script>
 			<script src="sandbox/sandbox.js" type="text/javascript" defer="defer"></script>
+			<!-- prod <script src="sandbox/sandbox.min.js" type="text/javascript" defer="defer"></script>-->
 		</head>
 		<body>
 			<div id="loader" style="z-index: 1072; overflow-x: hidden; overflow-y: auto; position: fixed;top: 0; right: 0; bottom: 0; left: 0; display: block; background-color: rgb(0,0,0); background-color: rgba(33,33,33,.6);"/>
@@ -165,7 +167,7 @@
 				    }
 				}
 				function wait4render() {
-				    if (typeof d3 != 'undefined' &amp;&amp; typeof CodeMirror != 'undefined' &amp;&amp; typeof render != 'undefined') {
+				    if (typeof d3 != 'undefined' &amp;&amp; typeof CodeMirror != 'undefined') {
 							closeLoader();
 							render(DATA, js_diff_matrix);
 				    }
@@ -401,7 +403,7 @@
 			<p><xsl:value-of select="$toolbox_LBL"/><i class="small">&#160;as&#160;<xsl:value-of select="$perspective/@username"/>&#160;(<xsl:value-of select="$role"/>)</i></p>
 		</div>
 		<div id="{$toolbox_ID}-body" class="toolbox-body">
-			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0); initAmendment(cm_editor, true); updateToDateIfSet();">
+			<form id="{$toolbox_ID}-valid-form" name="{$toolbox_ID}-valid-form" action="javascript:void(0); initAmendment(CM_EDITOR, true); updateToDateIfSet();">
 				<on:submit create="bhb:block">
 					<on:attribute name="body" script="_get('{$toolbox_ID}-editzone').value.replace(/\u0022/g, String.fromCharCode(39))"/> <!--replaces " by ' :-)-->
 					<bhb:copy-of select="bhb:parse(@body)"/>
@@ -415,14 +417,14 @@
 				<label for="{$toolbox_ID}-editzone" style="user-select: none;">
 					Edit Amendment
 					<xsl:text>    </xsl:text>
-					<button type="button" style="padding: 0; margin: 0; background: none; vertical-align: unset;" onclick="cm_editor.setOption('fullScreen', true); cm_editor.setOption('theme', 'material')">
+					<button type="button" style="padding: 0; margin: 0; background: none; vertical-align: unset;" onclick="CM_EDITOR.setOption('fullScreen', true); CM_EDITOR.setOption('theme', 'material')">
 						<span>&#8599;</span>
 					</button></label>
 				<textarea id="{$toolbox_ID}-editzone" placeholder= "Enter amendment or drag and drop an arc from the graph or an xml node from text... (F11/Esc for full screen editing)" name="{$toolbox_ID}-editzone" class="form-control" required="required" onchange="validateAmendment('{$toolbox_ID}-editzone')"/>
 				<div id="{$toolbox_ID}-editinfo" class="alert"/>
 				<button type="submit" form="{$toolbox_ID}-valid-form" value="Submit" id="{$toolbox_ID}-validbtn" name="{$toolbox_ID}-validbtn" class="btn btn-primary right" disabled="disabled">&#10003;</button>
-				<button type="button" title="Add drop placeholder here (current cursor position or replaces selection)" class="btn btn-secondary right" onclick="cmAddDropPlaceholder(cm_editor);">_</button>
-				<button type="button" title="Clear amendment" class="btn btn-secondary right" onclick="initAmendment(cm_editor, false);">&#x000D7;</button>
+				<button type="button" title="Add drop placeholder here (current cursor position or replaces selection)" class="btn btn-secondary right" onclick="cmAddDropPlaceholder(CM_EDITOR);">_</button>
+				<button type="button" title="Clear amendment" class="btn btn-secondary right" onclick="initAmendment(CM_EDITOR, false);">&#x000D7;</button>
 			</form>
 		</div>
 	</div>
