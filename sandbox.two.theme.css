@@ -3,7 +3,7 @@
 	/*--sbx-workspace-color: #cddc39;*/
 	--sbx-workspace-color: #050b42;
 	--sbx-toolbox-color: pink;
-	--sbx-toolbox-text-color: black;	
+	--sbx-toolbox-text-color: black;
 
 	/*misc*/
 	--sbx-edge-lbl-size: .8rem;
@@ -28,4 +28,8 @@
 	--sbx-spheric-color: lightseagreen;
 	--sbx-spheric-width: 1;
 	--sbx-spheric-opacity: 1;
+
+	--sbx-edge-viewed-color: pink;
+	--sbx-edge-viewed-width: 1;
+	--sbx-edge-viewed-opacity: 1;
 }

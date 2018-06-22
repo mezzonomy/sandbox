@@ -28,4 +28,8 @@
 	--sbx-spheric-color: black;
 	--sbx-spheric-width: 1;
 	--sbx-spheric-opacity: 1;
+
+	--sbx-edge-viewed-color: #007bff;
+	--sbx-edge-viewed-width: 1;
+	--sbx-edge-viewed-opacity: 1;
 }
