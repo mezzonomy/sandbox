@@ -137,7 +137,39 @@
 <xsl:template name="bhbtext">
 	<xsl:param name="mode"/>
 	<div id="bhb-text" data-bhbmode="{$mode}">
-			<div id="bhb-text-perspective-icon" data-bhbmode="{$mode}"/>
+			<div id="bhb-text-perspective-icon" data-bhbmode="{$mode}">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="1rem"
+					transform="rotate(180)"
+					viewBox="0 0 500 500">
+					<xsl:attribute name="width">
+						<xsl:if test="$mode = 'graph'">1rem</xsl:if>
+						<xsl:if test="$mode = 'text'">2rem</xsl:if>
+					</xsl:attribute>
+					<path
+						d="m 494.77828,253.84848 c 0,0 -130.27764,-110.20396 -225.55583,-124.80217 -122.2963,54.60887 -71.02251,228.28589 4.57981,241.94098 99.60596,-26.88446 220.97602,-117.13881 220.97602,-117.13881 z"
+						style="fill-opacity:1;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;"
+						class="icon-eye-shape"/>
+					<path
+						d="m 269.20989,129.01488 c 0,0 70.1786,13.69873 77.10413,113.72941 6.92546,100.03046 -73.08114,128.27457 -73.08114,128.27457"
+						style="fill:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;"
+						class="icon-eye-inner-shape"/>
+					<path
+						d="m -245.919,243.99281 a 16.668613,34.375835 0 0 1 -16.60367,34.37558 16.668613,34.375835 0 0 1 -16.73305,-34.10769 16.668613,34.375835 0 0 1 16.47326,-34.64137 16.668613,34.375835 0 0 1 16.86143,33.83773 l -16.66659,0.53575 z"
+						transform="scale(-1,1)"
+						style="stroke-width:1"
+						class="icon-eye-pupil"/>
+					<rect
+						width="77.037857"
+						height="10"
+						x="-78.037857"
+						y="245"
+						transform="scale(-1,1)"
+						style="stroke-width:1px"
+						class = "icon-eye-line"/>
+				</svg>
+			</div>
 			<xsl:apply-templates select="bhb:modal($situation)" mode="xsl:default"/>
 	</div>
 </xsl:template>

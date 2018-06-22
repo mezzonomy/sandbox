@@ -28,6 +28,10 @@
 	--sbx-spheric-color: darkgreen;
 	--sbx-spheric-width: 1;
 	--sbx-spheric-opacity: 1;
+
+	--sbx-edge-viewed-color: #007bff;
+	--sbx-edge-viewed-width: 1;
+	--sbx-edge-viewed-opacity: 1;
 }
 
 
@@ -353,7 +357,6 @@ div#text-pointnavtool[data-bhbmode=text]{
 }
 
 div#bhb-text-perspective-icon[data-bhbmode=graph]{
-	content:url(img-eye-optim-start.svg);
 	height: 1rem;
 	float: left;
 	position: relative;
@@ -361,7 +364,6 @@ div#bhb-text-perspective-icon[data-bhbmode=graph]{
 }
 
 div#bhb-text-perspective-icon[data-bhbmode=text]{
-	content:url(img-eye-optim-start.svg);
 	height: 2rem;
 	float: left;
 	position: relative;
@@ -1010,19 +1012,21 @@ button, input[type="submit"], .btn {
 	path.edges.selected {
 		stroke-width: 3px;
 	}
+
 	path.edges.viewed {
-		stroke:#007bff;
-		/*stroke-width: 3px;*/
+		stroke:	var(--sbx-edge-viewed-color);
+		stroke-width: var(--sbx-edge-viewed-width);
+		stroke-opacity: var(--sbx-edge-viewed-opacity);
 	}
 
 	.marker-viewed {
-		stroke: #007bff;
+		stroke: var(--sbx-edge-viewed-color);
 	}
 
-	path.edited {
+/*	path.edited {
 		stroke-width: 2px;
 		opacity: 1;
-	}
+	}*/
 
 	.notdisplayed{
 	  opacity: 0;
@@ -1035,6 +1039,27 @@ button, input[type="submit"], .btn {
 		opacity: .8;
 		cursor: crosshair;
 	}
+
+	/*svg icons colors ------------------------------ */
+
+	path.icon-eye-shape{
+		fill: none;
+		stroke:	var(--sbx-edge-viewed-color);
+		stroke-opacity: var(--sbx-edge-viewed-opacity);
+	}
+	path.icon-eye-inner-shape{
+		stroke: var(--sbx-edge-viewed-color);
+		stroke-opacity: var(--sbx-edge-viewed-opacity);
+	}
+	path.icon-eye-pupil{
+		fill: var(--sbx-edge-viewed-color);
+		stroke:	var(--sbx-edge-viewed-color);
+		opacity: var(--sbx-edge-viewed-opacity);
+	}
+	rect.icon-eye-line{
+		fill: var(--sbx-edge-viewed-color);
+	}
+
 
 	/*CODEMIRROR ------------------------------ */
 

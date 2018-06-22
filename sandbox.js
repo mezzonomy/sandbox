@@ -32,7 +32,30 @@ const POINT_RADIUS = +0,
 			ALLPINNED_DECAY = 1 - Math.pow(0.001, 1 / 50), // Decay when all vertices are pinned (ie. reloading)
 			REHEAT_ALPHATARGET = .3, // Non 0 to maintain heated
 			DEF_ALPHATARGET = 0,
-			EDGE_TYPES = [{kind:"hyperbolic"},{kind:"planar"},{kind:"spheric"},{kind:"link"}];
+			EDGE_TYPES = [{kind:"hyperbolic"},{kind:"planar"},{kind:"spheric"},{kind:"link"}],
+			SVG_EYE_ICON =
+			`<path
+				d="m 494.77828,253.84848 c 0,0 -130.27764,-110.20396 -225.55583,-124.80217 -122.2963,54.60887 -71.02251,228.28589 4.57981,241.94098 99.60596,-26.88446 220.97602,-117.13881 220.97602,-117.13881 z"
+				style="fill-opacity:1;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;"
+				class="icon-eye-shape"/>
+			<path
+				d="m 269.20989,129.01488 c 0,0 70.1786,13.69873 77.10413,113.72941 6.92546,100.03046 -73.08114,128.27457 -73.08114,128.27457"
+				style="fill:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;"
+				class="icon-eye-inner-shape"/>
+			<path
+				d="m -245.919,243.99281 a 16.668613,34.375835 0 0 1 -16.60367,34.37558 16.668613,34.375835 0 0 1 -16.73305,-34.10769 16.668613,34.375835 0 0 1 16.47326,-34.64137 16.668613,34.375835 0 0 1 16.86143,33.83773 l -16.66659,0.53575 z"
+				transform="scale(-1,1)"
+				style="stroke-width:1"
+				class="icon-eye-pupil"/>
+			<rect
+				width="77.037857"
+				height="10"
+				x="-78.037857"
+				y="245"
+				transform="scale(-1,1)"
+				style="stroke-width:1px"
+				class = "icon-eye-line"/>`
+				;
 
 // Global variables
 var D3_UNIVERSE,
@@ -1493,9 +1516,9 @@ function createMarkers(_defs) {
 		.attr("refX", "50")
 		.attr("refY", "25")
 		.attr("orient", "auto")
-		.append("image")
-		.attr("xlink:href", "/sandbox/img-eye-optim-start.svg")
-		.attr("transform", "scale(.1)");
+		.append("g")
+		.attr("transform", "translate(50, 50)  rotate(180) scale(.1)")
+		.html(SVG_EYE_ICON);
 	_defs.append("marker")
 		.attr("id", "marker-end-position")
 		.attr("class", "marker-position")
@@ -1504,10 +1527,9 @@ function createMarkers(_defs) {
 		.attr("refX", "0")
 		.attr("refY", "25")
 		.attr("orient", "auto")
-		.append("image")
-		.attr("xlink:href", "/sandbox/img-eye-optim-end.svg")
-		.attr("x",0).attr("y",0)
-		.attr("transform", "scale(.1)");
+		.append("g")
+		.attr("transform", "scale(.1)")
+		.html(SVG_EYE_ICON);
 	_defs.append("marker")
 		.attr("id", "marker-end-position-end")
 		.attr("class", "marker-position")
