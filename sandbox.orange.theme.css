@@ -1,0 +1,24 @@
+:root{
+	--sbx-workspace-color: #ff7900d6;
+	--sbx-toolbox-color: white;
+	--sbx-toolbox-text-color: black;
+	--sbx-edge-lbl-size: 1rem;
+	--sbx-amendment-color: #ff0000;
+	--sbx-vertex-color: #000000ed;
+	--sbx-vertex-opacity: 1;
+	--sbx-vertex-border-color: #cdae93;
+	--sbx-vertex-border-opacity: .6;
+	--sbx-vertex-border-width: 4;
+	--sbx-hyperbolic-color: #ff7900;
+	--sbx-hyperbolic-width: 1;
+	--sbx-hyperbolic-opacity: 1;
+	--sbx-planar-color: #000000ed;
+	--sbx-planar-width: 1;
+	--sbx-planar-opacity: 1;
+	--sbx-spheric-color: #746a11;
+	--sbx-spheric-width: 1;
+	--sbx-spheric-opacity: 1;
+	--sbx-edge-viewed-color: #fff;
+	--sbx-edge-viewed-width: 1.5;
+	--sbx-edge-viewed-opacity: 1;
+		}
