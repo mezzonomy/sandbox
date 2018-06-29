@@ -1328,7 +1328,7 @@ function tagDraggedEnded(d) {
 	if (xOK && yOK) amend(this.dataset.path, "append", false);
 	// Return all artefacts to initial state
 	D3_UNIVERSE.select("#" + AMEND_CM_EDITZONE_ID).classed("targeted", false).classed("zoom11", false);
-	d3.select(this).attr("transform", null); //return arc to initial position
+	//d3.select(this).attr("transform", null); //return arc to initial position
 	//console.log("arcDragEnded ended on:", this, "d3.event:",  d3.event, "d3.mouse:", d3.mouse(this));
 }
 

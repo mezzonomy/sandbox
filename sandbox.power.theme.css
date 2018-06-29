@@ -1,0 +1,24 @@
+:root{
+	--sbx-workspace-color: #e5e5cc78;
+	--sbx-toolbox-color: white;
+	--sbx-toolbox-text-color: black;
+	--sbx-edge-lbl-size: .8rem;
+	--sbx-amendment-color: #990000;
+	--sbx-vertex-color: #e5e5cc;
+	--sbx-vertex-opacity: .5;
+	--sbx-vertex-border-color: black;
+	--sbx-vertex-border-opacity: 0;
+	--sbx-vertex-border-width: 1;
+	--sbx-hyperbolic-color: #2d3770fa;
+	--sbx-hyperbolic-width: 1;
+	--sbx-hyperbolic-opacity: 1;
+	--sbx-planar-color: #9c1c7bfa;
+	--sbx-planar-width: 1;
+	--sbx-planar-opacity: 1;
+	--sbx-spheric-color: #702d2dfa;
+	--sbx-spheric-width: 1;
+	--sbx-spheric-opacity: 1;
+	--sbx-edge-viewed-color: #007bff;
+	--sbx-edge-viewed-width: 1;
+	--sbx-edge-viewed-opacity: 1;
+}

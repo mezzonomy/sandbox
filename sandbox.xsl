@@ -80,6 +80,8 @@
 			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.two.theme.css" charset="utf-8" role="theme" title="two" disabled="disabled"/>
 			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.three.theme.css" charset="utf-8" role="theme" title="three" disabled="disabled"/>
 			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.orange.theme.css" charset="utf-8" role="theme" title="orange" disabled="false"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.four.theme.css" charset="utf-8" role="theme" title="four" disabled="disabled"/>
+			<link type="text/css" rel="stylesheet" href="sandbox/sandbox.power.theme.css" charset="utf-8" role="theme" title="power" disabled="disabled"/>
 			<link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,700&amp;subset=latin-ext" rel="stylesheet"/>
 			<script src="sandbox/sandbox-misc.js" type="text/javascript"></script>
 			<script src="sandbox/helpers.min.js" type="text/javascript"></script>
