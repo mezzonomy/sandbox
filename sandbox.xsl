@@ -193,6 +193,19 @@
 			<xsl:text>];</xsl:text>
 			<!-- this postlude should be embedded in global prelude -->
 			<xsl:text>
+				function logTimer(_timer) {
+					const t = new Date();
+					if (!localStorage.timers) localStorage.setItem("timers", "[]");
+					const timers= JSON.parse(localStorage.timers);
+					let time = {};
+					time.timer = _timer;
+					time.np = DATA.length;
+					time.nv = (typeof VERTICES == 'undefined')?0:VERTICES.length;
+					time.date = t;
+					timers.push(time);
+					localStorage.setItem("timers", JSON.stringify(timers));
+				}
+				logTimer("000-init");
 				function wait4loader() {
 				    if (typeof initLoader != 'undefined') {
 				        initLoader();
@@ -211,7 +224,9 @@
 				    }
 				}
 				wait4loader();
+				logTimer("050-misc loaded");
 				wait4render();
+				logTimer("099-render loaded");
 			 </xsl:text>
 		</xsl:processing-instruction>
 </xsl:template>

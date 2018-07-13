@@ -448,3 +448,33 @@ function swithCssTheme(_theme) {
 	removeModal();
 	displayCssThemes();
 }
+
+function logTimer(_timer) {
+	const t = new Date();
+	if (!localStorage.timers) localStorage.setItem("timers", "[]");
+	const timers= JSON.parse(localStorage.timers);
+	let time = {};
+	time.timer = _timer;
+	time.np = DATA.length;
+	time.nv = (typeof VERTICES == 'undefined')?0:VERTICES.length;
+	time.date = t;
+	timers.push(time);
+	localStorage.setItem("timers", JSON.stringify(timers));
+}
+
+function dlTimer(_objArray) {
+		 const array = typeof _objArray != 'object' ? JSON.parse(_objArray) : _objArray;
+		 let str = "";
+		 let d = 0;
+		 for (let l of array.values()) {
+				 let line = '';
+				 for (let p of Object.values(l)) {
+						 line += '"' + p + '"' +  ';';
+				 }
+				 line += '"' + (Date.parse(l.date) - d) + '"' + ";"
+				 line.slice(0,line.Length-1);
+				 str += line + '\r\n';
+				 d = Date.parse(l.date);
+		 }
+		 window.open( "data:text/csv;charset=utf-8," + str)
+ }

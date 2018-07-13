@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 /**
 	* @file sandbox.js
 	* @copyright (c) 2014-2018, sarl mezzònomy
@@ -6,12 +6,10 @@
 	*/
 
 // Global Constants
-const POINT_RADIUS = +0,
-			VERTEX_RADIUS = +30,
+const VERTEX_RADIUS = +30,
 			VERTEX_RADIUS_M = 10, //The vertex radius is multiplied by ((this ratio) * sqrt(point number))
 			VERTEX_COMPUTATION_MAX_ITERATION = 100, // Limits the vertex computation iterations
 			BEYOND=800, // to get infinite line for spheric edges
-			ARC_INNER_RADIUS=.1, // Proportional to VERTEX_RADIUS. It is the radius of the inner donut circle of a selected vertex
 			// Elements & seelctions
 			AMEND_TOOLBOX_ID = "amendment",
 			AMEND_EDITZONE_ID = "amendment-editzone",
@@ -284,20 +282,20 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
 		d3.select(this).raise().classed("active", true);
 	}
 
-	function dragHandle(d){
+	function dragHandle(){
 		let ptx = d3.event.x;
 		if (ptx > xMax) {ptx = xMax} else if (ptx < xMin) {ptx = xMin}
 		sliderVals[d] = ptx;
 		const selHandle = d3.select(this);
 		selHandle.attr("transform", function(d) {return "translate("+ ptx +",0)"; });
-		selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part1")}).text(function(d) {return FORMAT_DATE_P1(x.invert(ptx));});
-		selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part2")}).text(function(d) {return FORMAT_DATE_P2(x.invert(ptx));});
-		selHandle.selectAll("text.handle-label").filter(function(d){return this.classList.contains("part3")}).text(function(d) {return FORMAT_DATE_P3(x.invert(ptx));});
+		selHandle.selectAll("text.handle-label").filter(function(){return this.classList.contains("part1")}).text(function() {return FORMAT_DATE_P1(x.invert(ptx));});
+		selHandle.selectAll("text.handle-label").filter(function(){return this.classList.contains("part2")}).text(function() {return FORMAT_DATE_P2(x.invert(ptx));});
+		selHandle.selectAll("text.handle-label").filter(function(){return this.classList.contains("part3")}).text(function() {return FORMAT_DATE_P3(x.invert(ptx));});
 		const ptx2=x(sliderVals[d===0?1:0]);
 		selRange.attr("x1", ptx).attr("x2", ptx2)
 	}
 
-	function endDragHandle(d){
+	function endDragHandle(){
 		const v = Math.round(x.invert(d3.event.x));
 		const elt = d3.select(this);
 		sliderVals[d] = v;
@@ -325,14 +323,14 @@ function timeRangeSlider(_evts, _d1, _d2, _dmin, _dmax, _action, _divId, _width)
 		ghandle.attr("transform", function(d,i){return "translate(" + (i===0?dx1:dx2) + ",0)";});
 	}
 
-	function endDragRange(d){
+	function endDragRange(){
 		const ox1 = +d3.select(this).attr("x1");
 		const ox2 = +d3.select(this).attr("x2");
 		const vx1 = Math.round(x.invert(ox1));
 		const vx2 = Math.round(x.invert(ox2));
-		const elt=d3.select(this);
-		const v1=Math.min(vx1, vx2);
-		const v2=Math.max(vx1, vx2);
+		const elt = d3.select(this);
+		const v1 = Math.min(vx1, vx2);
+		const v2 = Math.max(vx1, vx2);
 		ghandle.attr("transform", function(d,i){return "translate(" + (i===0?ox1:ox2) + ",0)";});
 		elt.classed("active", false);
 		sliderVals = [v1, v2];
@@ -370,32 +368,31 @@ const tags = {
 
 // CodeMirror : callback function from completion
 function completeAfter(cm, pred) {
-	 const cur = cm.getCursor();
-	 if (!pred || pred()) setTimeout(function() {
-		 if (!cm.state.completionActive)
-			 cm.showHint({completeSingle: false});
-	 }, 100);
-	 return CodeMirror.Pass;
+	if (!pred || pred()) setTimeout(function() {
+		if (!cm.state.completionActive)
+			cm.showHint({completeSingle: false});
+	}, 100);
+	return CodeMirror.Pass;
 }
 
 function completeIfAfterLt(cm) {
-	 return completeAfter(cm, function() {
-		 const cur = cm.getCursor();
-		 return cm.getRange(CodeMirror.Pos(cur.line, cur.ch - 1), cur) === "<";
-	 });
+	return completeAfter(cm, function() {
+		const cur = cm.getCursor();
+		return cm.getRange(CodeMirror.Pos(cur.line, cur.ch - 1), cur) === "<";
+	});
 }
 
 function completeIfInTag(cm) {
-	 return completeAfter(cm, function() {
-		 const tok = cm.getTokenAt(cm.getCursor());
-		 if (tok.type === "string" && (!/['"]/.test(tok.string.charAt(tok.string.length - 1)) || tok.string.length === 1)) return false;
-		 const inner = CodeMirror.innerMode(cm.getMode(), tok.state).state;
-		 return inner.tagName;
-	 });
+	return completeAfter(cm, function() {
+		const tok = cm.getTokenAt(cm.getCursor());
+		if (tok.type === "string" && (!/['"]/.test(tok.string.charAt(tok.string.length - 1)) || tok.string.length === 1)) return false;
+		const inner = CodeMirror.innerMode(cm.getMode(), tok.state).state;
+		return inner.tagName;
+	});
 }
 
 // CodeMirror : component config options
-var cm_config = {lineNumbers: true,
+var cm_config = {
 	mode: "xml",
 	matchClosing: true,
 	alignCDATA: true,
@@ -495,7 +492,10 @@ function render(_data, _diff){
 	ZOOM = d3.zoom()
 		.scaleExtent([1/8, 8])
 		.on("zoom", containerZoomed)
+		//.on("start", containerZoomStarted)
+		.on("end", containerZoomEnded)
 		.clickDistance(10);
+
 	init_timeRangeSlider();
 
 	CURRENT_BHB_POSITION = document.getElementById("universe").dataset.bhbposition;
@@ -530,7 +530,7 @@ function render(_data, _diff){
 
 	// CodeMirror : Listener to change the amendment value (original textarea) and color test
 	CM_EDITOR.on("change", function(cm){
-		var search_invit = CM_EDITOR.getSearchCursor(AMEND_INSERT_TEXT);
+		var search_invit = CM_EDITOR.                                                                                                                                                                                                                                                           getSearchCursor(AMEND_INSERT_TEXT);
 		var search_placeholder = CM_EDITOR.getSearchCursor(AMEND_INSERT_PLACEHOLDER);
 		while (search_invit.findNext()) {
 			CM_EDITOR.markText(search_invit.from(), search_invit.to(), {className: "sb-cm-insert"});
@@ -553,6 +553,8 @@ function render(_data, _diff){
 	// ******************************************************
 	// Beyond this point executed only if diffs in matrix or scene is empty or reinited
 	// ******************************************************
+	logTimer("100-render initialized");
+
 	if (!_diff && !D3_SCENE.empty()) return false;
 	//console.log("@ ----- Redraw graph ----------------------------------------------------");
 
@@ -639,22 +641,16 @@ function render(_data, _diff){
 	// ******************************************************
 	//	Dynamic colors and markers
 	// ******************************************************
-	// define coloring scheme
-	var coloring_arcs = d3.scaleOrdinal(d3.schemeBlues[9]);
-	var coloring_tags = d3.scaleOrdinal(d3.schemeCategory20);
+	var tags = D3_UNIVERSE.select("#perspective").selectAll("span.badge");
 
-	//Map of tags color and add selection on hover
-	 var tagsColor=[];
-	 var tags = D3_UNIVERSE.select("#perspective").selectAll("span.badge");
-
-		tags.on("mouseover", function(d){
-			D3_SCENE.selectAll(".edges").classed("selected", false);
-			var currentTag =  this.dataset.tagname.replace(":","_");
-			D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === currentTag;}).classed("selected", true);}
-		);
-		tags.on("mouseout", function(d){
-			D3_SCENE.selectAll(".edges").classed("selected", false);}
-		);
+	tags.on("mouseover", function(d){
+		D3_SCENE.selectAll(".edges").classed("selected", false);
+		var currentTag =  this.dataset.tagname.replace(":","_");
+		D3_SCENE.selectAll(".edges").filter(function(e){return e.tagnet === currentTag;}).classed("selected", true);}
+	);
+	tags.on("mouseout", function(d){
+		D3_SCENE.selectAll(".edges").classed("selected", false);}
+	);
 
 	// ******************************************************
 	// Computing vertices
@@ -776,10 +772,10 @@ function render(_data, _diff){
 	// ******************************************************
 	// Computing external edges
 	// ******************************************************
-	 // Creating a list of all planar and spheric edges for drawing links & force simulation in d3 source/target format
-	 var edges=[];
+	// Creating a list of all planar and spheric edges for drawing links & force simulation in d3 source/target format
+	var edges=[];
 
-	 POINTS_BY_ID.each(function(d){
+	POINTS_BY_ID.each(function(d){
 		let id="", s, t;
 		if (d.topology === "spheric") { //spheric edge case
 			// by design a spheric is alone or has a B_ conterpart
@@ -798,7 +794,7 @@ function render(_data, _diff){
 			id = d.topology + "_" + d.hc + "_" + t.hc + "_" + d.point;
 		}
 		if (id) {edges.push({topology:d.topology, id:id, source:s, target:t, point:d.point, peer:d.peer, tagnet:d.tagnet, tagraw:d.tagraw});}
- 	});
+	});
 
 	// ******************************************************
 	// Rendering external edges
@@ -842,7 +838,7 @@ function render(_data, _diff){
 	.selectAll(".edgeLbl")
 	.data(edges, function(d){return "lbl_" + d.id;});
 
- 	newEdgeLbl.exit().remove();
+	newEdgeLbl.exit().remove();
 
 	newEdgeLbl
 	.enter()
@@ -860,6 +856,8 @@ function render(_data, _diff){
 	});
 
 	var edgeLbl =  container.selectAll(".edgeLbl");
+
+	lblSize();
 
 	edgeLbl
 	.on("click", function(d){
@@ -909,6 +907,8 @@ function render(_data, _diff){
 		}
 	});
 
+	logTimer("150-done drawing");
+
 	// ******************************************************
 	// Forces and Ticks
 	// ******************************************************
@@ -925,6 +925,12 @@ function render(_data, _diff){
 			try{
 				semaphore = false
 
+				/* ticks control*/
+				var ticksDone = (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay())));
+				var ticksTotal = (Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay())));
+				var percentCpt = Math.floor(100*(ticksDone / ticksTotal));
+
+				/*positionning*/
 				vertexGroup
 				.attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")";});
 
@@ -943,35 +949,38 @@ function render(_data, _diff){
 						}
 					}
 				});
+				// if # of vertices sup 50, only refreshes edges on half the ticks
+				if (VERTICES.length < 50 || ticksDone === ticksTotal|| (VERTICES.length >= 50 && ticksDone%2 === 0)) {
+					edge
+					.filter(function(d){return (d.topology === "planar");})
+					.attr("d", function(d){return drawPlanar(d.source.point, d.target.point).path;})
 
-				edge
-				.filter(function(d){return (d.topology === "planar");})
-				.attr("d", function(d){return drawPlanar(d.source.point, d.target.point).path;})
+					edge
+					.filter(function(d){return (d.topology === "spheric");})
+					.attr("d", function(d){return drawSpheric(d.source.point, "gvertex_" + d.source.hc).path;})
 
-				edgeLbl
-				.filter(function(d){return (d.topology === "planar");})
-				.attrs(function(d) {
-					const sPt = getAbsCoordPoint(d.source.point);
-					const tPt = getAbsCoordPoint(d.target.point)
-					return {x: sPt.x, y: sPt.y, transform: EdgeLblOrientation(sPt.x, sPt.y, tPt.x, tPt.y, "lbl_" + d.id, d.topology)};
-				});
+					if (VERTICES.length < 100 || ticksDone === ticksTotal || (VERTICES.length >= 100 && ticksDone%50 === 0)) {
+						edgeLbl
+						.filter(function(d){return (d.topology === "planar");})
+						.attrs(function(d) {
+							const sPt = getAbsCoordPoint(d.source.point);
+							const tPt = getAbsCoordPoint(d.target.point)
+							return {x: sPt.x, y: sPt.y, transform: EdgeLblOrientation(sPt.x, sPt.y, tPt.x, tPt.y, "lbl_" + d.id, d.topology)};
+						});
 
-				edge
-				.filter(function(d){return (d.topology === "spheric");})
-				.attr("d", function(d){return drawSpheric(d.source.point, "gvertex_" + d.source.hc).path;})
+						edgeLbl
+						.filter(function(d){return (d.topology === "spheric");})
+						.attrs(function(d) {
+							const sPt = getAbsCoordPoint(d.source.point);
+							const vtx = getAbsCoord("gvertex_" + d.target.hc);
+							return {x: sPt.x, y: sPt.y, transform: EdgeLblOrientation(sPt.x, sPt.y, (sPt.x - vtx.x) * BEYOND, (sPt.y - vtx.y) * BEYOND, "lbl_" + d.id, d.topology)};
+						});
+						edgeLbl.attr("style", "");
+					} else {
+						edgeLbl.attr("style", "display:none");
+					}
+				}
 
-				edgeLbl
-				.filter(function(d){return (d.topology === "spheric");})
-				.attrs(function(d) {
-					const sPt = getAbsCoordPoint(d.source.point);
-					const vtx = getAbsCoord("gvertex_" + d.target.hc);
-					return {x: sPt.x, y: sPt.y, transform: EdgeLblOrientation(sPt.x, sPt.y, (sPt.x - vtx.x) * BEYOND, (sPt.y - vtx.y) * BEYOND, "lbl_" + d.id, d.topology)};
-				});
-
-				/* ticks control*/
-				var ticksDone = (Math.ceil(Math.log(this.alpha()) / Math.log(1 - this.alphaDecay())));
-				var ticksTotal = (Math.ceil(Math.log(this.alphaMin()) / Math.log(1 - this.alphaDecay())));
-				var percentCpt = Math.floor(100*(ticksDone / ticksTotal));
 				/* log forces status
 				var logforces = D3_UNIVERSE.select("#perspective-footer").select("#logforces");
 				if (logforces.empty) D3_UNIVERSE.select("#perspective-footer").insert("div").attr("id","logforces");
@@ -1007,6 +1016,7 @@ function render(_data, _diff){
 
 	// After the last Tick
 	function endTick() {
+		logTimer("500-forces done");
 		if (!PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").empty()) PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-stop-animation").attr("title","Position computation, click to pause").text("100%");
 		storeLocalVertexPositionning(VERTICES_BY_HC); //store last vertex position and rotation
 		// If mode has changed, recenter the selection on the point
@@ -1037,6 +1047,7 @@ function vertexComputation(QApointsList){
 	// console.log("Render ", QApointsList.length, " points. Details: ", QApointsList);
 	// Vertices computation from the entering QA points list
 	// sr stands for (S)egment (R)econstruction
+	logTimer("200-init vertex computation");
 	let sr=[];
 	let vertex={};
 	for(let pt of QApointsList){
@@ -1219,6 +1230,7 @@ function vertexComputation(QApointsList){
 
 	// logs TODO: remove
 	console.log("Render", QApointsList.length , "points. Vertices reconstruction in", (j + 1), "iterations.", sr.length, "vertices");
+	logTimer("250-done " + sr.length + " vertices in " + (j + 1) + " iterations");
 	return sr;
 }
 
@@ -1232,11 +1244,12 @@ function containerZoomed() {
 	d3.select("#container").attr("transform", d3.event.transform);
 }
 function containerZoomStarted() {
-	/*console.log("Current transform on scene:",D3_SCENE.node().__zoom)
-	console.log('zoomStarted() - transform ' + d3.event.transform.toString());*/
+	//console.log("Current transform on scene:",D3_SCENE.node().__zoom)
+	//console.log('zoomStarted() - transform ' + d3.event.transform.toString());
 }
 function containerZoomEnded() {
 	/*console.log('zoomEnded() - transform ' + d3.event.transform.toString());*/
+	lblSize();
 }
 
 // ******************************************************
@@ -1476,6 +1489,16 @@ function EdgeLblOrientation(x1, y1, x2, y2, lblId = "", topology) {
 			return "rotate(" + (rt - 180) + " , " + x1 + " , " + y1 + ") translate (" + (-labelBoxW) + "," + (-3) + ")";
 		}
 	}
+}
+
+/**
+	* function for (re)sizing the labels on svg relative to the zoom levek
+	*
+	* @returns - a style attribute with size on the elements
+	*/
+function lblSize() {
+	const k = .8 *  1/D3_SCENE.node().__zoom.k;
+	d3.selectAll(".edgeLbl").attr("style", "font-size:" + k + "rem;");
 }
 
 /**
@@ -1793,6 +1816,7 @@ function AddButtonsToPerspective(){
 					.call(ZOOM.transform, d3.zoomIdentity.scale(1/2));
 				}
 			})
+			lblSize();
 	}
 
 	// zoom on point
@@ -1921,8 +1945,8 @@ function selectVertexOnePoint(_ptId){
 	if (!pt) return false;
 	const vtx = d3.select("#gvertex_" + pt.hc);
 	if (!vtx.classed("focused")) {
-		var externalEdges = D3_SCENE.selectAll(".edge").filter(function(d){return (d.source.hc === vtx.datum().hc || d.target.hc === vtx.datum().hc);}); // raise the proper external edges
-		var internalEdges = vtx.selectAll(".edges");
+		const externalEdges = D3_SCENE.selectAll(".edge").filter(function(d){return (d.source.hc === vtx.datum().hc || d.target.hc === vtx.datum().hc);}); // raise the proper external edges
+		//var internalEdges = vtx.selectAll(".edges");
 		vtx.raise();
 		externalEdges.raise();
 		vtx.classed("focused", true);
@@ -2130,6 +2154,8 @@ function zoomOnPoint(_pt = CURRENT_BHB_POSITION, _zl = -1, duration = 2000) {
 	D3_SCENE.transition()
 	.duration(duration)
 	.call(ZOOM.transform, trf);
+
+	lblSize();
 }
 
 
@@ -2276,7 +2302,7 @@ function text_nav(_datum){
 function amendFromPoint(_pt) {
 	var point = D3_SCENE.select('#' + _pt);
 	// init and open amend toobox
-	amendFromText(point.datum().path, point.datum().order, true);
+	amendFromText(point.datum().path, point.datum().order);
 }
 
 /**
