@@ -478,3 +478,218 @@ function dlTimer(_objArray) {
 		 }
 		 window.open( "data:text/csv;charset=utf-8," + str)
  }
+
+function saveSvg(_svgEl, name) {
+	_svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+	_svgEl.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+	const exportStyle = `/* <![CDATA[ */
+		:root{
+			/*scene color*/
+			--sbx-workspace-color: transparent;
+
+			/*misc*/
+			--sbx-edge-lbl-size: .8rem;
+			--sbx-amendment-color: #990000;
+
+			/*vertex*/
+			--sbx-vertex-color: transparent;
+			--sbx-vertex-opacity: .3;
+			--sbx-vertex-border-color: black;
+			--sbx-vertex-border-opacity: .8;
+			--sbx-vertex-border-width: .5;
+
+			/*topology*/
+			--sbx-hyperbolic-color: darkblue;
+			--sbx-hyperbolic-width: 1;
+			--sbx-hyperbolic-opacity: 1;
+
+			--sbx-planar-color: darkcyan;
+			--sbx-planar-width: 1;
+			--sbx-planar-opacity: 1;
+
+			--sbx-spheric-color: darkgreen;
+			--sbx-spheric-width: 1;
+			--sbx-spheric-opacity: 1;
+
+			--sbx-edge-viewed-color: #007bff;
+			--sbx-edge-viewed-width: 1;
+			--sbx-edge-viewed-opacity: 1;
+		}
+		svg {
+			margin: 0;
+			font-family: sans-serif;
+			font-size: 1rem;
+			font-weight: 400;
+			height: 100%;
+			line-height: 1.5;
+		  text-align: left;
+			background-color: var(--sbx-workspace-color)
+		}
+		.gvertex {
+			fill: none;
+		}
+
+		.vertexCircleRotate {
+			opacity: 0;
+			fill: white; /* fill is mandatory to event trigger */
+		}
+
+		.vertexCircle {
+			fill: var(--sbx-vertex-color);
+			fill-opacity: var(--sbx-vertex-opacity);
+			stroke:var(--sbx-vertex-border-color);
+			stroke-width: var(--sbx-vertex-border-width);
+			stroke-opacity: var(--sbx-vertex-border-opacity);
+		}
+
+		text.edgeLbl  {
+			font-size: var(--sbx-edge-lbl-size);
+			pointer-events: visible;
+			cursor: help;
+			user-select: none;
+			text-anchor: middle;
+		}
+
+		path {
+			fill:none;
+		}
+
+		path.notselectable {
+			fill:none;
+			pointer-events: none;
+			user-select: none;
+			cursor: none;
+		}
+
+		path.edges {
+			pointer-events: visible;
+			cursor: help;
+		}
+
+		path.edges.hyperbolic {
+			stroke: var(--sbx-hyperbolic-color);
+			stroke-width: var(--sbx-hyperbolic-width);
+			stroke-opacity: var(--sbx-hyperbolic-opacity);
+		}
+
+		marker.marker-hyperbolic {
+			stroke: var(--sbx-hyperbolic-color);
+			stroke-width: var(--sbx-hyperbolic-width);
+			stroke-opacity: var(--sbx-hyperbolic-opacity);
+		}
+
+		path.edges.planar {
+			stroke: var(--sbx-planar-color);
+			stroke-width: var(--sbx-planar-width);
+			stroke-opacity: var(--sbx-planar-opacity);
+		}
+
+		marker.marker-planar {
+			stroke: var(--sbx-planar-color);
+			stroke-width: var(--sbx-planar-width);
+			stroke-opacity: var(--sbx-planar-opacity);
+		}
+
+		text.edgeLbl.planar {
+			fill: var(--sbx-planar-color)
+		}
+
+		text.edgeLbl.planar.bhb_link {
+			fill: var(--sbx-amendment-color)
+		}
+
+		path.edges.spheric {
+			stroke: var(--sbx-spheric-color);
+			stroke-width: var(--sbx-spheric-width);
+			stroke-opacity: var(--sbx-spheric-opacity);
+		}
+
+		marker.marker-spheric {
+			stroke: var(--sbx-spheric-color);
+			stroke-width: var(--sbx-spheric-width);
+			stroke-opacity: var(--sbx-spheric-opacity);
+		}
+
+		text.edgeLbl.spheric {
+			fill: var(--sbx-spheric-color)
+		}
+
+		path.edges.link {
+			stroke: var(--sbx-amendment-color);
+		}
+		marker.marker-link {
+			stroke:var(--sbx-amendment-color);
+		}
+
+		path.edges.selected {
+			stroke-width: 3px;
+		}
+
+		path.edges.viewed {
+			stroke:	var(--sbx-edge-viewed-color);
+			stroke-width: var(--sbx-edge-viewed-width);
+			stroke-opacity: var(--sbx-edge-viewed-opacity);
+		}
+
+		.marker-viewed {
+			stroke: var(--sbx-edge-viewed-color);
+		}
+
+	/*	path.edited {
+			stroke-width: 2px;
+			opacity: 1;
+		}*/
+
+		.notdisplayed{
+			opacity: 0;
+			pointer-events: none;
+		}
+
+		.graphAmendPlaceholder {
+			stroke: var(--sbx-amendment-color);
+			fill: var(--sbx-amendment-color);
+			opacity: .8;
+			cursor: crosshair;
+		}
+
+		/*svg icons colors ------------------------------ */
+
+		path.icon-eye-shape{
+			fill: none;
+			stroke:	var(--sbx-edge-viewed-color);
+			stroke-opacity: var(--sbx-edge-viewed-opacity);
+		}
+		path.icon-eye-inner-shape{
+			stroke: var(--sbx-edge-viewed-color);
+			stroke-opacity: var(--sbx-edge-viewed-opacity);
+		}
+		path.icon-eye-pupil{
+			fill: var(--sbx-edge-viewed-color);
+			stroke:	var(--sbx-edge-viewed-color);
+			opacity: var(--sbx-edge-viewed-opacity);
+		}
+		rect.icon-eye-line{
+			fill: var(--sbx-edge-viewed-color);
+		}
+
+		/* Hide objects with "no-export" class ------------------ */
+		.no-export{
+			display: none;
+		}
+
+		/* ]]> */`;
+	var styleNode = document.createElement("style");
+	styleNode.innerHTML = exportStyle;
+	_svgEl.appendChild(styleNode);
+	const svgData = _svgEl.outerHTML;
+	const preface = '<?xml version="1.0" standalone="no"?>\r\n';
+	const svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+	const svgUrl = URL.createObjectURL(svgBlob);
+	const downloadLink = document.createElement("a");
+	downloadLink.href = svgUrl;
+	downloadLink.download = name;
+	document.body.appendChild(downloadLink);
+	downloadLink.click();
+	document.body.removeChild(downloadLink);
+	_svgEl.removeChild(styleNode);
+ }

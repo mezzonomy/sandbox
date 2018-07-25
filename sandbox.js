@@ -1915,7 +1915,7 @@ function AddButtonsToPerspective(){
 		.attr("style", styleIcons);
 	}
 
-	let btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-color-picker");
+	/*let btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-color-picker");
 	if (btnColorPicker.empty()) {
 		btnColorPicker = PERSPECTIVE_TOOLBOX_FOOTER.append("input")
 		.attr("type","color")
@@ -1924,6 +1924,18 @@ function AddButtonsToPerspective(){
 		.attr("style","width: 2.1rem; height: 2.1rem; position: relative; top: 11px; border: none;")
 		.on("change", function () {
 			document.body.style.backgroundColor = this.value;
+		});
+	}*/
+
+	let btnSvgExport = PERSPECTIVE_TOOLBOX_FOOTER.select("#btn-svg-export");
+	if (btnSvgExport.empty()) {
+		btnSvgExport = PERSPECTIVE_TOOLBOX_FOOTER.append("button").attr("type","button").attr("class","btn btn-dark")
+		.attr("id","btn-svg-export")
+		.attr("title","Export to svg")
+		.attr("style","font-weight: 100; padding-right: 0px; padding-left: 0px; text-align: center; width: 2.1rem;")
+		.text(".svg")
+		.on("click", function () {
+			saveSvg(document.getElementById("scene"), 'export.svg');
 		});
 	}
 
@@ -2036,6 +2048,7 @@ function pinVertex(_vertex) {
 	if (D3_SCENE.select("#" + _vertex).select("image").empty()) {
 		D3_SCENE.select("#" + _vertex).append("image")
 		.attr("xlink:href", "/sandbox/img-icon-pin.png")
+		.attr("class","no-export")
 		.attr("x",-25).attr("y",-25)
 		.attr("height","50px").attr("width","50px")
 		.on("click", function(d){
