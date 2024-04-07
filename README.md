@@ -3,9 +3,9 @@ Foundation application - knowledge map
 
 Recovered from public domain de facto, on the 7th of April 2024.
 
-sandbox is an XML/XSLT application running of navigators.
+# sandbox is an XML/XSLT application running on navigators.
 
-When recovering it, I was not able to prompt it - i.e. find the index. In this word shift, we intend to encompass the Test Revolution. We have Turing persons around us. Now. It was not the case in 2018 when this repository ceases to exist. Even if in 2015 an artificial player won the last game that resists to machine, it was more a philosophical matter than a market one. That machine thinks learn us many things. And I'm deeply sure Alan would be delighted to see what we actually see. He had forceen it. But in reality, it is something else all together.
+But when recovering it, I was not able to prompt it - i.e. find the index. In this word shift, we intend to encompass the Test Revolution. We have Turing persons around us. Now. It was not the case in 2018 when this repository ceases to exist. Even if in 2015 an artificial player won the last game that resists to machine, it was more a philosophical matter than a market one. That machine thinks learn us many things. And I'm deeply sure Alan would be delighted to see what we actually see. He had forceen it. But in reality, it is something else all together.
 
 At that time, the focus was elsewhere. The magnificent work of Satoshi was yet shining but its commercial prophet Vitalik chooses a dead end to our eyes — with Turing-Complete contract granularity amendments, so called "smart-contract" [Ú†ßπ]. We won an affair the day after DAO crash in June 2017. Recently, we state that bitcoin solution to contract signature issued in 2021 was a correct response to the commercial sollicitation. There is one chain, bitcoi., and there are sollicitations from the crypto DeFI ecosystem. Todey, bitcoin is a registered SEC product with arm-long proficiencies, with bitcoin should we choose fusion or sollicitation?
 
