@@ -31,6 +31,8 @@ Our basic contribution is to remark that bitcoin is dead simple in that context 
 (TBD: provide under this syntax a bunch of bitcoin track)
 
 
+Bibliography
 
 [1] for "hitomezachi" stitching on Japanese isles, see [Ò†®†Ò]
+
 [EDMNUDS-1959] Jack Edmonds, « A Combinatorial Representation for Polyhedral Surfaces », Notices Amer. Math. Soc., vol. 7,‎ 1960 , p. 646-650.
