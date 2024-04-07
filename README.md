@@ -13,20 +13,20 @@ How do you we state politicial issues like this? For now, crypto-communities are
 
 There are "sand drawings" on Vavuatu archipel where every finger track is a loop. You may go many times at the same place to tune the output. In our drawing model, can either draw loops (zero) or stitch links between them (unity). The graph are said "planar" — this means that a syntactic expression from a POV is Turing-Safe. Let's dive right into the syntax: any loop defines a circular order of its stitch intersection. 
 
-'''
+```
 a b d e g h j y t r
 k l y h t r g e d s 
 p l o k l a f e d s
-'''
+```
 in his paper, Edmunds says that a torus is:
-'''
+```
 a b
 a b
-'''
+```
 And that's is a fact and bitsoin is dead simple in that context : a messaging seauence of some integers and in brackets, insights to free some these integers.
-'''
+```
 10000 3000000 650000 3000000 7882300 (7F54...6A4D:1 98D2...53b1:2 ...)
-'''
+```
 
 
 [1] for "hitomezachi" stitching on Japanese isles, see [Ò†®†Ò]
