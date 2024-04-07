@@ -11,10 +11,9 @@ At that time, the focus was elsewhere. The magnificent work of Satoshi was yet s
 
 How do you we state politicial issues like this? For now, crypto-communities are not yet able to propose something alternative to an avatar of mediation. To overcome that structuring limitation, we propose the Romulus Solution, to draw circles on a single surface — a local plane on a sphere with some tunnels or "holes" [EDMNUDS-1959]. We found this method in 2008, and during lock-down, we found an old reference of graphical processing which was it. How to describe this surface? Edmunds wonders, and I long ago and still, that a simple graph would do. Like Groenthendieck's "Dessin d'Enfant", combinatorial map where drawn graph — the sand interaction from Archimedes to Hypathie (AGORA).
 
-There are "sand drawings" on Vavuatu archipel where every finger track is a loop. You may go many times at the same place to tune the output. In our drawing model, can either draw loops (zero) or stitch links between them (unity). The graph are said "planar" — this means that a syntactic expression from a POV is Turing-Safe. Let's dive right into the syntax: any loop defines a circular order of its stitch intersection. 
-
+There are "sand drawings" on Vavuatu archipel where every finger track is a loop. You may go many times at the same place to tune the output. In our drawing model, can either draw loops (zero) or stitch links between them (unity). The graph are said "planar" — this means that a syntactic expression from a POV is Turing-Safe. Let's dive right into the syntax: any loop defines a circular order of its stitch intersection. This is a serious candidate for overall space/time discret structure:
 ```
-a b d e g h j y t r
+a b d c g h j y t r
 k l y h t r g e d s 
 p l o k l a f e d s
 ```
@@ -23,10 +22,14 @@ in his paper, Edmunds says that a torus is:
 a b
 a b
 ```
-And that's is a fact and bitsoin is dead simple in that context : a messaging seauence of some integers and in brackets, insights to free some these integers.
+And that's is a fact.
+
+Our basic contribution is to remark that bitcoin is dead simple in that context : a cadenced messaging system which bodies are some integers and in brackets, insights to free some these integers. The difference between liberations and consumption is called the "fee" and compensate system growth.
 ```
 10000 3000000 650000 3000000 7882300 (7F54...6A4D:1 98D2...53b1:2 ...)
 ```
+(TBD: provide under this syntax a bunch of bitcoin track)
+
 
 
 [1] for "hitomezachi" stitching on Japanese isles, see [Ò†®†Ò]
