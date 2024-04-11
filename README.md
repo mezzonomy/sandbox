@@ -30,6 +30,18 @@ Our basic contribution is to remark that bitcoin is dead simple in that context 
 ```
 (TBD: provide under this syntax a bunch of bitcoin track)
 
+The key of Bitcoin security resides on a complexity argument: the language "Stack" used to interpret liberating conditions of bitcoin is "Turing-Safe". A stack program can not hide any intention. The study of complexity made great progresses considering the questions around tilings. 
+
+```
+U+2800	⠀⠁ ⠂⠃ ⠄⠅ ⠆⠇ ⠈⠉ ⠊⠋ ⠌⠍ ⠎⠏ ⠐⠑ ⠒⠓ ⠔⠕ ⠖⠗ ⠘⠙ ⠚⠛ ⠜⠝ ⠞⠟
+U+2820	⠠⠡ ⠢⠣ ⠤⠥ ⠦⠧ ⠨⠩ ⠪⠫ ⠬⠭ ⠮⠯ ⠰⠱ ⠲⠳ ⠴⠵ ⠶⠷ ⠸⠹ ⠺⠻ ⠼⠽ ⠾⠿
+U+2840	⡀⡁ ⡂⡃ ⡄⡅ ⡆⡇ ⡈⡉ ⡊⡋ ⡌⡍ ⡎⡏ ⡐⡑ ⡒⡓ ⡔⡕ ⡖⡗ ⡘⡙ ⡚⡛ ⡜⡝ ⡞⡟
+U+2860	⡠⡡ ⡢⡣ ⡤⡥ ⡦⡧ ⡨⡩ ⡪⡫ ⡬⡭ ⡮⡯ ⡰⡱ ⡲⡳ ⡴⡵ ⡶⡷ ⡸⡹ ⡺⡻ ⡼⡽ ⡾⡿
+U+2880	⢀⢁ ⢂⢃ ⢄⢅ ⢆⢇ ⢈⢉ ⢊⢋ ⢌⢍ ⢎⢏ ⢐⢑ ⢒⢓ ⢔⢕ ⢖⢗ ⢘⢙ ⢚⢛ ⢜⢝ ⢞⢟
+U+28A0	⢠⢡ ⢢⢣ ⢤⢥ ⢦⢧ ⢨⢩ ⢪⢫ ⢬⢭ ⢮⢯ ⢰⢱ ⢲⢳ ⢴⢵ ⢶⢷ ⢸⢹ ⢺⢻ ⢼⢽ ⢾⢿
+U+28C0	⣀⣁ ⣂⣃ ⣄⣅ ⣆⣇ ⣈⣉ ⣊⣋ ⣌⣍ ⣎⣏ ⣐⣑ ⣒⣓ ⣔⣕ ⣖⣗ ⣘⣙ ⣚⣛ ⣜⣝ ⣞⣟
+U+28E0  ⣠⣡ ⣢⣣ ⣤⣥ ⣦⣧ ⣨⣩ ⣪⣫ ⣬⣭ ⣮⣯ ⣰⣱ ⣲⣳ ⣴⣵ ⣶⣷ ⣸⣹ ⣺⣻ ⣼⣽ ⣾⣿
+```
 
 Bibliography
 
