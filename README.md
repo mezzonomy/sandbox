@@ -3,9 +3,9 @@ Foundation application - knowledge map
 
 Recovered from public domain de facto, on the 7th of April 2024.
 
-# sandbox is an XML/XSLT application running on navigators.
+# Introduction
 
-But when recovering it, I was not able to prompt it - i.e. find the index. In this word shift, we intend to encompass the Test Revolution. We have Turing persons around us. Now. It was not the case in 2018 when this repository ceases to exist. Even if in 2015 an artificial player won the last game that resists to machine, it was more a philosophical matter than a market one. That machine think learns us many things. And I'm deeply sure Alan would be delighted to see what we actually see. He had forceen it: but againt reality, it is something else all together.
+sandbox is an XML/XSLT application running on navigators. But when recovering it, I was not able to prompt it - i.e. find the index. In this word shift, we intend to encompass the Test Revolution. We have Turing persons around us. Now. It was not the case in 2018 when this repository ceases to exist. Even if in 2015 an artificial player won the last game that resists to machine, it was more a philosophical matter than a market one. That machine think learns us many things. And I'm deeply sure Alan would be delighted to see what we actually see. He had forceen it: but againt reality, it is something else all together.
 
 At that time, 2018, the focus was elsewhere. The magnificent work of Satoshi was yet shining but its commercial prophet Vitalik chooses a dead end to our eyes — with Turing-Complete contract granularity amendments, so called "smart-contract" [Ú†ßπ]. We won an affair the day after DAO crash in June 2017. Recently, we state that bitcoin solution to contract signature issued in 2021 was a correct response to the commercial sollicitation. There is one chain, *bitcoin* and there are sollicitations from the crypto-DeFI ecosystem. Today, bitcoin is a registered SEC product with arm-long proficiencies. 
 
@@ -29,10 +29,13 @@ Our basic contribution is to remark that elementary bitcoin transaction graph is
 10000 3000000 650000 3000000 7882300 (7F54...6A4D:1 98D2...53b1:2 ...)
 ```
 
-# Complexity and Tilings - Wang Tiles
+# Wang tiles
 The key of Bitcoin security resides on a complexity argument: the language "_Stack_" used to interpret liberating conditions of bitcoin is "_Turing-Safe_". A stack program can not dissimulate any intentions. 
 
-The study of complexity made great progresses considering the questions around tilings. This question emerges in the early sixties by the Wang Conjecture[2] : "_if a set of tiles can tile the plane, then they can always be arranged to do so periodically_". The first set of tiles proving that conjecture to be false had 20426 tiles. This number drop to 2 in the mid-seventies, and to 1 very recently. But the order of magnitude of the first Berger set is interesting. It is the same trade-off with regards to vocabulary size for a single language tokenisation: 0x7fff=32767 tokens. This has the benefit of fitting easily within 16 bits, which makes handling tokenized data easier in many cases[3].
+The study of complexity made great progresses considering the questions around tilings. This question emerges in the early sixties by the Wang Conjecture[2] : "_if a set of tiles can tile the plane, then they can always be arranged to do so periodically_". The first set of tiles proving that conjecture to be false had 20426 tiles. This number drop to 2 in the mid-seventies, and to 1 very recently. 
+
+## Wang Braille Tiles
+But the order of magnitude of the first Berger set is interesting. It is the same trade-off with regards to vocabulary size for a single language tokenisation: 0x7fff=32767 tokens. This has the benefit of fitting easily within 16 bits, which makes handling tokenized data easier in many cases[3].
 ```
 U+2800	⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟
 U+2820	⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿
@@ -64,7 +67,7 @@ Encoding WRGB as 00,01,10,11, the _11 Quadrichrome Wang Tiles_ set is written:
 ```
 Which in braille is very compact...
 
-# Complexity and Tilings - Filets Tiles.
+## Wang Filets Tiles.
  But our field if study is more to use _filets_, like in the old days.
 ```
 U+2500	─━│┃┄┅┆┇┈┉┊┋┌┍┎┏┐┑┒┓└┕┖┗┘┙┚┛├┝┞┟
@@ -93,7 +96,7 @@ Our one main argument for more than a decade is to remark that there is only fou
 
 There are two options if the agent follows the path in front of him: it is a **link** if this path hits a path or return as a _qualified_ **document**. The qualification depends on the side of the return: _left_, _right_ or _forward_ **document**. Forward can be distinguised in left forward and right forward. So basically, this structure is a planar _Hypertext Document System_: ╳ is a _link_, the first tile is a _right document_, the bubbles are two _right documents_.
 
-Bibliography
+# Bibliography
 
 [1] for "hitomezachi" stitching on Japanese isles, see [Ò†®†Ò]
 
@@ -104,7 +107,8 @@ https://mathworld.wolfram.com/WangsConjecture.html
 [3] Michael Humor, "Understanding “tokens” and tokenization in large language models", DevGenius 2023.
 https://blog.devgenius.io/understanding-tokens-and-tokenization-in-large-language-models-1058cd24b944
 
-[Hooper-2006] 
+[Hooper-2006] Hooper, Percolation tiles
+
 [EDMNUDS-1959] Jack Edmonds, « A Combinatorial Representation for Polyhedral Surfaces »,
 Notices Amer. Math. Soc., vol. 7,‎ 1960 , p. 646-650.
 
