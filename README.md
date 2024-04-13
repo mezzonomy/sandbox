@@ -57,10 +57,10 @@ Encoding WRGB as 00,01,10,11, the _11 Quadrichrome Wang Tiles_ set is written:
 0 - - 0   1 - - 1   0 - - 0   0 - - 0   0 - - 1   0 - - 0   
 - 0 1 -   - 0 1 -   - 1 1 -   - 0 1 -   - 0 1 -   - 1 0 -
 
-- 0 0 -   - 0 0 -   - 1 1 -   - 1 1 -   - 1 0 -
+- 1 1 -   - 0 0 -   - 1 1 -   - 1 1 -   - 1 0 -
 0 - - 0   0 - - 0   1 - - 1   1 - - 0   0 - - 1
 1 - - 0   1 - - 1   1 - - 1   0 - - 1   1 - - 0 
-- 0 1 -   - 0 0 -   - 0 0 -   - 1 1 -   - 1 1 -
+- 1 1 -   - 0 0 -   - 0 0 -   - 1 1 -   - 1 1 -
 ```
 Which in braille is very compact...
 
@@ -80,14 +80,14 @@ Encoding _11 Quadrichrome Wang Tiles_ with filets could give:
   ╰─┤     ────┬── │   ╭─┤         │   │     ├──     │       
 ╮   │ ╭   ╮   │ ╭ │ ╮ │ │ ╭   ╮   │ ╭ │ ╮   │ ╭   ╮ │   ╭
                   │         ╭─────────┴─────────╮
-╯     ╰   ╯     ╰ │ ╯ │ │ ╰ │ ╯ │ │ ╰   ╯ │   ╰ │
-                  │ ──╯ ╰── │ ──┤ │       │ ╭── │
-────╮     ─────── │ ─────── │   │ ├──   ──┤ │   │
-╮   │ ╭   ╮     ╭ │ ╮     ╭ │ ╮ │ │ ╭   ╮ │ │ ╭ │
+╯ │ │ ╰   ╯     ╰ │ ╯ │ │ ╰ │ ╯ │ │ ╰   ╯ │   ╰ │
+  │ │             │ ──╯ ╰── │ ──┤ │       │ ╭── │
+──┤ │     ─────── │ ─────── │   │ ├──   ──┤ │   │
+╮ │ │ ╭   ╮     ╭ │ ╮     ╭ │ ╮ │ │ ╭   ╮ │ │ ╭ │
                   ╰─────────┴───────────────────╯
 ```
 
-First, we treat the corners with _percolation tiles_[Hooper]: ╭╮╯╰. Tiling with such tiles is equivalent to Hitomezachi[1]. We provide a view with a thread continuity. As colors are treated as ray of light from an external observer, we will keep horizontals and verticals at most. Horizontal bar is the first character. In in given category of filet, the first one is the plain one. At the end, we had bubbles to express the largest continuous patterns, that contains insights for the following discussion and a check tool against original.
+First, we treat the corners with _percolation tiles_[Hooper]: ╭╮╯╰. Tiling with such tiles is equivalent to Hitomezachi[1]. As colors are encoded as two ray of light from an external observer, we will keep horizontals and verticals at most. Horizontal bar is the first character. In in given category of filet, the first one is the plain one. At the end, we had bubbles to express the largest continuous patterns, that contains insights for the following discussion and a check tool against original.
 
 Our one main argument for more than a decade is to remark that there is only four even tile "├┬─┴┤" and the rest is even. Lucky that the first tile embodies the main concept of our most recent engine: the _document_. Cool. Now, we will do a very common experience to topologist, suppose an ╳ agent, not necessarly a person, which lives in this 2D world. The cosmos is planar, you have a left and a right. Suppose our little guy at a three road intersection, ┴. He has a left, a right and path. What educated guess can this agent do?
 
