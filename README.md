@@ -66,6 +66,28 @@ Which in braille is very compact...
 
 # Complexity and Tilings - Filets Tiles.
  But our field if study is more to use _filets_, like in the old days.
+```
+U+2500	─━│┃┄┅┆┇┈┉┊┋┌┍┎┏┐┑┒┓└┕┖┗┘┙┚┛├┝┞┟
+U+2520	┠┡┢┣┤┥┦┧┨┩┪┫┬┭┮┯┰┱┲┳┴┵┶┷┸┹┺┻┼┽┾┿
+U+2540 ╀╁╂╃╄╅╆╇╈╉╊╋╌╍╎╏═║╒╓╔╕╖╗╘╙╚╛╜╝╞╟
+U+2560	╠╡╢╣╤╥╦╧╨╩╪╫╬╭╮╯╰╱╲╳╴╵╶╷╸╹╺╻╼╽╾╿
+```
+Encoding _11 Quadrichrome Wang Tiles_ with filets could give:
+```
+╯     ╰   ╯     ╰   ╯   │ ╰   ╯   │ ╰   ╯   │ ╰   ╯   │ ╰
+  ╭ ╮     ─ ─ ─ ─     ╭ ┼ ─   ─ ─ ┤     ─ ─ ┤     ─ ┬ ┴ ─
+  ╰ ┤     ─ ─ ┬ ─     │ │         │         ├ ─     │       
+╮   │ ╭   ╮   │ ╭   ╮ │ │ ╭   ╮   │ ╭   ╮   │ ╭   ╮ │   ╭
+
+╯     ╰   ╯     ╰   ╯ │ │ ╰   ╯ │ │ ╰   ╯   │ ╰
+          ─ ─ ─ ─   ─ ┴ ┴ ─   ─ ┤ │         ├ ─
+─ ─ ╮     ─ ─ ─ ─   ─ ─ ─ ─     │ ├ ─   ─ ╮ │   
+╮   │ ╭   ╮     ╭   ╮     ╭   ╮ │ │ ╭   ╮ │ │ ╭
+```
+
+First, we treat the corners with _percolation tiles_[Hooper]: ╭╮╯╰. Tiling with such tiles is equivalent to Hitomezachi. We provide a view with a thread continuity. As colors are treated in global context, we will keep horizontals and verticals at most. Horizontal bar is the first character. In in given category of filet, the first one is the plain one, not bold at any extremities. 
+
+Our one main argument for more than a decade is to remark that there is only one even tile "├" and the rest is even. Lucky that the first tile embodies the main concept of our engine: the _document_. Cool. 
 
 Bibliography
 
