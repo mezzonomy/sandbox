@@ -32,7 +32,7 @@ Our basic contribution is to remark that elementary bitcoin transaction graph is
 # Complexity and Tilings - Wang Tiles
 The key of Bitcoin security resides on a complexity argument: the language "_Stack_" used to interpret liberating conditions of bitcoin is "_Turing-Safe_". A stack program can not dissimulate any intentions. 
 
-The study of complexity made great progresses considering the questions around tilings. This question emerges in the early sixties by the Wang Conjecture[2] : "_if a set of tiles can tile the plane, then they can always be arranged to do so periodically_". The first set of tiles proving that conjecture to be false had 20426 tiles. This number drop to 2 in the mid-seventies, and to 1 very recently. But the order of magnitude of the first Berger set is interesting. It is the same trade-off with regards to vocabulary size for a single language tokenisation: 0x7fff=32767 tokens. This has the benefit of fitting easily within 16 bits, which makes handling tokenized data easier in many cases.
+The study of complexity made great progresses considering the questions around tilings. This question emerges in the early sixties by the Wang Conjecture[2] : "_if a set of tiles can tile the plane, then they can always be arranged to do so periodically_". The first set of tiles proving that conjecture to be false had 20426 tiles. This number drop to 2 in the mid-seventies, and to 1 very recently. But the order of magnitude of the first Berger set is interesting. It is the same trade-off with regards to vocabulary size for a single language tokenisation: 0x7fff=32767 tokens. This has the benefit of fitting easily within 16 bits, which makes handling tokenized data easier in many cases[3].
 ```
 U+2800	⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟
 U+2820	⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿
@@ -96,7 +96,18 @@ There are two options if the agent follows the path in front of him: it is a **l
 Bibliography
 
 [1] for "hitomezachi" stitching on Japanese isles, see [Ò†®†Ò]
-[2] https://mathworld.wolfram.com/WangsConjecture.html
+
+[2] Pegg, Ed Jr. and Weisstein, Eric W. "Wang's Conjecture." 
+From MathWorld--A Wolfram Web Resource.
+https://mathworld.wolfram.com/WangsConjecture.html
+
+[3] Michael Humor, "Understanding “tokens” and tokenization in large language models", DevGenius 2023.
+https://blog.devgenius.io/understanding-tokens-and-tokenization-in-large-language-models-1058cd24b944
 
 [Hooper-2006] 
-[EDMNUDS-1959] Jack Edmonds, « A Combinatorial Representation for Polyhedral Surfaces », Notices Amer. Math. Soc., vol. 7,‎ 1960 , p. 646-650.
+[EDMNUDS-1959] Jack Edmonds, « A Combinatorial Representation for Polyhedral Surfaces »,
+Notices Amer. Math. Soc., vol. 7,‎ 1960 , p. 646-650.
+
+
+
+
