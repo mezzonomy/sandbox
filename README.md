@@ -93,6 +93,30 @@ Encoding _11 Quadrichrome Wang Tiles_ with filets could give:
 First, we treat the corners with _percolation tiles_[Hooper]: ╭╮╯╰. Tiling with such tiles is equivalent to Hitomezachi[1]. As colors are encoded as two ray of light from an external observer, we will keep horizontals and verticals at most. Horizontal bar is the first character. In in given category of filet, the first one is the plain one. At the end, we had bubbles to express the largest continuous patterns, that contains insights for the following discussion and a check tool against original.
 
 Our one main argument for more than a decade is to remark that there is only four even tile "├┬─┴┤" and the rest is even. Lucky that the first tile embodies the main concept of our most recent engine: the _document_. Cool. Now, we will do a very common experience to topologist, suppose an ╳ agent, not necessarly a person, which lives in this 2D world. The cosmos is planar, you have a left and a right. Suppose our little guy at a three road intersection, ┴. He has a left, a right and path. What educated guess can this agent do?
+```
+╯ │ │ ╰╯ │ │ ╰╯ │ │ ╰╯     ╰╯     ╰╯     ╰╯     ╰
+──╯ ╰────╯ ╰────╯ ╰──────────────────────────────
+─────────────────────────┬──────┬──────┬──────┬──
+╮     ╭╮     ╭╮     ╭╮   │ ╭╮   │ ╭╮   │ ╭╮   │ ╭
+╯     ╰╯     ╰╯     ╰╯   │ ╰╯   │ ╰╯   │ ╰╯   │ ╰
+  ╭─╮    ╭─╮    ╭─╮      ├────┬─┴──────┤╳     ├──
+  ╰─┤    ╰─┤    ╰─┤    ╭─┤    │        │    ╭─┤  
+╮   │ ╭╮   │ ╭╮   │ ╭╮ │ │ ╭╮ │   ╭╮   │ ╭╮ │ │ ╭
+╯   │ ╰╯   │ ╰╯   │ ╰╯ │ │ ╰╯ │   ╰╯   │ ╰╯ │ │ ╰
+────┤╳     ├────┬─┴────┤ │    │ ╭──────┤    │ │  
+    │    ╭─┤    │      │ ├────┤ │      ├────┤ │  
+╮   │ ╭╮ │ │ ╭╮ │   ╭╮ │ │ ╭╮ │ │ ╭╮   │ ╭╮ │ │ ╭
+╯   │ ╰╯ │ │ ╰╯ │   ╰╯ │ │ ╰╯ │ │ ╰╯   │ ╰╯ │ │ ╰
+    ├────┤ │    │ ╭────┤ │    │ │      ├────┤ │  
+  ╭─┤    │ ├────┤ │    │ ├────┤ │    ╭─┤    │ ├──
+╮ │ │ ╭╮ │ │ ╭╮ │ │ ╭╮ │ │ ╭╮ │ │ ╭╮ │ │ ╭╮ │ │ ╭
+╯ │ │ ╰╯ │ │ ╰╯ │ │ ╰╯ │ │ ╰╯ │ │ ╰╯ │ │ ╰╯ │ │ ╰
+──╯ ╰────╯ ╰────╯ ╰────╯ ╰────╯ ╰────╯ ╰────╯ ╰──
+─────────────────────────────────────────────────
+╮     ╭╮     ╭╮     ╭╮     ╭╮     ╭╮     ╭╮     ╭
+```
+
+
 
 There are two options if the agent follows the path in front of him: it is a **link** if this path hits a path or return as a _qualified_ **document**. The qualification depends on the side of the return: _left_, _right_ or _forward_ **document**. Forward can be distinguised in left forward and right forward. So basically, this structure is a planar _Hypertext Document System_: ╳ is a _link_, the first tile is a _right document_, the bubbles are two _right documents_.
 
